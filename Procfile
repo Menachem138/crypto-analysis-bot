@@ -1,1 +1,1 @@
-web: python predictions_server.py
+web: gunicorn -c gunicorn_config.py predictions_server:app
