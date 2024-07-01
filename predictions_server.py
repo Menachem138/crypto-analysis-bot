@@ -7,6 +7,10 @@ import openai
 import requests
 import os
 import logging
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Set up logging
 logging.basicConfig(filename='flask_server.log', level=logging.INFO,
