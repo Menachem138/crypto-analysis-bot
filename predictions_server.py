@@ -44,6 +44,15 @@ def custom_objects():
         def __init__(self, gain=1.0):
             super(CustomOrthogonalInitializer, self).__init__(gain=gain)
 
+        def get_config(self):
+            config = super(CustomOrthogonalInitializer, self).get_config()
+            config.update({'gain': self.gain})
+            return config
+
+        @classmethod
+        def from_config(cls, config):
+            return cls(**config)
+
     return {
         'InputLayer': InputLayer,
         'DTypePolicy': DTypePolicy,
@@ -57,11 +66,14 @@ if os.path.exists(model_path_json) and os.path.exists(model_path_weights):
             model_json = json_file.read()
             logger.info('Model JSON: %s', model_json)
         with tf.keras.utils.custom_object_scope(custom_objects()):
+            logger.info('Custom objects: %s', custom_objects())
             model = tf.keras.models.model_from_json(model_json, custom_objects=custom_objects())
             logger.info('Model architecture loaded successfully.')
             model.summary(print_fn=logger.info)  # Log the model summary
             print(model.summary())  # Print the model summary to the console
+            logger.info('Model layers before loading weights: %s', [layer.name for layer in model.layers])
             model.load_weights(model_path_weights)
+            logger.info('Model weights loaded successfully.')
         logger.info('Model loaded successfully.')
     except Exception as e:
         logger.error('Error loading model: %s', str(e))
