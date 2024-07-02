@@ -73,7 +73,9 @@ def make_predictions():
     # Simulated input data for prediction
     input_data = np.array([[0.01, 0.02, 0.03, 0.04]])  # Example input data
     input_data = input_data.reshape((1, 4, 1))  # Reshape to match the expected input shape (batch_size, timesteps, features)
+    logger.info('Input data shape for prediction: %s', input_data.shape)
     predictions = model.predict(input_data)
+    logger.info('Predictions: %s', predictions)
     return predictions[0]
 
 @app.route('/api/predictions', methods=['GET'])
