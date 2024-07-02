@@ -60,6 +60,16 @@ def custom_objects():
         'CustomOrthogonalInitializer': CustomOrthogonalInitializer
     }
 
+def build_model(input_shape):
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.LSTM(50, return_sequences=True, input_shape=input_shape))
+    model.add(tf.keras.layers.Dropout(0.2))
+    model.add(tf.keras.layers.LSTM(50, return_sequences=False))
+    model.add(tf.keras.layers.Dropout(0.2))
+    model.add(tf.keras.layers.Dense(1))
+    model.compile(optimizer='adam', loss='mean_squared_error')
+    return model
+
 if os.path.exists(model_path_json) and os.path.exists(model_path_weights):
     try:
         with open(model_path_json, 'r') as json_file:
@@ -67,7 +77,7 @@ if os.path.exists(model_path_json) and os.path.exists(model_path_weights):
             logger.info('Model JSON: %s', model_json)
         with tf.keras.utils.custom_object_scope(custom_objects()):
             logger.info('Custom objects: %s', custom_objects())
-            model = tf.keras.models.model_from_json(model_json, custom_objects=custom_objects())
+            model = build_model((4, 1))  # Use the build_model function to create the model
             logger.info('Model architecture loaded successfully.')
             model.summary(print_fn=logger.info)  # Log the model summary
             print(model.summary())  # Print the model summary to the console
