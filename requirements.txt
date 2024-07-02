@@ -94,7 +94,7 @@ openai==1.35.7
 opt-einsum==3.3.0
 optree==0.11.0
 packaging==23.2
-pandas==2.2.0
+pandas==1.5.3
 parsel==1.9.1
 pexpect==4.8.0
 pillow==10.2.0
