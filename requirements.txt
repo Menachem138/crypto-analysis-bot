@@ -41,7 +41,7 @@ Flask-Cors==4.0.1
 flatbuffers
 folium==0.15.1
 fonttools==4.48.1
-gast==0.6.0
+gast==0.4.0
 gitdb==4.0.11
 GitPython==3.1.41
 google-pasta==0.2.0
