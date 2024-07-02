@@ -32,17 +32,29 @@ def add_cors_headers(response):
 redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 # Load the trained model
-model_path = '/app/crypto_prediction_model.h5'
-if os.path.exists(model_path):
+model_path = '/app/crypto_prediction_model'
+
+def custom_objects():
+    from tensorflow.keras.layers import InputLayer
+    from tensorflow.keras.mixed_precision.experimental import Policy as DTypePolicy
+    return {'InputLayer': InputLayer, 'DTypePolicy': DTypePolicy}
+
+if os.path.exists(model_path + '.json') and os.path.exists(model_path + '.h5'):
     try:
-        model = tf.keras.models.load_model(model_path)
+        with open(model_path + '.json', 'r') as json_file:
+            model_json = json_file.read()
+            model_json = model_json.replace('"batch_shape":', '"input_shape":')
+            logger.info('Modified model JSON: %s', model_json)
+        with tf.keras.utils.custom_object_scope(custom_objects()):
+            model = tf.keras.models.model_from_json(model_json)
+            model.load_weights(model_path + '.h5')
         logger.info('Model loaded successfully.')
     except Exception as e:
         logger.error('Error loading model: %s', str(e))
         raise
 else:
-    logger.error('Model file not found at path: %s', model_path)
-    raise FileNotFoundError(f'Model file not found at path: {model_path}')
+    logger.error('Model file not found at path: %s.json or %s.h5', model_path, model_path)
+    raise FileNotFoundError(f'Model file not found at path: {model_path}.json or {model_path}.h5')
 
 # Function to make predictions
 def make_predictions():

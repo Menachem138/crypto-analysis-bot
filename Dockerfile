@@ -7,8 +7,10 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-# Copy the model file into the container at /app
+# Copy the model files into the container at /app
 COPY crypto_prediction_model.h5 /app/crypto_prediction_model.h5
+COPY crypto_prediction_model.json /app/crypto_prediction_model.json
+COPY crypto_prediction_model.weights.h5 /app/crypto_prediction_model.weights.h5
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y pkg-config libcairo2-dev build-essential libgirepository1.0-dev libdbus-1-dev
