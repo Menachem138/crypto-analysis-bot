@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y pkg-config libcairo2-dev build-essential libgirepository1.0-dev
+RUN apt-get update && apt-get install -y pkg-config libcairo2-dev build-essential libgirepository1.0-dev libdbus-1-dev
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
