@@ -133,8 +133,7 @@
           "kernel_initializer": {
             "module": "keras.initializers",
             "class_name": "GlorotUniform",
-            "config": {
-              "seed": null
+            "config": {}
             },
             "registered_name": null
           },
@@ -142,8 +141,7 @@
             "module": "keras.initializers",
             "class_name": "CustomOrthogonalInitializer",
             "config": {
-              "gain": 1.0,
-              "seed": null
+              "gain": 1.0
             },
             "registered_name": null
           },
@@ -162,8 +160,7 @@
           "recurrent_constraint": null,
           "bias_constraint": null,
           "dropout": 0.0,
-          "recurrent_dropout": 0.0,
-          "seed": null
+          "recurrent_dropout": 0.0
         },
         "registered_name": null,
         "build_config": {
@@ -185,7 +182,6 @@
             "registered_name": null
           },
           "rate": 0.2,
-          "seed": null,
           "noise_shape": null
         },
         "registered_name": null,
@@ -213,9 +209,7 @@
           "kernel_initializer": {
             "module": "keras.initializers",
             "class_name": "GlorotUniform",
-            "config": {
-              "seed": null
-            },
+            "config": {},
             "registered_name": null
           },
           "bias_initializer": {
