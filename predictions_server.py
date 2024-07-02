@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, redirect, make_response
 from flask_cors import CORS
+from flask_socketio import SocketIO, send
 import tensorflow as tf
 import numpy as np
 import redis
@@ -18,6 +19,7 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
 CORS(app, resources={r"/*": {"origins": "*"}}, methods=["GET", "POST", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
 
 @app.after_request
@@ -230,6 +232,19 @@ def get_prices():
         logger.error('Error in /api/prices: %s', str(e))
         return jsonify({'error': 'Internal Server Error'}), 500
 
+@socketio.on('connect')
+def handle_connect():
+    logger.info('Client connected')
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    logger.info('Client disconnected')
+
+@socketio.on('message')
+def handle_message(message):
+    logger.info('Received message: %s', message)
+    send('Message received: ' + message)
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5002))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    socketio.run(app, host='0.0.0.0', port=port, debug=True)
