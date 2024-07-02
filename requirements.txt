@@ -153,9 +153,8 @@ spacy-loggers==1.0.5
 srsly==2.4.8
 ssh-import-id==5.11
 streamlit==1.31.0
-# systemd-python==234
 tenacity==8.2.3
-tensorboard==2.16.2
+tensorboard==2.14.0
 tensorboard-data-server==0.7.2
 tensorflow==2.16.2
 tensorflow-io-gcs-filesystem==0.37.0
