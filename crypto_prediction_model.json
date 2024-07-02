@@ -60,7 +60,7 @@
             "config": {
               "gain": 1.0
             },
-            "registered_name": null
+            "registered_name": "CustomOrthogonalInitializer"
           },
           "bias_initializer": {
             "module": "keras.initializers",
@@ -142,7 +142,7 @@
             "config": {
               "gain": 1.0
             },
-            "registered_name": null
+            "registered_name": "CustomOrthogonalInitializer"
           },
           "bias_initializer": {
             "module": "keras.initializers",
