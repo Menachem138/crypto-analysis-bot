@@ -58,7 +58,7 @@ if os.path.exists(model_path_json) and os.path.exists(model_path_weights):
             model_json = model_json.replace('"batch_shape":', '"input_shape":')
             logger.info('Modified model JSON: %s', model_json)
         with tf.keras.utils.custom_object_scope(custom_objects()):
-            model = tf.keras.models.model_from_json(model_json)
+            model = tf.keras.models.model_from_json(model_json, custom_objects=custom_objects())
             model.load_weights(model_path_weights)
         logger.info('Model loaded successfully.')
     except Exception as e:
