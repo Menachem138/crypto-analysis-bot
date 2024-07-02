@@ -181,7 +181,7 @@ watchdog==4.0.0
 weasel==0.4.1
 websocket-client==1.2.3
 Werkzeug==3.0.3
-wrapt==1.16.0
+wrapt==1.12.1
 xyzservices==2023.10.1
 zipp==1.0.0
 zope.interface==5.4.0
