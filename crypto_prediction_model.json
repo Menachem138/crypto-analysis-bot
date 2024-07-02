@@ -133,8 +133,7 @@
           "kernel_initializer": {
             "module": "keras.initializers",
             "class_name": "GlorotUniform",
-            "config": {}
-            },
+            "config": {},
             "registered_name": null
           },
           "recurrent_initializer": {
