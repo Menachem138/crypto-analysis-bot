@@ -40,10 +40,15 @@ def custom_objects():
     from tensorflow.keras.mixed_precision.experimental import Policy as DTypePolicy
     from tensorflow.keras.initializers import Orthogonal as OrthogonalInitializer
 
+    class CustomOrthogonalInitializer(OrthogonalInitializer):
+        def __init__(self, gain=1.0, seed=None):
+            super(CustomOrthogonalInitializer, self).__init__(gain=gain, seed=seed)
+
     return {
         'InputLayer': InputLayer,
         'DTypePolicy': DTypePolicy,
-        'OrthogonalInitializer': OrthogonalInitializer
+        'OrthogonalInitializer': OrthogonalInitializer,
+        'CustomOrthogonalInitializer': CustomOrthogonalInitializer
     }
 
 if os.path.exists(model_path_json) and os.path.exists(model_path_weights):
