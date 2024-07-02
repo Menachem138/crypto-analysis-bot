@@ -37,7 +37,7 @@ model_path_weights = '/app/crypto_prediction_model.weights.h5'
 
 def custom_objects():
     from tensorflow.keras.layers import InputLayer
-    from tensorflow.keras.mixed_precision.experimental import Policy as DTypePolicy
+    from tensorflow.keras.mixed_precision import DTypePolicy
     from tensorflow.keras.initializers import Orthogonal as OrthogonalInitializer
 
     class CustomOrthogonalInitializer(OrthogonalInitializer):
