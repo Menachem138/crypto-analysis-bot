@@ -32,29 +32,41 @@ def add_cors_headers(response):
 redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 # Load the trained model
-model_path = '/app/crypto_prediction_model'
+model_path_json = '/app/crypto_prediction_model.json'
+model_path_weights = '/app/crypto_prediction_model.weights.h5'
 
 def custom_objects():
     from tensorflow.keras.layers import InputLayer
-    from tensorflow.keras.mixed_precision.experimental import Policy as DTypePolicy
-    return {'InputLayer': InputLayer, 'DTypePolicy': DTypePolicy}
+    from tensorflow.keras.mixed_precision import Policy as DTypePolicy
+    from tensorflow.keras.initializers import Orthogonal as OrthogonalInitializer
 
-if os.path.exists(model_path + '.json') and os.path.exists(model_path + '.h5'):
+    class CustomOrthogonalInitializer(OrthogonalInitializer):
+        def __init__(self, seed=None):
+            super(CustomOrthogonalInitializer, self).__init__(seed=seed)
+
+    return {
+        'InputLayer': InputLayer,
+        'DTypePolicy': DTypePolicy,
+        'OrthogonalInitializer': OrthogonalInitializer,
+        'CustomOrthogonalInitializer': CustomOrthogonalInitializer
+    }
+
+if os.path.exists(model_path_json) and os.path.exists(model_path_weights):
     try:
-        with open(model_path + '.json', 'r') as json_file:
+        with open(model_path_json, 'r') as json_file:
             model_json = json_file.read()
             model_json = model_json.replace('"batch_shape":', '"input_shape":')
             logger.info('Modified model JSON: %s', model_json)
         with tf.keras.utils.custom_object_scope(custom_objects()):
             model = tf.keras.models.model_from_json(model_json)
-            model.load_weights(model_path + '.h5')
+            model.load_weights(model_path_weights)
         logger.info('Model loaded successfully.')
     except Exception as e:
         logger.error('Error loading model: %s', str(e))
         raise
 else:
-    logger.error('Model file not found at path: %s.json or %s.h5', model_path, model_path)
-    raise FileNotFoundError(f'Model file not found at path: {model_path}.json or {model_path}.h5')
+    logger.error('Model file not found at path: %s or %s', model_path_json, model_path_weights)
+    raise FileNotFoundError(f'Model file not found at path: {model_path_json} or {model_path_weights}')
 
 # Function to make predictions
 def make_predictions():
