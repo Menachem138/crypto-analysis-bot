@@ -1,0 +1,8 @@
+# Ignore Python cache files
+__pycache__/
+
+# Ignore model file
+crypto_prediction_model.h5
+
+# Ignore log files
+flask_server.log

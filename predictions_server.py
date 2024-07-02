@@ -32,7 +32,17 @@ def add_cors_headers(response):
 redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 # Load the trained model
-model = tf.keras.models.load_model('/home/ubuntu/crypto_prediction_model.h5')
+model_path = '/app/crypto_prediction_model.h5'
+if os.path.exists(model_path):
+    try:
+        model = tf.keras.models.load_model(model_path)
+        logger.info('Model loaded successfully.')
+    except Exception as e:
+        logger.error('Error loading model: %s', str(e))
+        raise
+else:
+    logger.error('Model file not found at path: %s', model_path)
+    raise FileNotFoundError(f'Model file not found at path: {model_path}')
 
 # Function to make predictions
 def make_predictions():
