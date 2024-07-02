@@ -80,7 +80,7 @@ marisa-trie==1.2.0
 Markdown==3.6
 markdown-it-py==3.0.0
 MarkupSafe==2.1.5
-matplotlib==3.3.4
+matplotlib==3.4.0
 mdurl==0.1.2
 more-itertools==8.10.0
 murmurhash==1.0.10
