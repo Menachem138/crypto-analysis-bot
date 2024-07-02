@@ -41,8 +41,8 @@ def custom_objects():
     from tensorflow.keras.initializers import Orthogonal as OrthogonalInitializer
 
     class CustomOrthogonalInitializer(OrthogonalInitializer):
-        def __init__(self, gain=1.0, seed=None):
-            super(CustomOrthogonalInitializer, self).__init__(gain=gain, seed=seed)
+        def __init__(self, gain=1.0):
+            super(CustomOrthogonalInitializer, self).__init__(gain=gain)
 
     return {
         'InputLayer': InputLayer,
