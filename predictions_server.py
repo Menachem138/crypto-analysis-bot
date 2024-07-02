@@ -55,8 +55,7 @@ if os.path.exists(model_path_json) and os.path.exists(model_path_weights):
     try:
         with open(model_path_json, 'r') as json_file:
             model_json = json_file.read()
-            model_json = model_json.replace('"batch_shape":', '"input_shape":')
-            logger.info('Modified model JSON: %s', model_json)
+            logger.info('Model JSON: %s', model_json)
         with tf.keras.utils.custom_object_scope(custom_objects()):
             model = tf.keras.models.model_from_json(model_json, custom_objects=custom_objects())
             model.load_weights(model_path_weights)
