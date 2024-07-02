@@ -169,9 +169,9 @@ tornado==6.4
 tqdm==4.66.4
 Twisted==22.1.0
 typer==0.12.3
-typing_extensions==4.9.0
 tzdata==2023.4
 tzlocal==5.2
+typing_extensions
 urllib3==1.26.5
 validators==0.22.0
 w3lib==2.2.1
