@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Set up logging
-logging.basicConfig(filename='flask_server.log', level=logging.INFO,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -32,8 +32,8 @@ def add_cors_headers(response):
 redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 # Load the trained model
-model_path_json = '/app/crypto_prediction_model.json'
-model_path_weights = '/app/crypto_prediction_model.weights.h5'
+model_path_json = './crypto_prediction_model.json'
+model_path_weights = './crypto_prediction_model.weights.h5'
 
 def custom_objects():
     from tensorflow.keras.layers import InputLayer
@@ -60,15 +60,6 @@ def custom_objects():
         'CustomOrthogonalInitializer': CustomOrthogonalInitializer
     }
 
-def build_model(input_shape):
-    model = tf.keras.Sequential()
-    model.add(tf.keras.layers.LSTM(50, return_sequences=True, input_shape=input_shape))
-    model.add(tf.keras.layers.Dropout(0.2))
-    model.add(tf.keras.layers.LSTM(50, return_sequences=False))
-    model.add(tf.keras.layers.Dropout(0.2))
-    model.add(tf.keras.layers.Dense(1))
-    model.compile(optimizer='adam', loss='mean_squared_error')
-    return model
 
 if os.path.exists(model_path_json) and os.path.exists(model_path_weights):
     try:
@@ -77,7 +68,7 @@ if os.path.exists(model_path_json) and os.path.exists(model_path_weights):
             logger.info('Model JSON: %s', model_json)
         with tf.keras.utils.custom_object_scope(custom_objects()):
             logger.info('Custom objects: %s', custom_objects())
-            model = build_model((4, 1))  # Use the build_model function to create the model
+            model = tf.keras.models.model_from_json(model_json, custom_objects=custom_objects())
             logger.info('Model architecture loaded successfully.')
             model.summary(print_fn=logger.info)  # Log the model summary
             print(model.summary())  # Print the model summary to the console
@@ -195,9 +186,11 @@ def get_news():
     logger.info('Request headers: %s', request.headers)
     try:
         tickers = request.args.get('tickers', 'BTC,ETH,LTC,XRP,ADA,DOT,BNB,LINK')
-        items = request.args.get('items', 10)
-        url = f"https://cryptonews-api.com/api/v1?tickers={tickers}&items={items}&token={os.environ.get('CRYPTO_NEWS_API_KEY')}"
+        items = request.args.get('items', 3)
+        url = f"https://cryptonews-api.com/api/v1?tickers={tickers}&items={items}&token=hi7s0bo7b7xqsq7owr8d9uadipkppbt0lvcdy6ix"
+        logger.info('Request URL: %s', url)
         response = requests.get(url)
+        logger.info('Response status code: %s', response.status_code)
         if response.status_code == 200:
             news_data = response.json()
         else:
@@ -239,4 +232,4 @@ def get_prices():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5002))
-    app.run(host='0.0.0.0', port=port, ssl_context=('cert.pem', 'key.pem'))
+    app.run(host='0.0.0.0', port=port, debug=True)
