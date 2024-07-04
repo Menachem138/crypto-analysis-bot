@@ -62,22 +62,36 @@ const Dashboard = () => {
         await parsedData.forEachAsync(row => dataArray.push(row));
         console.log('Data array created successfully');
 
+        // Extract features and labels
+        const features = dataArray.map(row => [
+          row.Open_Close_diff,
+          row.High_Low_diff,
+          row.Average_Price,
+          row.Price_Range,
+          row.Volume_Change,
+          row.Close_Change,
+          row.Rolling_Mean_Close,
+          row.Rolling_Std_Close,
+          row.Exponential_Moving_Avg,
+          row.Relative_Strength_Index
+        ]);
+        const labels = dataArray.map(row => row.Close);
+
         // Split the data into training and testing sets
-        const trainSize = Math.floor(dataArray.length * 0.8);
-        const trainData = dataArray.slice(0, trainSize);
-        const testData = dataArray.slice(trainSize);
+        const trainSize = Math.floor(features.length * 0.8);
+        const trainFeatures = features.slice(0, trainSize);
+        const trainLabels = labels.slice(0, trainSize);
+        const testFeatures = features.slice(trainSize);
+        const testLabels = labels.slice(trainSize);
         console.log('Data split into training and testing sets');
 
         // Convert the data to tensors
-        const convertToTensor = (data) => {
+        const convertToTensor = (data, labels) => {
           return tf.tidy(() => {
             tf.util.shuffle(data);
 
-            const inputs = data.map(d => Object.values(d.xs));
-            const labels = data.map(d => Object.values(d.ys));
-
-            const inputTensor = tf.tensor2d(inputs, [inputs.length, inputs[0].length]);
-            const labelTensor = tf.tensor2d(labels, [labels.length, labels[0].length]);
+            const inputTensor = tf.tensor2d(data, [data.length, data[0].length]);
+            const labelTensor = tf.tensor2d(labels, [labels.length, 1]);
 
             console.log('Input Tensor Shape:', inputTensor.shape);
             console.log('Label Tensor Shape:', labelTensor.shape);
@@ -91,10 +105,10 @@ const Dashboard = () => {
           });
         };
 
-        const trainTensors = convertToTensor(trainData);
+        const trainTensors = convertToTensor(trainFeatures, trainLabels);
         console.log('Train Tensors:', trainTensors);
 
-        const testTensors = convertToTensor(testData);
+        const testTensors = convertToTensor(testFeatures, testLabels);
         console.log('Test Tensors:', testTensors);
 
         console.log('Data converted to tensors');
