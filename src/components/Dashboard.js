@@ -8,6 +8,7 @@ const Dashboard = () => {
   const [marketData, setMarketData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  console.log('Initial error state:', error);
   const [trainingResult, setTrainingResult] = useState(null);
   const [evaluationResult, setEvaluationResult] = useState(null);
 
@@ -19,6 +20,7 @@ const Dashboard = () => {
         setMarketData(response.data);
       } catch (err) {
         setError(err.message);
+        console.log('Error set in getMarketData:', err.message);
       } finally {
         setLoading(false);
       }
@@ -32,6 +34,7 @@ const Dashboard = () => {
       try {
         // Clear any previous errors
         setError(null);
+        console.log('Error state cleared at start of loadAndTrainModel');
 
         // Load and preprocess the historical data
         const response = await fetch('/Binance_1INCHBTC_d.csv');
@@ -108,9 +111,14 @@ const Dashboard = () => {
 
         // Clear any previous errors after successful operations
         setError(null);
+        console.log('Error state cleared after successful operations');
       } catch (err) {
         console.error('Error during fetch operation:', err);
         setError(err.message);
+        console.log('Error set in loadAndTrainModel:', err.message);
+      } finally {
+        setLoading(false);
+        console.log('Loading state set to false');
       }
     };
 
