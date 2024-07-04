@@ -30,6 +30,9 @@ const Dashboard = () => {
   useEffect(() => {
     const loadAndTrainModel = async () => {
       try {
+        // Clear any previous errors
+        setError(null);
+
         // Load and preprocess the historical data
         const response = await fetch('/Binance_1INCHBTC_d.csv');
         console.log('Fetch response status:', response.status);
@@ -38,6 +41,7 @@ const Dashboard = () => {
         }
         console.log('CSV file fetched successfully');
         const csv = await response.text();
+        console.log('CSV file content:', csv.slice(0, 100)); // Log the first 100 characters of the CSV content
         const parsedData = tf.data.csv(csv, {
           columnConfigs: {
             Close: {
@@ -45,15 +49,18 @@ const Dashboard = () => {
             }
           }
         });
+        console.log('CSV file parsed successfully');
 
         // Convert the data to arrays
         const dataArray = [];
         await parsedData.forEachAsync(row => dataArray.push(row));
+        console.log('Data array created successfully');
 
         // Split the data into training and testing sets
         const trainSize = Math.floor(dataArray.length * 0.8);
         const trainData = dataArray.slice(0, trainSize);
         const testData = dataArray.slice(trainSize);
+        console.log('Data split into training and testing sets');
 
         // Convert the data to tensors
         const convertToTensor = (data) => {
@@ -79,16 +86,28 @@ const Dashboard = () => {
         };
 
         const trainTensors = convertToTensor(trainData);
+        console.log('Train Tensors:', trainTensors);
+
         const testTensors = convertToTensor(testData);
+        console.log('Test Tensors:', testTensors);
+
+        console.log('Data converted to tensors');
 
         // Create and train the model
         const model = createModel();
+        console.log('Model created:', model);
+
         const history = await trainModel(model, trainTensors.inputs, trainTensors.labels);
+        console.log('Model trained successfully:', history);
         setTrainingResult(history);
 
         // Evaluate the model
         const evaluation = await evaluateModel(model, testTensors.inputs, testTensors.labels);
+        console.log('Model evaluated successfully:', evaluation);
         setEvaluationResult(evaluation);
+
+        // Clear any previous errors after successful operations
+        setError(null);
       } catch (err) {
         console.error('Error during fetch operation:', err);
         setError(err.message);
