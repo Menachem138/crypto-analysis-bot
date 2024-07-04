@@ -133,6 +133,9 @@ const Dashboard = () => {
         console.error('Error during fetch operation:', err);
         setError(`Error: ${err.message}`);
         console.log('Full error object:', err);
+        console.log('Error stack trace:', err.stack);
+        console.log('Error name:', err.name);
+        console.log('Error message:', err.message);
       } finally {
         setLoading(false);
         console.log('Loading state set to false');
