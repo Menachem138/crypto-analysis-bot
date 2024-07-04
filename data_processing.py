@@ -3,6 +3,7 @@ import pandas as pd
 # Load the CSV data into a pandas DataFrame
 def load_data(file_path):
     data = pd.read_csv(file_path)
+    print("Data Columns:", data.columns)  # Print the columns of the DataFrame
     return data
 
 # Perform data cleaning and preprocessing
