@@ -32,9 +32,11 @@ const Dashboard = () => {
       try {
         // Load and preprocess the historical data
         const response = await fetch('/Binance_1INCHBTC_d.csv');
+        console.log('Fetch response status:', response.status);
         if (!response.ok) {
           throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
         }
+        console.log('CSV file fetched successfully');
         const csv = await response.text();
         const parsedData = tf.data.csv(csv, {
           columnConfigs: {
