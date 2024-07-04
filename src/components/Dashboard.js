@@ -9,8 +9,11 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   console.log('Initial error state:', error);
+  console.log('Initial loading state:', loading);
   const [trainingResult, setTrainingResult] = useState(null);
   const [evaluationResult, setEvaluationResult] = useState(null);
+  console.log('Initial training result:', trainingResult);
+  console.log('Initial evaluation result:', evaluationResult);
 
   useEffect(() => {
     const getMarketData = async () => {
