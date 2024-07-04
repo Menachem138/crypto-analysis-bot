@@ -117,8 +117,8 @@ const Dashboard = () => {
         console.log('Error state cleared after successful operations:', error);
       } catch (err) {
         console.error('Error during fetch operation:', err);
-        setError(err.message);
-        console.log('Error set in loadAndTrainModel:', err.message);
+        setError(`Error: ${err.message}`);
+        console.log('Full error object:', err);
       } finally {
         setLoading(false);
         console.log('Loading state set to false');
