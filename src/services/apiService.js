@@ -114,6 +114,20 @@ const apiService = {
       throw error;
     }
   },
+
+  getMarketData: async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/global`);
+      console.log('Market Data:', response.data); // Log the data to inspect its structure
+      console.log('Market Cap:', response.data.data.total_market_cap);
+      console.log('Total Volume:', response.data.data.total_volume);
+      console.log('Market Cap Percentage:', response.data.data.market_cap_percentage);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching market data:', error);
+      throw error;
+    }
+  },
 };
 
 export default apiService;

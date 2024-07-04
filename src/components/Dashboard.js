@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Heading, Text, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
-import { fetchMarketData } from '../services/apiService';
+import apiService from '../services/apiService';
 
 const Dashboard = () => {
   const [marketData, setMarketData] = useState(null);
@@ -10,8 +10,9 @@ const Dashboard = () => {
   useEffect(() => {
     const getMarketData = async () => {
       try {
-        const data = await fetchMarketData();
-        setMarketData(data);
+        const response = await apiService.getMarketData();
+        console.log('Market Data:', response.data); // Log the market data
+        setMarketData(response.data);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -49,9 +50,15 @@ const Dashboard = () => {
       </Heading>
       {marketData && (
         <Box>
-          <Text>Market Cap: ${marketData.market_cap}</Text>
-          <Text>24h Volume: ${marketData.total_volume}</Text>
-          <Text>Bitcoin Dominance: {marketData.market_cap_percentage.btc}%</Text>
+          {marketData.market_cap && marketData.market_cap.usd !== undefined && (
+            <Text>Market Cap: ${marketData.market_cap.usd}</Text>
+          )}
+          {marketData.total_volume && marketData.total_volume.usd !== undefined && (
+            <Text>24h Volume: ${marketData.total_volume.usd}</Text>
+          )}
+          {marketData.market_cap_percentage && marketData.market_cap_percentage.btc !== undefined && (
+            <Text>Bitcoin Dominance: {marketData.market_cap_percentage.btc}%</Text>
+          )}
         </Box>
       )}
     </Box>
