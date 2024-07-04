@@ -8,7 +8,6 @@ const Dashboard = () => {
   const [marketData, setMarketData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [model, setModel] = useState(null);
   const [trainingResult, setTrainingResult] = useState(null);
   const [evaluationResult, setEvaluationResult] = useState(null);
 
@@ -33,6 +32,9 @@ const Dashboard = () => {
       try {
         // Load and preprocess the historical data
         const response = await fetch('/Binance_1INCHBTC_d.csv');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
+        }
         const csv = await response.text();
         const parsedData = tf.data.csv(csv, {
           columnConfigs: {
@@ -62,6 +64,11 @@ const Dashboard = () => {
             const inputTensor = tf.tensor2d(inputs, [inputs.length, inputs[0].length]);
             const labelTensor = tf.tensor2d(labels, [labels.length, labels[0].length]);
 
+            console.log('Input Tensor Shape:', inputTensor.shape);
+            console.log('Label Tensor Shape:', labelTensor.shape);
+            console.log('Input Tensor Data:', inputTensor.arraySync());
+            console.log('Label Tensor Data:', labelTensor.arraySync());
+
             return {
               inputs: inputTensor,
               labels: labelTensor
@@ -74,7 +81,6 @@ const Dashboard = () => {
 
         // Create and train the model
         const model = createModel();
-        setModel(model);
         const history = await trainModel(model, trainTensors.inputs, trainTensors.labels);
         setTrainingResult(history);
 
@@ -82,6 +88,7 @@ const Dashboard = () => {
         const evaluation = await evaluateModel(model, testTensors.inputs, testTensors.labels);
         setEvaluationResult(evaluation);
       } catch (err) {
+        console.error('Error during fetch operation:', err);
         setError(err.message);
       }
     };
