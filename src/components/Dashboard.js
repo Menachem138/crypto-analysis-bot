@@ -76,6 +76,9 @@ const Dashboard = () => {
           row.Relative_Strength_Index
         ]);
         const labels = dataArray.map(row => row.Close);
+        console.log('Features and labels extracted successfully');
+        console.log('Features:', features.slice(0, 5)); // Log the first 5 feature sets
+        console.log('Labels:', labels.slice(0, 5)); // Log the first 5 labels
 
         // Split the data into training and testing sets
         const trainSize = Math.floor(features.length * 0.8);
@@ -116,14 +119,17 @@ const Dashboard = () => {
         // Create and train the model
         const model = createModel();
         console.log('Model created:', model);
+        model.summary(); // Log the model summary
 
         const history = await trainModel(model, trainTensors.inputs, trainTensors.labels);
         console.log('Model trained successfully:', history);
+        console.log('Training history:', history.history);
         setTrainingResult(history);
 
         // Evaluate the model
         const evaluation = await evaluateModel(model, testTensors.inputs, testTensors.labels);
         console.log('Model evaluated successfully:', evaluation);
+        console.log('Evaluation result:', evaluation);
         setEvaluationResult(evaluation);
 
         // Clear any previous errors after successful operations
