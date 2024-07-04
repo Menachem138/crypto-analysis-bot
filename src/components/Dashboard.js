@@ -30,41 +30,60 @@ const Dashboard = () => {
 
   useEffect(() => {
     const loadAndTrainModel = async () => {
-      // Load and preprocess the historical data
-      const data = await fetch('/home/ubuntu/browser_downloads/Binance_1INCHBTC_d.csv')
-        .then(response => response.text())
-        .then(csv => {
-          const parsedData = tf.data.csv(csv, {
-            columnConfigs: {
-              Close: {
-                isLabel: true
-              }
+      try {
+        // Load and preprocess the historical data
+        const response = await fetch('/Binance_1INCHBTC_d.csv');
+        const csv = await response.text();
+        const parsedData = tf.data.csv(csv, {
+          columnConfigs: {
+            Close: {
+              isLabel: true
             }
-          });
-          return parsedData;
+          }
         });
 
-      // Split the data into training and testing sets
-      const trainData = data.take(0.8);
-      const testData = data.skip(0.8);
+        // Convert the data to arrays
+        const dataArray = [];
+        await parsedData.forEachAsync(row => dataArray.push(row));
 
-      // Convert the data to tensors
-      const trainTensors = trainData.map(({ xs, ys }) => {
-        return { xs: Object.values(xs), ys: Object.values(ys) };
-      }).batch(32);
-      const testTensors = testData.map(({ xs, ys }) => {
-        return { xs: Object.values(xs), ys: Object.values(ys) };
-      }).batch(32);
+        // Split the data into training and testing sets
+        const trainSize = Math.floor(dataArray.length * 0.8);
+        const trainData = dataArray.slice(0, trainSize);
+        const testData = dataArray.slice(trainSize);
 
-      // Create and train the model
-      const model = createModel();
-      setModel(model);
-      const history = await trainModel(model, trainTensors);
-      setTrainingResult(history);
+        // Convert the data to tensors
+        const convertToTensor = (data) => {
+          return tf.tidy(() => {
+            tf.util.shuffle(data);
 
-      // Evaluate the model
-      const evaluation = await evaluateModel(model, testTensors);
-      setEvaluationResult(evaluation);
+            const inputs = data.map(d => Object.values(d.xs));
+            const labels = data.map(d => Object.values(d.ys));
+
+            const inputTensor = tf.tensor2d(inputs, [inputs.length, inputs[0].length]);
+            const labelTensor = tf.tensor2d(labels, [labels.length, labels[0].length]);
+
+            return {
+              inputs: inputTensor,
+              labels: labelTensor
+            };
+          });
+        };
+
+        const trainTensors = convertToTensor(trainData);
+        const testTensors = convertToTensor(testData);
+
+        // Create and train the model
+        const model = createModel();
+        setModel(model);
+        const history = await trainModel(model, trainTensors.inputs, trainTensors.labels);
+        setTrainingResult(history);
+
+        // Evaluate the model
+        const evaluation = await evaluateModel(model, testTensors.inputs, testTensors.labels);
+        setEvaluationResult(evaluation);
+      } catch (err) {
+        setError(err.message);
+      }
     };
 
     loadAndTrainModel();
