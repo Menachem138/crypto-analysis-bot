@@ -37,7 +37,7 @@ const Dashboard = () => {
       try {
         // Clear any previous errors
         setError(null);
-        console.log('Error state cleared at start of loadAndTrainModel');
+        console.log('Error state cleared at start of loadAndTrainModel:', error);
 
         // Load and preprocess the historical data
         const response = await fetch('/Binance_1INCHBTC_d.csv');
@@ -114,7 +114,7 @@ const Dashboard = () => {
 
         // Clear any previous errors after successful operations
         setError(null);
-        console.log('Error state cleared after successful operations');
+        console.log('Error state cleared after successful operations:', error);
       } catch (err) {
         console.error('Error during fetch operation:', err);
         setError(err.message);
@@ -126,7 +126,7 @@ const Dashboard = () => {
     };
 
     loadAndTrainModel();
-  }, []);
+  }, [error]);
 
   if (loading) {
     return (
