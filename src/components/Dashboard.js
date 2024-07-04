@@ -126,7 +126,7 @@ const Dashboard = () => {
     };
 
     loadAndTrainModel();
-  }, [error]);
+  }, []);
 
   if (loading) {
     return (
