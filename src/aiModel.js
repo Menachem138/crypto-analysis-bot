@@ -1,5 +1,8 @@
 import * as tf from '@tensorflow/tfjs';
 
+// Set TensorFlow.js to use the CPU backend
+tf.setBackend('cpu');
+
 // Define the model architecture
 const createModel = () => {
   const model = tf.sequential();
