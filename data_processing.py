@@ -12,7 +12,7 @@ def preprocess_data(data):
     data = data.dropna()
 
     # Normalize the data (example: scaling the 'Close' prices)
-    data['Close'] = (data['Close'] - data['Close'].min()) / (data['Close'].max() - data['Close'].min())
+    data['Close'] = (data['Close'] - data['Close'].min()) / (data['Close'].max() - data['Close'].min() + 1e-8)
 
     # Select and engineer 10 relevant features
     data['Open_Close_diff'] = data['Open'] - data['Close']
