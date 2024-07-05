@@ -26,6 +26,9 @@ def preprocess_data(data):
     data['Exponential_Moving_Avg'] = data['Close'].ewm(span=5, adjust=False).mean().fillna(0)
     data['Relative_Strength_Index'] = 100 - (100 / (1 + data['Close_Change'].rolling(window=14).mean() / data['Close_Change'].rolling(window=14).std().fillna(0)))
 
+    # Replace any remaining NaN values with zeros
+    data = data.fillna(0)
+
     # Select the 10 features for the model
     features = data[['Open_Close_diff', 'High_Low_diff', 'Average_Price', 'Price_Range', 'Volume_Change', 'Close_Change', 'Rolling_Mean_Close', 'Rolling_Std_Close', 'Exponential_Moving_Avg', 'Relative_Strength_Index']]
 

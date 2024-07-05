@@ -113,13 +113,17 @@ const Dashboard = () => {
           row.Unix / maxUnix, // Normalized Unix timestamp
           (row.tradecount - meanTradecount) / stdTradecount // tradecount as an additional feature
         ]);
+
+        // Check for NaN values in features
+        const cleanedFeatures = features.map(featureSet => featureSet.map(value => isNaN(value) ? 0 : value));
+
         const labels = dataArray.map(row => row.Close);
 
         // Replace NaN values in labels with zeros
         const cleanedLabels = labels.map(label => isNaN(label) ? 0 : label);
 
         console.log('Features and labels extracted successfully');
-        console.log('Features:', features.slice(0, 5)); // Log the first 5 feature sets
+        console.log('Features:', cleanedFeatures.slice(0, 5)); // Log the first 5 feature sets
         console.log('Labels:', cleanedLabels.slice(0, 5)); // Log the first 5 labels
 
         // Split the data into training and testing sets
