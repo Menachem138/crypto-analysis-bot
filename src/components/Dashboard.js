@@ -238,6 +238,7 @@ const Dashboard = () => {
           Object.keys(row).forEach(key => {
             if (isNaN(row[key]) || !isFinite(row[key])) {
               console.error(`Invalid value found in key: ${key}, value: ${row[key]} at row index: ${index}`); // Log the key, value, and row index if NaN or infinite is found
+              row[key] = 0; // Replace NaN or infinite values with zero
             }
           });
         });
