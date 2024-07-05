@@ -8,7 +8,7 @@ const apiService = {
       const response = await axios.get(`${BASE_URL}/ping`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching ping:', error);
+      console.error('Error fetching ping:', error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
       throw error;
     }
   },
@@ -23,7 +23,7 @@ const apiService = {
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching simple price:', error);
+      console.error('Error fetching simple price:', error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
       throw error;
     }
   },
@@ -41,7 +41,7 @@ const apiService = {
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching coins markets:', error);
+      console.error('Error fetching coins markets:', error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
       throw error;
     }
   },
@@ -51,7 +51,7 @@ const apiService = {
       const response = await axios.get(`${BASE_URL}/coins/${id}`);
       return response.data;
     } catch (error) {
-      console.error(`Error fetching coin data for ${id}:`, error);
+      console.error(`Error fetching coin data for ${id}:`, error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
       throw error;
     }
   },
@@ -65,7 +65,7 @@ const apiService = {
       });
       return response.data;
     } catch (error) {
-      console.error(`Error fetching coin history for ${id} on ${date}:`, error);
+      console.error(`Error fetching coin history for ${id} on ${date}:`, error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
       throw error;
     }
   },
@@ -80,7 +80,7 @@ const apiService = {
       });
       return response.data;
     } catch (error) {
-      console.error(`Error fetching market chart for ${id}:`, error);
+      console.error(`Error fetching market chart for ${id}:`, error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
       throw error;
     }
   },
@@ -90,7 +90,7 @@ const apiService = {
       const response = await axios.get(`${BASE_URL}/exchange_rates`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching exchange rates:', error);
+      console.error('Error fetching exchange rates:', error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
       throw error;
     }
   },
@@ -100,7 +100,7 @@ const apiService = {
       const response = await axios.get(`${BASE_URL}/search/trending`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching trending searches:', error);
+      console.error('Error fetching trending searches:', error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
       throw error;
     }
   },
@@ -110,7 +110,7 @@ const apiService = {
       const response = await axios.get(`${BASE_URL}/global`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching global data:', error);
+      console.error('Error fetching global data:', error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
       throw error;
     }
   },
@@ -124,7 +124,7 @@ const apiService = {
       console.log('Market Cap Percentage:', response.data.data.market_cap_percentage);
       return response.data;
     } catch (error) {
-      console.error('Error fetching market data:', error);
+      console.error('Error fetching market data:', error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
       throw error;
     }
   },
