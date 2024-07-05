@@ -148,8 +148,8 @@ const Dashboard = () => {
         // Check for NaN values in parsed data and replace them with zeros
         parsedData = parsedData.map(row => {
           Object.keys(row).forEach(key => {
-            if (isNaN(row[key])) {
-              console.log(`NaN value found in key: ${key}, value: ${row[key]}`); // Log the key and value if NaN is found
+            if (isNaN(row[key]) || !isFinite(row[key])) {
+              console.log(`Invalid value found in key: ${key}, value: ${row[key]}`); // Log the key and value if NaN or infinite is found
               row[key] = 0;
             }
           });
@@ -176,8 +176,8 @@ const Dashboard = () => {
         // Check for NaN values in raw data array and replace them with zeros
         const cleanedDataArray = dataArray.map(row => {
           Object.keys(row).forEach(key => {
-            if (isNaN(row[key])) {
-              console.log(`NaN value found in key: ${key}, value: ${row[key]}`); // Log the key and value if NaN is found
+            if (isNaN(row[key]) || !isFinite(row[key])) {
+              console.log(`Invalid value found in key: ${key}, value: ${row[key]}`); // Log the key and value if NaN or infinite is found
               row[key] = 0;
             }
           });
@@ -297,7 +297,6 @@ const Dashboard = () => {
           console.log('Normalized Tensor contains NaN values before replacement');
         }
 
-        // Replace NaN values in the normalized tensor with zeros
         // Replace NaN values in the normalized tensor with zeros
         const cleanedNormalizedTensor = tf.where(tf.isNaN(normalizedTensor), tf.zerosLike(normalizedTensor), normalizedTensor);
         console.log('Final Normalized Tensor:', cleanedNormalizedTensor.arraySync());
