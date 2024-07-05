@@ -56,7 +56,7 @@ const Dashboard = () => {
         try {
           const csvText = await response.text();
           console.log('Fetched CSV Text:', csvText.split('\n').slice(0, 5)); // Log the first 5 lines of the fetched CSV text
-          const rows = csvText.split('\n').filter((row, index) => index > 1 && row.trim() !== '' && row.split(',').length === 10); // Remove the first two lines (URL and header row), filter out any empty rows, and ensure each row has the expected number of columns
+          const rows = csvText.split('\n').slice(2).filter(row => row.trim() !== '' && row.split(',').length === 10); // Remove the first two lines (URL and header row), filter out any empty rows, and ensure each row has the expected number of columns
           parsedData = rows.map(row => {
             const values = row.split(',');
             if (values.length === 10) { // Ensure the row has the expected number of columns
