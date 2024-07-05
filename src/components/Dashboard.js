@@ -3,6 +3,7 @@ import { Box, Heading, Text, Spinner, Alert, AlertIcon } from '@chakra-ui/react'
 import apiService from '../services/apiService';
 import { createModel, trainModel, evaluateModel } from '../aiModel';
 import * as tf from '@tensorflow/tfjs';
+import { calculateMovingAverage, calculateRSI, calculateMACD } from '../technicalAnalysis';
 
 const Dashboard = () => {
   const [marketData, setMarketData] = useState(null);
@@ -133,75 +134,6 @@ const Dashboard = () => {
 
         console.log('Cleaned raw data array before tensor creation:', cleanedDataArray.slice(0, 5)); // Log the first 5 cleaned raw data rows
 
-        const calculateRSI = (data, period = 14) => {
-          let rsi = [];
-
-          for (let i = 0; i < data.length; i++) {
-            if (i < period) {
-              rsi.push(0); // RSI is not defined for the first 'period' values
-              continue;
-            }
-
-            let gain = 0;
-            let loss = 0;
-
-            for (let j = i - period + 1; j <= i; j++) {
-              const change = data[j].Close - data[j - 1].Close;
-              if (change > 0) {
-                gain += change;
-              } else {
-                loss -= change;
-              }
-            }
-
-            const avgGain = gain / period;
-            const avgLoss = loss / period;
-            const rs = avgGain / (avgLoss + 1e-8); // Add small constant to prevent division by zero
-            rsi.push(100 - (100 / (1 + rs)));
-          }
-
-          return rsi;
-        };
-
-        // Calculate Moving Average
-        const calculateMovingAverage = (data, period = 14) => {
-          let movingAverage = [];
-
-          for (let i = 0; i < data.length; i++) {
-            if (i < period) {
-              movingAverage.push(0); // Moving Average is not defined for the first 'period' values
-              continue;
-            }
-
-            let sum = 0;
-            for (let j = i - period + 1; j <= i; j++) {
-              sum += data[j].Close;
-            }
-
-            movingAverage.push(sum / period);
-          }
-
-          return movingAverage;
-        };
-
-        // Placeholder for Copy-Trading Integration
-        const integrateCopyTrading = async () => {
-          // TODO: Implement copy-trading integration
-          console.log('Integrating copy-trading functionality...');
-        };
-
-        // Placeholder for Live Graphs and Insights
-        const updateLiveGraphsAndInsights = async () => {
-          // TODO: Implement live graphs and insights
-          console.log('Updating live graphs and insights...');
-        };
-
-        // Placeholder for Personalized Financial Advice
-        const providePersonalizedAdvice = async () => {
-          // TODO: Implement personalized financial advice
-          console.log('Providing personalized financial advice...');
-        };
-
         // Calculate RSI with the corrected rolling calculation
         const rsiValues = calculateRSI(cleanedDataArray);
         cleanedDataArray.forEach((row, index) => {
@@ -211,6 +143,11 @@ const Dashboard = () => {
         const movingAverageValues = calculateMovingAverage(cleanedDataArray);
         cleanedDataArray.forEach((row, index) => {
           row.Moving_Average = movingAverageValues[index];
+        });
+
+        const macdValues = calculateMACD(cleanedDataArray);
+        cleanedDataArray.forEach((row, index) => {
+          row.MACD = macdValues[index];
         });
 
         console.log('Starting tensor creation from cleaned data array');
@@ -225,7 +162,8 @@ const Dashboard = () => {
           row.Open - row.Close, // Difference between Open and Close prices
           row.Unix / 1e9, // Scale Unix timestamp to a more suitable range
           row.Relative_Strength_Index, // Add the Relative Strength Index feature
-          row.Moving_Average // Add the Moving Average feature
+          row.Moving_Average, // Add the Moving Average feature
+          row.MACD // Add the MACD feature
         ]));
         console.log('Data Tensor created:', dataTensor.arraySync());
 
