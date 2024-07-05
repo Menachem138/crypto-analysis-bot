@@ -31,7 +31,7 @@ const getCopyTradingData = async () => {
   }
 };
 
-module.exports = {
+export {
   getMarketData,
   getCopyTradingData
 };
