@@ -84,43 +84,86 @@ const Dashboard = () => {
         // Extract features and labels
         console.log('Starting to extract features and labels');
         const maxUnix = Math.max(...dataArray.map(row => row.Unix));
-        const meanOpen = tf.mean(dataArray.map(row => row.Open));
-        const stdOpen = tf.moments(dataArray.map(row => row.Open)).variance.sqrt();
-        const meanHigh = tf.mean(dataArray.map(row => row.High));
-        const stdHigh = tf.moments(dataArray.map(row => row.High)).variance.sqrt();
-        const meanLow = tf.mean(dataArray.map(row => row.Low));
-        const stdLow = tf.moments(dataArray.map(row => row.Low)).variance.sqrt();
-        const meanVolume1INCH = tf.mean(dataArray.map(row => row['Volume 1INCH']));
-        const stdVolume1INCH = tf.moments(dataArray.map(row => row['Volume 1INCH'])).variance.sqrt();
-        const meanVolumeBTC = tf.mean(dataArray.map(row => row['Volume BTC']));
-        const stdVolumeBTC = tf.moments(dataArray.map(row => row['Volume BTC'])).variance.sqrt();
-        const meanTradecount = tf.mean(dataArray.map(row => row.tradecount));
-        const stdTradecount = tf.moments(dataArray.map(row => row.tradecount)).variance.sqrt();
-        const meanAvgHighLow = tf.mean(dataArray.map(row => (row.High + row.Low) / 2));
-        const stdAvgHighLow = tf.moments(dataArray.map(row => (row.High + row.Low) / 2)).variance.sqrt();
-        const meanOpenCloseDiff = tf.mean(dataArray.map(row => row.Open - row.Close));
-        const stdOpenCloseDiff = tf.moments(dataArray.map(row => row.Open - row.Close)).variance.sqrt();
 
-        const features = dataArray.map(row => [
-          (row.Open - meanOpen) / stdOpen,
-          (row.High - meanHigh) / stdHigh,
-          (row.Low - meanLow) / stdLow,
-          (row['Volume 1INCH'] - meanVolume1INCH) / stdVolume1INCH,
-          (row['Volume BTC'] - meanVolumeBTC) / stdVolumeBTC,
-          (row.tradecount - meanTradecount) / stdTradecount,
-          ((row.High + row.Low) / 2 - meanAvgHighLow) / stdAvgHighLow, // Average of High and Low prices
-          (row.Open - row.Close - meanOpenCloseDiff) / stdOpenCloseDiff, // Difference between Open and Close prices
-          row.Unix / maxUnix, // Normalized Unix timestamp
-          (row.tradecount - meanTradecount) / stdTradecount // tradecount as an additional feature
-        ]);
+        // Check for zero standard deviation and replace with a small constant
+        const replaceZeroStd = (std) => std.dataSync()[0] === 0 ? tf.scalar(1e-8) : std;
+
+        // Ensure mean and standard deviation calculations are valid
+        const safeMean = (values) => {
+          const mean = tf.mean(values);
+          return isNaN(mean.dataSync()[0]) ? tf.scalar(0) : mean;
+        };
+
+        const safeStd = (values) => {
+          const std = tf.moments(values).variance.sqrt();
+          return isNaN(std.dataSync()[0]) ? tf.scalar(1e-8) : std;
+        };
+
+        // Calculate mean and standard deviation for each feature
+        const meanOpen = safeMean(dataArray.map(r => r.Open));
+        const stdOpen = replaceZeroStd(safeStd(dataArray.map(r => r.Open)));
+        const meanHigh = safeMean(dataArray.map(r => r.High));
+        const stdHigh = replaceZeroStd(safeStd(dataArray.map(r => r.High)));
+        const meanLow = safeMean(dataArray.map(r => r.Low));
+        const stdLow = replaceZeroStd(safeStd(dataArray.map(r => r.Low)));
+        const meanVolume1INCH = safeMean(dataArray.map(r => r['Volume 1INCH']));
+        const stdVolume1INCH = replaceZeroStd(safeStd(dataArray.map(r => r['Volume 1INCH'])));
+        const meanVolumeBTC = safeMean(dataArray.map(r => r['Volume BTC']));
+        const stdVolumeBTC = replaceZeroStd(safeStd(dataArray.map(r => r['Volume BTC'])));
+        const meanTradecount = safeMean(dataArray.map(r => r.tradecount));
+        const stdTradecount = replaceZeroStd(safeStd(dataArray.map(r => r.tradecount)));
+        const meanAvgPrice = safeMean(dataArray.map(r => (r.High + r.Low) / 2));
+        const stdAvgPrice = replaceZeroStd(safeStd(dataArray.map(r => (r.High + r.Low) / 2)));
+        const meanOpenCloseDiff = safeMean(dataArray.map(r => r.Open - r.Close));
+        const stdOpenCloseDiff = replaceZeroStd(safeStd(dataArray.map(r => r.Open - r.Close)));
+
+        const features = dataArray.map(row => {
+          const rawFeatures = [
+            row.Open,
+            row.High,
+            row.Low,
+            row['Volume 1INCH'],
+            row['Volume BTC'],
+            row.tradecount,
+            (row.High + row.Low) / 2, // Average of High and Low prices
+            row.Open - row.Close, // Difference between Open and Close prices
+            row.Unix,
+            row.tradecount // tradecount as an additional feature
+          ];
+
+          console.log('Raw Features:', rawFeatures);
+
+          const normalizedFeatures = [
+            (row.Open - meanOpen) / stdOpen,
+            (row.High - meanHigh) / stdHigh,
+            (row.Low - meanLow) / stdLow,
+            (row['Volume 1INCH'] - meanVolume1INCH) / stdVolume1INCH,
+            (row['Volume BTC'] - meanVolumeBTC) / stdVolumeBTC,
+            (row.tradecount - meanTradecount) / stdTradecount,
+            ((row.High + row.Low) / 2 - meanAvgPrice) / stdAvgPrice, // Average of High and Low prices
+            (row.Open - row.Close - meanOpenCloseDiff) / stdOpenCloseDiff, // Difference between Open and Close prices
+            row.Unix / maxUnix, // Normalized Unix timestamp
+            (row.tradecount - meanTradecount) / stdTradecount // tradecount as an additional feature
+          ];
+
+          console.log('Normalized Features:', normalizedFeatures);
+
+          return normalizedFeatures;
+        });
 
         // Check for NaN values in features
         const cleanedFeatures = features.map(featureSet => featureSet.map(value => isNaN(value) ? 0 : value));
+        const hasNaNFeatures = cleanedFeatures.some(featureSet => featureSet.some(value => isNaN(value)));
+        if (hasNaNFeatures) {
+          throw new Error('Cleaned features contain NaN values');
+        }
 
         const labels = dataArray.map(row => row.Close);
-
-        // Replace NaN values in labels with zeros
         const cleanedLabels = labels.map(label => isNaN(label) ? 0 : label);
+        const hasNaNLabels = cleanedLabels.some(label => isNaN(label));
+        if (hasNaNLabels) {
+          throw new Error('Cleaned labels contain NaN values');
+        }
 
         console.log('Features and labels extracted successfully');
         console.log('Features:', cleanedFeatures.slice(0, 5)); // Log the first 5 feature sets
@@ -153,12 +196,24 @@ const Dashboard = () => {
 
             let inputTensor, labelTensor;
             try {
+              console.log('Data before tensor creation:', data);
+              console.log('Labels before tensor creation:', labels);
               inputTensor = tf.tensor2d(data, [data.length, data[0].length]);
               labelTensor = tf.tensor2d(labels, [labels.length, 1]);
               console.log('Input Tensor Shape:', inputTensor.shape);
               console.log('Label Tensor Shape:', labelTensor.shape);
               console.log('Input Tensor Data:', inputTensor.arraySync());
               console.log('Label Tensor Data:', labelTensor.arraySync());
+
+              // Check for NaN or infinite values in tensors
+              const hasNaN = (tensor) => tf.any(tf.isNaN(tensor)).dataSync()[0];
+              const hasInf = (tensor) => tf.any(tf.isInf(tensor)).dataSync()[0];
+              if (hasNaN(inputTensor) || hasNaN(labelTensor) || hasInf(inputTensor) || hasInf(labelTensor)) {
+                console.error('Tensor contains NaN or infinite values');
+                console.log('Input Tensor Data with NaN or Inf:', inputTensor.arraySync());
+                console.log('Label Tensor Data with NaN or Inf:', labelTensor.arraySync());
+                throw new Error('Tensor contains NaN or infinite values');
+              }
             } catch (error) {
               console.error('Error during tensor creation:', error);
               throw new Error(`Tensor Creation Error: ${error.message}`);
