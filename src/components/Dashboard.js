@@ -60,6 +60,7 @@ const Dashboard = () => {
             }
           });
           console.log('CSV file parsed successfully');
+          await parsedData.setColumnNames(['Unix', 'Date', 'Symbol', 'Open', 'High', 'Low', 'Close', 'Volume 1INCH', 'Volume BTC', 'tradecount']);
           const columnNames = await parsedData.columnNames();
           console.log('Parsed column names:', columnNames);
           if (!columnNames.includes('Close')) {
