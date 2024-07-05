@@ -117,7 +117,7 @@ const Dashboard = () => {
         console.log('Standard Deviation Tensor:', stdTensor.arraySync());
 
         // Normalize the data
-        const normalizedTensor = dataTensor.sub(await meanTensor).div(await stdTensor);
+        const normalizedTensor = dataTensor.sub(meanTensor).div(stdTensor);
 
         // Log the normalized features
         const normalizedFeatures = normalizedTensor.arraySync();
