@@ -16,7 +16,14 @@ const getMarketData = async (symbol) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching market data:', error);
+    console.error('Error fetching market data:', {
+      message: error.message,
+      response: error.response ? {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data
+      } : null
+    });
     throw error;
   }
 };
@@ -26,7 +33,14 @@ const getCopyTradingData = async () => {
     const response = await instance.get(`/v1/cryptocurrency/listings/latest`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching copy-trading data:', error);
+    console.error('Error fetching copy-trading data:', {
+      message: error.message,
+      response: error.response ? {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data
+      } : null
+    });
     throw error;
   }
 };
