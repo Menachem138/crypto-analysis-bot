@@ -77,6 +77,8 @@ const Dashboard = () => {
           throw new Error(`CSV Parsing Error: ${error.message}`);
         }
 
+        console.log('Parsed Data:', parsedData.slice(0, 5)); // Log the first 5 parsed data rows
+
         // Convert the data to arrays
         console.log('Starting to convert parsed data to arrays');
         const dataArray = parsedData;
