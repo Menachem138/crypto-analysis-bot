@@ -193,17 +193,38 @@ const Dashboard = () => {
         });
         console.log('RSI Values:', rsiValues.slice(0, 5)); // Log the first 5 RSI values
 
+        // Check for NaN or infinite values in RSI
+        rsiValues.forEach((value, index) => {
+          if (isNaN(value) || !isFinite(value)) {
+            console.error(`Invalid RSI value at index ${index}: ${value}`);
+          }
+        });
+
         const movingAverageValues = calculateMovingAverage(cleanedDataArray);
         cleanedDataArray.forEach((row, index) => {
           row.Moving_Average = movingAverageValues[index];
         });
         console.log('Moving Average Values:', movingAverageValues.slice(0, 5)); // Log the first 5 Moving Average values
 
+        // Check for NaN or infinite values in Moving Average
+        movingAverageValues.forEach((value, index) => {
+          if (isNaN(value) || !isFinite(value)) {
+            console.error(`Invalid Moving Average value at index ${index}: ${value}`);
+          }
+        });
+
         const macdValues = calculateMACD(cleanedDataArray);
         cleanedDataArray.forEach((row, index) => {
           row.MACD = macdValues[index];
         });
         console.log('MACD Values:', macdValues.slice(0, 5)); // Log the first 5 MACD values
+
+        // Check for NaN or infinite values in MACD
+        macdValues.forEach((value, index) => {
+          if (isNaN(value) || !isFinite(value)) {
+            console.error(`Invalid MACD value at index ${index}: ${value}`);
+          }
+        });
 
         console.log('Starting tensor creation from cleaned data array');
         const dataTensor = tf.tensor2d(cleanedDataArray.map(row => [
