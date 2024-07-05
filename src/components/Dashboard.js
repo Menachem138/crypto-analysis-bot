@@ -83,6 +83,7 @@ const Dashboard = () => {
       } finally {
         setLoading(false);
         console.log('Loading state set to false');
+        console.log('Loading state set to false in fetchMarketData finally block');
       }
     };
 
@@ -261,6 +262,8 @@ const Dashboard = () => {
     date: new Date(entry.Unix * 1000), // Convert Unix timestamp to Date object
     price: entry.Close
   })) : [];
+
+  console.log('Formatted Market Data:', formattedMarketData);
 
   return (
     <ErrorBoundary>
