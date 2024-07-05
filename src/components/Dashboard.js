@@ -79,6 +79,18 @@ const Dashboard = () => {
 
         console.log('Parsed Data:', parsedData.slice(0, 5)); // Log the first 5 parsed data rows
 
+        // Check for NaN values in parsed data and replace them with zeros
+        parsedData = parsedData.map(row => {
+          Object.keys(row).forEach(key => {
+            if (isNaN(row[key])) {
+              row[key] = 0;
+            }
+          });
+          return row;
+        });
+
+        console.log('Parsed Data after NaN check:', parsedData.slice(0, 5)); // Log the first 5 parsed data rows after NaN check
+
         // Convert the data to arrays
         console.log('Starting to convert parsed data to arrays');
         const dataArray = parsedData;
