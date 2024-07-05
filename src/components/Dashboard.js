@@ -118,9 +118,17 @@ const Dashboard = () => {
 
         const trainTensors = convertToTensor(trainFeatures, trainLabels);
         console.log('Train Tensors:', trainTensors);
+        console.log('Train Tensors Input Shape:', trainTensors.inputs.shape);
+        console.log('Train Tensors Label Shape:', trainTensors.labels.shape);
+        console.log('Train Tensors Input Data:', trainTensors.inputs.arraySync());
+        console.log('Train Tensors Label Data:', trainTensors.labels.arraySync());
 
         const testTensors = convertToTensor(testFeatures, testLabels);
         console.log('Test Tensors:', testTensors);
+        console.log('Test Tensors Input Shape:', testTensors.inputs.shape);
+        console.log('Test Tensors Label Shape:', testTensors.labels.shape);
+        console.log('Test Tensors Input Data:', testTensors.inputs.arraySync());
+        console.log('Test Tensors Label Data:', testTensors.labels.arraySync());
 
         console.log('Data converted to tensors');
 
