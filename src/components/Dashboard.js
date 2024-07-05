@@ -70,7 +70,10 @@ const Dashboard = () => {
         const dataArray = [];
         try {
           console.log('Before forEachAsync call');
-          await parsedData.forEachAsync(row => dataArray.push(row));
+          await parsedData.forEachAsync(row => {
+            console.log('Row data:', row);
+            dataArray.push(row);
+          });
           console.log('After forEachAsync call');
           console.log('Data array created successfully');
         } catch (error) {
