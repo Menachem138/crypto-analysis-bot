@@ -208,6 +208,11 @@ const Dashboard = () => {
           row.Relative_Strength_Index = rsiValues[index];
         });
 
+        const movingAverageValues = calculateMovingAverage(cleanedDataArray);
+        cleanedDataArray.forEach((row, index) => {
+          row.Moving_Average = movingAverageValues[index];
+        });
+
         console.log('Starting tensor creation from cleaned data array');
         const dataTensor = tf.tensor2d(cleanedDataArray.map(row => [
           row.Open,
@@ -219,7 +224,8 @@ const Dashboard = () => {
           (row.High + row.Low) / 2, // Average of High and Low prices
           row.Open - row.Close, // Difference between Open and Close prices
           row.Unix / 1e9, // Scale Unix timestamp to a more suitable range
-          row.Relative_Strength_Index // Add the Relative Strength Index feature
+          row.Relative_Strength_Index, // Add the Relative Strength Index feature
+          row.Moving_Average // Add the Moving Average feature
         ]));
         console.log('Data Tensor created:', dataTensor.arraySync());
 
