@@ -59,19 +59,24 @@ const Dashboard = () => {
           const rows = csvText.split('\n').slice(2); // Remove the first two lines (URL and header row)
           parsedData = rows.map(row => {
             const values = row.split(',');
-            return {
-              Unix: parseInt(values[0], 10),
-              Date: values[1],
-              Symbol: values[2],
-              Open: parseFloat(values[3]),
-              High: parseFloat(values[4]),
-              Low: parseFloat(values[5]),
-              Close: parseFloat(values[6]),
-              'Volume 1INCH': parseFloat(values[7]),
-              'Volume BTC': parseFloat(values[8]),
-              tradecount: parseInt(values[9], 10)
-            };
-          });
+            if (values.length === 10) { // Ensure the row has the expected number of columns
+              return {
+                Unix: parseInt(values[0], 10),
+                Date: values[1],
+                Symbol: values[2],
+                Open: parseFloat(values[3]),
+                High: parseFloat(values[4]),
+                Low: parseFloat(values[5]),
+                Close: parseFloat(values[6]),
+                'Volume 1INCH': parseFloat(values[7]),
+                'Volume BTC': parseFloat(values[8]),
+                tradecount: parseInt(values[9], 10)
+              };
+            } else {
+              console.log('Skipping malformed row:', row); // Log and skip malformed rows
+              return null;
+            }
+          }).filter(row => row !== null); // Filter out null values
           console.log('CSV file parsed successfully');
           console.log('Parsed Data:', parsedData.slice(0, 5)); // Log the first 5 parsed data rows
           // Additional logging to capture the state of the data immediately after parsing
