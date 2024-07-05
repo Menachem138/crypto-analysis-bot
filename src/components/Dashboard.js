@@ -226,6 +226,7 @@ const Dashboard = () => {
           }
         });
 
+        // Starting tensor creation from cleaned data array
         console.log('Starting tensor creation from cleaned data array');
         const dataTensor = tf.tensor2d(cleanedDataArray.map(row => [
           row.Open,
@@ -249,6 +250,7 @@ const Dashboard = () => {
         console.log('hasNaNDataTensor:', hasNaNDataTensor);
         console.log('hasInfDataTensor:', hasInfDataTensor);
         if (hasNaNDataTensor || hasInfDataTensor) {
+          console.log('Data Tensor contains NaN or infinite values:', dataTensor.arraySync());
           throw new Error('Data Tensor contains NaN or infinite values');
         }
 
@@ -267,6 +269,10 @@ const Dashboard = () => {
         console.log('hasNaNMeanTensor:', hasNaNMeanTensor);
         console.log('hasNaNStdTensor:', hasNaNStdTensor);
         if (hasNaNMeanTensor || hasNaNStdTensor) {
+          console.log('Mean or Standard Deviation Tensor contains NaN values:', {
+            meanTensor: meanTensor.arraySync(),
+            stdTensor: stdTensor.arraySync()
+          });
           throw new Error('Mean or Standard Deviation Tensor contains NaN values');
         }
 
@@ -294,7 +300,7 @@ const Dashboard = () => {
         const hasNaNAfterNormalization = tf.any(tf.isNaN(cleanedNormalizedTensor)).dataSync()[0];
         console.log('hasNaNAfterNormalization:', hasNaNAfterNormalization);
         if (hasNaNAfterNormalization) {
-          console.log('Final Normalized Tensor contains NaN values after normalization');
+          console.log('Final Normalized Tensor contains NaN values after normalization:', cleanedNormalizedTensor.arraySync());
           throw new Error('Final Normalized Tensor contains NaN values after normalization');
         }
 
