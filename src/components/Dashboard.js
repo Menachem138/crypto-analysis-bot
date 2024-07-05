@@ -72,17 +72,23 @@ const Dashboard = () => {
             };
           });
           console.log('CSV file parsed successfully');
+          console.log('Parsed Data:', parsedData.slice(0, 5)); // Log the first 5 parsed data rows
+          // Additional logging to capture the state of the data immediately after parsing
+          parsedData.forEach((row, index) => {
+            console.log(`Row ${index} after parsing:`, row);
+          });
         } catch (error) {
           console.error('Error during CSV parsing:', error);
           throw new Error(`CSV Parsing Error: ${error.message}`);
         }
 
-        console.log('Parsed Data:', parsedData.slice(0, 5)); // Log the first 5 parsed data rows
+        console.log('Parsed Data before NaN check:', parsedData.slice(0, 5)); // Log the first 5 parsed data rows before NaN check
 
         // Check for NaN values in parsed data and replace them with zeros
         parsedData = parsedData.map(row => {
           Object.keys(row).forEach(key => {
             if (isNaN(row[key])) {
+              console.log(`NaN value found in key: ${key}, value: ${row[key]}`); // Log the key and value if NaN is found
               row[key] = 0;
             }
           });
@@ -91,6 +97,11 @@ const Dashboard = () => {
 
         console.log('Parsed Data after NaN check:', parsedData.slice(0, 5)); // Log the first 5 parsed data rows after NaN check
 
+        // Additional logging to capture the state of the data at each step
+        parsedData.forEach((row, index) => {
+          console.log(`Row ${index} after NaN check:`, row);
+        });
+
         // Convert the data to arrays
         console.log('Starting to convert parsed data to arrays');
         const dataArray = parsedData;
@@ -98,20 +109,25 @@ const Dashboard = () => {
         // Extract features and labels
         console.log('Starting to extract features and labels');
 
-        // Ensure mean and standard deviation calculations are valid
-        const safeMean = (values) => {
-          const mean = tf.mean(values, 0);
-          return mean;
-        };
+        // Log the raw data array before tensor creation
+        console.log('Raw data array before tensor creation:', dataArray.slice(0, 5)); // Log the first 5 raw data rows
 
-        const safeStd = (values) => {
-          const std = tf.moments(values, 0).variance.sqrt();
-          const epsilon = tf.scalar(1e-8); // Small constant to prevent division by zero
-          return std.add(epsilon);
-        };
+        // Check for NaN values in raw data array and replace them with zeros
+        const cleanedDataArray = dataArray.map(row => {
+          Object.keys(row).forEach(key => {
+            if (isNaN(row[key])) {
+              console.log(`NaN value found in key: ${key}, value: ${row[key]}`); // Log the key and value if NaN is found
+              row[key] = 0;
+            }
+          });
+          return row;
+        });
 
-        // Convert the data to tensors
-        const dataTensor = tf.tensor2d(dataArray.map(row => [
+        console.log('Cleaned raw data array before tensor creation:', cleanedDataArray.slice(0, 5)); // Log the first 5 cleaned raw data rows
+
+        // Convert the cleaned data to tensors
+        console.log('Starting tensor creation from cleaned data array');
+        const dataTensor = tf.tensor2d(cleanedDataArray.map(row => [
           row.Open,
           row.High,
           row.Low,
@@ -120,8 +136,19 @@ const Dashboard = () => {
           row.tradecount,
           (row.High + row.Low) / 2, // Average of High and Low prices
           row.Open - row.Close, // Difference between Open and Close prices
-          row.Unix / 1e9 // Scale Unix timestamp to a more suitable range
+          row.Unix / 1e9, // Scale Unix timestamp to a more suitable range
+          row.Relative_Strength_Index // Add the Relative Strength Index feature
         ]));
+        console.log('Data Tensor created:', dataTensor.arraySync());
+
+        // Check for NaN or infinite values in dataTensor
+        const hasNaNDataTensor = tf.any(tf.isNaN(dataTensor)).dataSync()[0];
+        const hasInfDataTensor = tf.any(tf.isInf(dataTensor)).dataSync()[0];
+        console.log('hasNaNDataTensor:', hasNaNDataTensor);
+        console.log('hasInfDataTensor:', hasInfDataTensor);
+        if (hasNaNDataTensor || hasInfDataTensor) {
+          throw new Error('Data Tensor contains NaN or infinite values');
+        }
 
         // Log the raw data before normalization
         const rawFeatures = dataTensor.arraySync();
@@ -129,33 +156,54 @@ const Dashboard = () => {
 
         // Calculate mean and standard deviation for each feature
         console.log('Calculating mean tensor');
-        const meanTensor = await safeMean(dataTensor);
+        const meanTensor = tf.mean(dataTensor, 0);
         console.log('Mean Tensor:', meanTensor.arraySync());
 
         console.log('Calculating standard deviation tensor');
-        const stdTensor = await safeStd(dataTensor);
+        const stdTensor = tf.moments(dataTensor, 0).variance.sqrt().add(tf.scalar(1e-8)); // Add small constant to prevent division by zero
         console.log('Standard Deviation Tensor:', stdTensor.arraySync());
 
         // Check for NaN values in mean and standard deviation tensors
         const hasNaNMeanTensor = tf.any(tf.isNaN(meanTensor)).dataSync()[0];
         const hasNaNStdTensor = tf.any(tf.isNaN(stdTensor)).dataSync()[0];
+        console.log('hasNaNMeanTensor:', hasNaNMeanTensor);
+        console.log('hasNaNStdTensor:', hasNaNStdTensor);
         if (hasNaNMeanTensor || hasNaNStdTensor) {
           throw new Error('Mean or Standard Deviation Tensor contains NaN values');
         }
 
-        // Check for zero standard deviation values
-        const hasZeroStdTensor = tf.any(tf.equal(stdTensor, 0)).dataSync()[0];
-        if (hasZeroStdTensor) {
-          throw new Error('Standard Deviation Tensor contains zero values');
+        // Check for zero standard deviation values and replace them with a small constant
+        const adjustedStdTensor = tf.where(tf.equal(stdTensor, 0), tf.scalar(1e-8), stdTensor);
+        console.log('Adjusted Standard Deviation Tensor:', adjustedStdTensor.arraySync());
+
+        // Perform normalization
+        console.log('Starting normalization');
+        const normalizedTensor = dataTensor.sub(meanTensor).div(adjustedStdTensor);
+        console.log('Normalized Tensor before NaN replacement:', normalizedTensor.arraySync());
+
+        // Check for NaN values in the normalized tensor before replacement
+        const hasNaNBeforeReplacement = tf.any(tf.isNaN(normalizedTensor)).dataSync()[0];
+        console.log('hasNaNBeforeReplacement:', hasNaNBeforeReplacement);
+        if (hasNaNBeforeReplacement) {
+          console.log('Normalized Tensor contains NaN values before replacement');
         }
 
-        // Normalize the data
-        console.log('Data Tensor before normalization:', dataTensor.arraySync());
-        const normalizedTensor = dataTensor.sub(meanTensor).div(stdTensor);
-        console.log('Normalized Tensor:', normalizedTensor.arraySync());
+        // Replace NaN values in the normalized tensor with zeros
+        const cleanedNormalizedTensor = tf.where(tf.isNaN(normalizedTensor), tf.zerosLike(normalizedTensor), normalizedTensor);
+        console.log('Final Normalized Tensor:', cleanedNormalizedTensor.arraySync());
+
+        // Check for NaN values after normalization
+        const hasNaNAfterNormalization = tf.any(tf.isNaN(cleanedNormalizedTensor)).dataSync()[0];
+        console.log('hasNaNAfterNormalization:', hasNaNAfterNormalization);
+        if (hasNaNAfterNormalization) {
+          throw new Error('Final Normalized Tensor contains NaN values after normalization');
+        }
+
+        // Log the final normalized tensor
+        console.log('Final Normalized Tensor:', cleanedNormalizedTensor.arraySync());
 
         // Log the normalized features
-        const normalizedFeatures = normalizedTensor.arraySync();
+        const normalizedFeatures = cleanedNormalizedTensor.arraySync();
         console.log('Normalized Features:', normalizedFeatures.slice(0, 5)); // Log the first 5 normalized feature sets
 
         // Convert the normalized tensor back to an array
