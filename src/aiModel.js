@@ -5,6 +5,7 @@ tf.setBackend('cpu');
 
 // Define the model architecture
 const createModel = () => {
+  console.log('Creating model...');
   const model = tf.sequential();
 
   // Add layers to the model
@@ -19,24 +20,38 @@ const createModel = () => {
     metrics: ['mse'],
   });
 
+  console.log('Model created successfully:', model);
   return model;
 };
 
 // Train the model
 const trainModel = async (model, trainData, trainLabels) => {
-  const history = await model.fit(trainData, trainLabels, {
-    epochs: 50,
-    batchSize: 32,
-    validationSplit: 0.2,
-  });
-
-  return history;
+  console.log('Starting model training...');
+  try {
+    const history = await model.fit(trainData, trainLabels, {
+      epochs: 50,
+      batchSize: 32,
+      validationSplit: 0.2,
+    });
+    console.log('Model trained successfully:', history);
+    return history;
+  } catch (error) {
+    console.error('Error during model training:', error);
+    throw error;
+  }
 };
 
 // Evaluate the model
 const evaluateModel = async (model, testData, testLabels) => {
-  const result = await model.evaluate(testData, testLabels);
-  return result;
+  console.log('Starting model evaluation...');
+  try {
+    const result = await model.evaluate(testData, testLabels);
+    console.log('Model evaluated successfully:', result);
+    return result;
+  } catch (error) {
+    console.error('Error during model evaluation:', error);
+    throw error;
+  }
 };
 
 export { createModel, trainModel, evaluateModel };
