@@ -60,7 +60,8 @@ const Dashboard = () => {
             }
           });
           console.log('CSV file parsed successfully');
-          console.log('Parsed column names:', parsedData.columnNames());
+          const columnNames = await parsedData.columnNames();
+          console.log('Parsed column names:', columnNames);
         } catch (error) {
           console.error('Error during CSV parsing:', error);
           throw new Error(`CSV Parsing Error: ${error.message}`);
