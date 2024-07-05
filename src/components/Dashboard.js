@@ -55,9 +55,9 @@ const Dashboard = () => {
         let parsedData;
         try {
           const csvText = await response.text();
-          console.log('Fetched CSV Text (first few rows):', csvText.split('\n').slice(0, 5));
+          console.log('Fetched CSV Text (first few rows):', csvText.split('\n').slice(0, 5)); // Log the first 5 rows of the fetched CSV text
           const rows = csvText.split('\n').slice(2).filter(row => row.trim() !== '' && row.split(',').length === 10 && !isNaN(parseInt(row.split(',')[0], 10)));
-          console.log('Filtered Rows:', rows.slice(0, 5)); // Log the first 5 rows after filtering
+          console.log('Filtered Rows (after skipping first two lines):', rows.slice(0, 5)); // Log the first 5 rows after filtering and skipping the first two lines
           parsedData = rows.map(row => {
             const values = row.split(',');
             if (values.length === 10) { // Ensure the row has the expected number of columns
@@ -385,6 +385,10 @@ const Dashboard = () => {
 
           // Evaluate the model
           console.log('Starting to evaluate the model');
+          console.log('Test Tensors Input Shape:', testTensors.inputs.shape);
+          console.log('Test Tensors Label Shape:', testTensors.labels.shape);
+          console.log('Test Tensors Input Data:', testTensors.inputs.arraySync());
+          console.log('Test Tensors Label Data:', testTensors.labels.arraySync());
           const evaluation = await evaluateModel(model, testTensors.inputs, testTensors.labels);
           console.log('Model evaluated successfully:', evaluation);
           console.log('Evaluation result:', evaluation);
