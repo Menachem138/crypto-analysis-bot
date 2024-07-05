@@ -132,6 +132,7 @@ const Dashboard = () => {
               throw new Error(`Tensor Creation Error: ${error.message}`);
             }
 
+            console.log('Tensors created successfully');
             return {
               inputs: inputTensor,
               labels: labelTensor
