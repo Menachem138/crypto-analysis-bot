@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
-import Navbar from './Navbar';
-import Dashboard from './components/Dashboard';
+import Navbar from './Navbar.js';
+import Dashboard from './components/Dashboard.js';
 import './App.css';
 
 function App() {
