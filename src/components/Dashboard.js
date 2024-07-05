@@ -363,6 +363,10 @@ const Dashboard = () => {
           console.log('Train Tensors Label Shape:', trainTensors.labels.shape);
           console.log('Train Tensors Input Data:', trainTensors.inputs.arraySync());
           console.log('Train Tensors Label Data:', trainTensors.labels.arraySync());
+          console.log('Train Tensors Input Shape:', trainTensors.inputs.shape);
+          console.log('Train Tensors Label Shape:', trainTensors.labels.shape);
+          console.log('Train Tensors Input Data:', trainTensors.inputs.arraySync());
+          console.log('Train Tensors Label Data:', trainTensors.labels.arraySync());
           try {
             console.log('Before trainModel function call');
             console.log('Train Tensors Input Data (before training):', trainTensors.inputs.arraySync());
