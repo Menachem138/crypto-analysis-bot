@@ -177,10 +177,6 @@ const Dashboard = () => {
           throw new Error('Data Tensor contains NaN or infinite values');
         }
 
-        // Log the raw data before normalization
-        const rawFeatures = dataTensor.arraySync();
-        console.log('Raw Features:', rawFeatures.slice(0, 5)); // Log the first 5 raw feature sets
-
         // Calculate mean and standard deviation for each feature
         console.log('Calculating mean tensor');
         const meanTensor = tf.mean(dataTensor, 0);
@@ -234,7 +230,7 @@ const Dashboard = () => {
         console.log('Normalized Features:', normalizedFeatures.slice(0, 5)); // Log the first 5 normalized feature sets
 
         // Convert the normalized tensor back to an array
-        const features = normalizedTensor.arraySync();
+        const features = cleanedNormalizedTensor.arraySync();
 
         console.log('Features:', features.slice(0, 5)); // Log the first 5 feature sets
 
