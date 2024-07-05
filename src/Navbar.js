@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Button, useColorMode } from '@chakra-ui/react';
+import { Link, Button, useColorMode, Input } from '@chakra-ui/react';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
 
 const Navbar = () => {
@@ -13,6 +13,7 @@ const Navbar = () => {
         <Link href="#" className="navbar-link">Market Analysis</Link>
         <Link href="#" className="navbar-link">Predictions</Link>
         <Link href="#" className="navbar-link">Copy Trading</Link>
+        <Input placeholder="Search..." className="navbar-search" />
         <Button onClick={toggleColorMode} className="navbar-button">
           {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
         </Button>
