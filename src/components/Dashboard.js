@@ -152,7 +152,9 @@ const Dashboard = () => {
           console.log('Train Tensors Input Data:', trainTensors.inputs.arraySync());
           console.log('Train Tensors Label Data:', trainTensors.labels.arraySync());
           try {
+            console.log('Before trainModel function call');
             const history = await trainModel(model, trainTensors.inputs, trainTensors.labels);
+            console.log('After trainModel function call');
             console.log('trainModel function completed');
             console.log('Model trained successfully:', history);
             console.log('Training history:', history.history);
@@ -177,7 +179,7 @@ const Dashboard = () => {
           throw error;
         }
       } catch (err) {
-        console.error('Error during fetch operation:', err);
+        console.error('Error during loadAndTrainModel execution:', err);
         console.log('Setting error state with message:', err.message);
         setError(`Error: ${err.message}`);
         console.log('Full error object in loadAndTrainModel:', err);
