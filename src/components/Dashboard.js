@@ -147,6 +147,10 @@ const Dashboard = () => {
           model.summary(); // Log the model summary
 
           console.log('Calling trainModel function');
+          console.log('Train Tensors Input Shape:', trainTensors.inputs.shape);
+          console.log('Train Tensors Label Shape:', trainTensors.labels.shape);
+          console.log('Train Tensors Input Data:', trainTensors.inputs.arraySync());
+          console.log('Train Tensors Label Data:', trainTensors.labels.arraySync());
           try {
             const history = await trainModel(model, trainTensors.inputs, trainTensors.labels);
             console.log('trainModel function completed');
