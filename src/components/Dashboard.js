@@ -43,24 +43,20 @@ const Dashboard = () => {
         setError(null);
 
         // Load and preprocess the historical data
-        console.log('Starting to fetch CSV file from path: /Binance_1INCHBTC_d.csv');
-        const response = await fetch('/Binance_1INCHBTC_d.csv');
+        console.log('Starting to fetch CSV file from path: Binance_1INCHBTC_d.csv');
+        const response = await fetch('Binance_1INCHBTC_d.csv');
         console.log('Fetch response status:', response.status);
         if (!response.ok) {
           throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
         }
-        console.log('CSV file fetched successfully from path: /Binance_1INCHBTC_d.csv');
-        const csv = await response.text();
-        console.log('CSV file content:', csv.slice(0, 100)); // Log the first 100 characters of the CSV content
+        console.log('CSV file fetched successfully from path: Binance_1INCHBTC_d.csv');
 
         console.log('Starting to parse CSV file');
         let parsedData;
         try {
-          parsedData = tf.data.csv(csv, {
+          parsedData = tf.data.csv('Binance_1INCHBTC_d.csv', {
             columnConfigs: {
-              Close: {
-                isLabel: true
-              }
+              Close: { isLabel: true }
             }
           });
           console.log('CSV file parsed successfully');
@@ -73,7 +69,9 @@ const Dashboard = () => {
         console.log('Starting to convert parsed data to arrays');
         const dataArray = [];
         try {
+          console.log('Before forEachAsync call');
           await parsedData.forEachAsync(row => dataArray.push(row));
+          console.log('After forEachAsync call');
           console.log('Data array created successfully');
         } catch (error) {
           console.error('Error during data conversion:', error);
