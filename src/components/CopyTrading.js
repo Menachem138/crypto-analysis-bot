@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getCopyTradingData } from '../coinMarketCapService';
+import { getCopyTradingData } from '../coinMarketCapService.js';
 import { Box, Text, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
 
 const CopyTrading = () => {
