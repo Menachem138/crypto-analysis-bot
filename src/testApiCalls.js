@@ -1,4 +1,4 @@
-import { getMarketData, getCopyTradingData } from './coinMarketCapService';
+import { getMarketData, getCopyTradingData } from './coinMarketCapService.js';
 
 const testApiCalls = async () => {
   try {
