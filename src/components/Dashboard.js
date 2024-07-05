@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Box, Heading, Text, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
 import MarketChart from './MarketChart';
 import CopyTrading from './CopyTrading';
+import { getMarketData } from '../coinMarketCapService';
+import { calculateRSI, calculateMovingAverage } from '../technicalAnalysis';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -67,23 +69,23 @@ const Dashboard = () => {
   // }, [evaluationResult]);
 
   useEffect(() => {
-    const getMarketData = async () => {
+    const fetchMarketData = async () => {
       try {
-        const response = await apiService.getMarketData();
+        const response = await getMarketData();
         console.log('Market Data:', response.data); // Log the market data
         setMarketData(response.data);
       } catch (err) {
         setError(`Error: ${err.message}`);
-        console.log('Full error object in getMarketData:', err);
-        console.log('Error stack trace in getMarketData:', err.stack);
-        console.log('Error name in getMarketData:', err.name);
-        console.log('Error message in getMarketData:', err.message);
+        console.log('Full error object in fetchMarketData:', err);
+        console.log('Error stack trace in fetchMarketData:', err.stack);
+        console.log('Error name in fetchMarketData:', err.name);
+        console.log('Error message in fetchMarketData:', err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    getMarketData();
+    fetchMarketData();
   }, []);
 
   useEffect(() => {
