@@ -448,6 +448,12 @@ const Dashboard = () => {
     );
   }
 
+  // Convert tensor data to arrays before rendering
+  const trainingLoss = trainingResult ? trainingResult.history.loss[trainingResult.history.loss.length - 1] : null;
+  const validationLoss = trainingResult ? trainingResult.history.val_loss[trainingResult.history.val_loss.length - 1] : null;
+  const testLoss = evaluationResult ? evaluationResult[0].arraySync() : null;
+  const testMSE = evaluationResult ? evaluationResult[1].arraySync() : null;
+
   return (
     <Box textAlign="center" py={10} px={6}>
       <Heading as="h1" size="xl" mb={6}>
@@ -471,8 +477,8 @@ const Dashboard = () => {
           <Heading as="h2" size="lg" mt={6}>
             Model Training Result
           </Heading>
-          <Text>Training Loss: {trainingResult.history.loss[trainingResult.history.loss.length - 1]}</Text>
-          <Text>Validation Loss: {trainingResult.history.val_loss[trainingResult.history.val_loss.length - 1]}</Text>
+          <Text>Training Loss: {trainingLoss}</Text>
+          <Text>Validation Loss: {validationLoss}</Text>
         </Box>
       )}
       {evaluationResult && (
@@ -480,8 +486,8 @@ const Dashboard = () => {
           <Heading as="h2" size="lg" mt={6}>
             Model Evaluation Result
           </Heading>
-          <Text>Test Loss: {evaluationResult[0]}</Text>
-          <Text>Test MSE: {evaluationResult[1]}</Text>
+          <Text>Test Loss: {testLoss}</Text>
+          <Text>Test MSE: {testMSE}</Text>
         </Box>
       )}
     </Box>
