@@ -244,22 +244,18 @@ const Dashboard = () => {
         });
 
         console.log('Starting tensor creation from cleaned data array');
-        const dataTensor = tf.tensor2d(cleanedDataArray.map(row => {
-          const tensorRow = [
-            row.Open,
-            row.High,
-            row.Low,
-            row['Volume 1INCH'],
-            row['Volume BTC'],
-            row.tradecount,
-            (row.High + row.Low) / 2, // Average of High and Low prices
-            row.Open - row.Close, // Difference between Open and Close prices
-            row.Unix / 1e9, // Scale Unix timestamp to a more suitable range
-            row.Relative_Strength_Index // Add the Relative Strength Index feature
-          ];
-          console.log('Tensor Row:', tensorRow); // Log each tensor row
-          return tensorRow;
-        }));
+        const dataTensor = tf.tensor2d(cleanedDataArray.map(row => [
+          row.Open,
+          row.High,
+          row.Low,
+          row['Volume 1INCH'],
+          row['Volume BTC'],
+          row.tradecount,
+          (row.High + row.Low) / 2, // Average of High and Low prices
+          row.Open - row.Close, // Difference between Open and Close prices
+          row.Unix / 1e9, // Scale Unix timestamp to a more suitable range
+          row.Relative_Strength_Index // Add the Relative Strength Index feature
+        ]));
         console.log('Data Tensor created:', dataTensor.arraySync());
 
         // Check for NaN or infinite values in dataTensor
