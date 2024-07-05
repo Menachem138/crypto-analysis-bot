@@ -211,6 +211,17 @@ const Dashboard = () => {
         movingAverageValues.forEach((value, index) => {
           if (isNaN(value) || !isFinite(value)) {
             console.error(`Invalid value found in Moving Average at index ${index}: ${value}`);
+          }
+        });
+      } catch (err) {
+        setError(`Error: ${err.message}`);
+        console.error('Error in loadAndTrainModel:', err);
+      }
+    };
+
+    loadAndTrainModel();
+  }, []);
+
   useEffect(() => {
     console.log('Error state updated:', error);
   }, [error]);
