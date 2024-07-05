@@ -85,14 +85,14 @@ const Dashboard = () => {
         console.log('Starting to extract features and labels');
 
         // Ensure mean and standard deviation calculations are valid
-        const safeMean = (values) => {
-          const mean = tf.mean(values);
-          return isNaN(mean.dataSync()[0]) ? tf.scalar(0) : mean;
+        const safeMean = async (values) => {
+          const mean = await tf.mean(values).data();
+          return isNaN(mean[0]) ? tf.scalar(0) : tf.scalar(mean[0]);
         };
 
-        const safeStd = (values) => {
-          const std = tf.moments(values).variance.sqrt();
-          return isNaN(std.dataSync()[0]) ? tf.scalar(1e-8) : std;
+        const safeStd = async (values) => {
+          const std = await tf.moments(values).variance.sqrt().data();
+          return isNaN(std[0]) || std[0] === 0 ? tf.scalar(1e-8) : tf.scalar(std[0]);
         };
 
         // Convert the data to tensors
@@ -110,8 +110,8 @@ const Dashboard = () => {
         ]));
 
         // Calculate mean and standard deviation for each feature
-        const meanTensor = safeMean(dataTensor);
-        const stdTensor = safeStd(dataTensor);
+        const meanTensor = await safeMean(dataTensor);
+        const stdTensor = await safeStd(dataTensor);
 
         // Normalize the data
         const normalizedTensor = dataTensor.sub(meanTensor).div(stdTensor);
