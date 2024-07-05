@@ -85,14 +85,15 @@ const Dashboard = () => {
         console.log('Starting to extract features and labels');
 
         // Ensure mean and standard deviation calculations are valid
-        const safeMean = async (values) => {
-          const mean = await tf.mean(values).data();
-          return isNaN(mean[0]) ? tf.scalar(0) : tf.scalar(mean[0]);
+        const safeMean = (values) => {
+          const mean = tf.mean(values, 0);
+          return mean;
         };
 
-        const safeStd = async (values) => {
-          const std = await tf.moments(values).variance.sqrt().data();
-          return isNaN(std[0]) || std[0] === 0 ? tf.scalar(1e-8) : tf.scalar(std[0]);
+        const safeStd = (values) => {
+          const std = tf.moments(values, 0).variance.sqrt();
+          const epsilon = tf.scalar(1e-8); // Small constant to prevent division by zero
+          return std.add(epsilon);
         };
 
         // Convert the data to tensors
@@ -105,9 +106,12 @@ const Dashboard = () => {
           row.tradecount,
           (row.High + row.Low) / 2, // Average of High and Low prices
           row.Open - row.Close, // Difference between Open and Close prices
-          row.Unix,
-          row.tradecount // tradecount as an additional feature
+          row.Unix / 1e9 // Scale Unix timestamp to a more suitable range
         ]));
+
+        // Log the raw data before normalization
+        const rawFeatures = dataTensor.arraySync();
+        console.log('Raw Features:', rawFeatures.slice(0, 5)); // Log the first 5 raw feature sets
 
         // Calculate mean and standard deviation for each feature
         const meanTensor = await safeMean(dataTensor);
@@ -115,6 +119,19 @@ const Dashboard = () => {
 
         const stdTensor = await safeStd(dataTensor);
         console.log('Standard Deviation Tensor:', stdTensor.arraySync());
+
+        // Check for NaN values in mean and standard deviation tensors
+        const hasNaNMeanTensor = tf.any(tf.isNaN(meanTensor)).dataSync()[0];
+        const hasNaNStdTensor = tf.any(tf.isNaN(stdTensor)).dataSync()[0];
+        if (hasNaNMeanTensor || hasNaNStdTensor) {
+          throw new Error('Mean or Standard Deviation Tensor contains NaN values');
+        }
+
+        // Check for zero standard deviation values
+        const hasZeroStdTensor = tf.any(tf.equal(stdTensor, 0)).dataSync()[0];
+        if (hasZeroStdTensor) {
+          throw new Error('Standard Deviation Tensor contains zero values');
+        }
 
         // Normalize the data
         const normalizedTensor = dataTensor.sub(meanTensor).div(stdTensor);
