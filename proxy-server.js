@@ -21,6 +21,8 @@ app.use('/api', createProxyMiddleware({
   onProxyReq: (proxyReq, req, res) => {
     // Add the CoinMarketCap API key to the request headers
     proxyReq.setHeader('X-CMC_PRO_API_KEY', '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f');
+    // Log the outgoing request headers
+    console.log('Outgoing request headers:', proxyReq.getHeaders());
   },
   onProxyRes: (proxyRes, req, res) => {
     // Add CORS headers to the response
