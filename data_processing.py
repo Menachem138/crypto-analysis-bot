@@ -10,9 +10,13 @@ def load_data(file_path):
 def preprocess_data(data):
     # Handle missing values
     data = data.dropna()
+    print("Data after dropping NaN values:")
+    print(data.head())
 
     # Normalize the data (example: scaling the 'Close' prices)
     data['Close'] = (data['Close'] - data['Close'].min()) / (data['Close'].max() - data['Close'].min() + 1e-8)
+    print("Data after normalizing 'Close' prices:")
+    print(data.head())
 
     # Select and engineer 10 relevant features
     data['Open_Close_diff'] = data['Open'] - data['Close']
@@ -24,10 +28,19 @@ def preprocess_data(data):
     data['Rolling_Mean_Close'] = data['Close'].rolling(window=5).mean().fillna(0)
     data['Rolling_Std_Close'] = data['Close'].rolling(window=5).std().fillna(0)
     data['Exponential_Moving_Avg'] = data['Close'].ewm(span=5, adjust=False).mean().fillna(0)
-    data['Relative_Strength_Index'] = 100 - (100 / (1 + data['Close_Change'].rolling(window=14).mean() / data['Close_Change'].rolling(window=14).std().fillna(0)))
+
+    # Calculate RSI with checks to prevent division by zero
+    close_change_mean = data['Close_Change'].rolling(window=14).mean()
+    close_change_std = data['Close_Change'].rolling(window=14).std().replace(0, 1e-8)  # Replace zero std with a small constant
+    data['Relative_Strength_Index'] = 100 - (100 / (1 + close_change_mean / close_change_std))
+
+    print("Data after feature engineering:")
+    print(data.head())
 
     # Replace any remaining NaN values with zeros
     data = data.fillna(0)
+    print("Data after replacing remaining NaN values with zeros:")
+    print(data.head())
 
     # Select the 10 features for the model
     features = data[['Open_Close_diff', 'High_Low_diff', 'Average_Price', 'Price_Range', 'Volume_Change', 'Close_Change', 'Rolling_Mean_Close', 'Rolling_Std_Close', 'Exponential_Moving_Avg', 'Relative_Strength_Index']]
