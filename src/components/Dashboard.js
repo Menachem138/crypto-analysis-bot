@@ -233,7 +233,15 @@ const Dashboard = () => {
 
         console.log('Cleaned Data Array before tensor creation:', cleanedDataArray.slice(0, 5)); // Log the first 5 cleaned data rows before tensor creation
 
-        // Starting tensor creation from cleaned data array
+        // Check for NaN or infinite values in cleaned data array before tensor creation
+        cleanedDataArray.forEach((row, index) => {
+          Object.keys(row).forEach(key => {
+            if (isNaN(row[key]) || !isFinite(row[key])) {
+              console.error(`Invalid value found in key: ${key}, value: ${row[key]} at row index: ${index}`); // Log the key, value, and row index if NaN or infinite is found
+            }
+          });
+        });
+
         console.log('Starting tensor creation from cleaned data array');
         const dataTensor = tf.tensor2d(cleanedDataArray.map(row => {
           const tensorRow = [
