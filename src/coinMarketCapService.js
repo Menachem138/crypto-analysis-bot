@@ -1,0 +1,1 @@
+const axios = require('axios');\n\nconst API_KEY = process.env.COINMARKETCAP_API_KEY;\n\nconst instance = axios.create({\n  baseURL: 'https://pro-api.coinmarketcap.com',\n  headers: {'X-CMC_PRO_API_KEY': API_KEY}\n});\n\nmodule.exports = instance;
