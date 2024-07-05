@@ -111,7 +111,10 @@ const Dashboard = () => {
 
         // Calculate mean and standard deviation for each feature
         const meanTensor = await safeMean(dataTensor);
+        console.log('Mean Tensor:', meanTensor.arraySync());
+
         const stdTensor = await safeStd(dataTensor);
+        console.log('Standard Deviation Tensor:', stdTensor.arraySync());
 
         // Normalize the data
         const normalizedTensor = dataTensor.sub(meanTensor).div(stdTensor);
