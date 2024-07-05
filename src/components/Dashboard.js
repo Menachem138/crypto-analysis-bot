@@ -38,6 +38,7 @@ class ErrorBoundary extends React.Component {
 }
 
 const Dashboard = () => {
+  console.log('Dashboard component is rendering');
   const [marketData, setMarketData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
