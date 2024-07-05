@@ -64,8 +64,13 @@ const Dashboard = () => {
         // Convert the data to arrays
         console.log('Starting to convert parsed data to arrays');
         const dataArray = [];
-        await parsedData.forEachAsync(row => dataArray.push(row));
-        console.log('Data array created successfully');
+        try {
+          await parsedData.forEachAsync(row => dataArray.push(row));
+          console.log('Data array created successfully');
+        } catch (error) {
+          console.error('Error during data conversion:', error);
+          throw error;
+        }
 
         // Extract features and labels
         console.log('Starting to extract features and labels');
@@ -116,51 +121,57 @@ const Dashboard = () => {
           });
         };
 
-        console.log('Calling convertToTensor for training data');
-        const trainTensors = convertToTensor(trainFeatures, trainLabels);
-        console.log('Train Tensors:', trainTensors);
-        console.log('Train Tensors Input Shape:', trainTensors.inputs.shape);
-        console.log('Train Tensors Label Shape:', trainTensors.labels.shape);
-        console.log('Train Tensors Input Data:', trainTensors.inputs.arraySync());
-        console.log('Train Tensors Label Data:', trainTensors.labels.arraySync());
-
-        console.log('Calling convertToTensor for testing data');
-        const testTensors = convertToTensor(testFeatures, testLabels);
-        console.log('Test Tensors:', testTensors);
-        console.log('Test Tensors Input Shape:', testTensors.inputs.shape);
-        console.log('Test Tensors Label Shape:', testTensors.labels.shape);
-        console.log('Test Tensors Input Data:', testTensors.inputs.arraySync());
-        console.log('Test Tensors Label Data:', testTensors.labels.arraySync());
-
-        console.log('Data converted to tensors');
-
-        // Create and train the model
-        console.log('Starting to create the model');
-        const model = createModel();
-        console.log('Model created:', model);
-        model.summary(); // Log the model summary
-
-        console.log('Calling trainModel function');
         try {
-          const history = await trainModel(model, trainTensors.inputs, trainTensors.labels);
-          console.log('trainModel function completed');
-          console.log('Model trained successfully:', history);
-          console.log('Training history:', history.history);
-          setTrainingResult(history);
+          console.log('Calling convertToTensor for training data');
+          const trainTensors = convertToTensor(trainFeatures, trainLabels);
+          console.log('Train Tensors:', trainTensors);
+          console.log('Train Tensors Input Shape:', trainTensors.inputs.shape);
+          console.log('Train Tensors Label Shape:', trainTensors.labels.shape);
+          console.log('Train Tensors Input Data:', trainTensors.inputs.arraySync());
+          console.log('Train Tensors Label Data:', trainTensors.labels.arraySync());
+
+          console.log('Calling convertToTensor for testing data');
+          const testTensors = convertToTensor(testFeatures, testLabels);
+          console.log('Test Tensors:', testTensors);
+          console.log('Test Tensors Input Shape:', testTensors.inputs.shape);
+          console.log('Test Tensors Label Shape:', testTensors.labels.shape);
+          console.log('Test Tensors Input Data:', testTensors.inputs.arraySync());
+          console.log('Test Tensors Label Data:', testTensors.labels.arraySync());
+
+          console.log('Data converted to tensors');
+
+          // Create and train the model
+          console.log('Starting to create the model');
+          const model = createModel();
+          console.log('Model created:', model);
+          model.summary(); // Log the model summary
+
+          console.log('Calling trainModel function');
+          try {
+            const history = await trainModel(model, trainTensors.inputs, trainTensors.labels);
+            console.log('trainModel function completed');
+            console.log('Model trained successfully:', history);
+            console.log('Training history:', history.history);
+            setTrainingResult(history);
+          } catch (error) {
+            console.error('Error during model training:', error);
+            throw error;
+          }
+
+          // Evaluate the model
+          console.log('Starting to evaluate the model');
+          const evaluation = await evaluateModel(model, testTensors.inputs, testTensors.labels);
+          console.log('Model evaluated successfully:', evaluation);
+          console.log('Evaluation result:', evaluation);
+          setEvaluationResult(evaluation);
+
+          // Clear any previous errors after successful operations
+          console.log('Clearing error state after successful operations');
+          setError(null);
         } catch (error) {
-          console.error('Error during model training:', error);
+          console.error('Error during tensor conversion or model training:', error);
+          throw error;
         }
-
-        // Evaluate the model
-        console.log('Starting to evaluate the model');
-        const evaluation = await evaluateModel(model, testTensors.inputs, testTensors.labels);
-        console.log('Model evaluated successfully:', evaluation);
-        console.log('Evaluation result:', evaluation);
-        setEvaluationResult(evaluation);
-
-        // Clear any previous errors after successful operations
-        console.log('Clearing error state after successful operations');
-        setError(null);
       } catch (err) {
         console.error('Error during fetch operation:', err);
         console.log('Setting error state with message:', err.message);
