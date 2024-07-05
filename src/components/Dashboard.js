@@ -200,6 +200,7 @@ const Dashboard = () => {
           }
         });
 
+        // Calculate Moving Average
         const movingAverageValues = calculateMovingAverage(cleanedDataArray);
         cleanedDataArray.forEach((row, index) => {
           row.Moving_Average = movingAverageValues[index];
@@ -213,6 +214,7 @@ const Dashboard = () => {
           }
         });
 
+        // Calculate MACD
         const macdValues = calculateMACD(cleanedDataArray);
         cleanedDataArray.forEach((row, index) => {
           row.MACD = macdValues[index];
