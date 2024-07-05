@@ -11,7 +11,8 @@ const getMarketData = async (symbol) => {
   try {
     const response = await instance.get(`/v1/cryptocurrency/quotes/latest`, {
       params: {
-        symbol: symbol
+        symbol: symbol,
+        convert: 'USD' // Ensure the response is in USD
       }
     });
     return response.data;
@@ -30,7 +31,13 @@ const getMarketData = async (symbol) => {
 
 const getCopyTradingData = async () => {
   try {
-    const response = await instance.get(`/v1/cryptocurrency/listings/latest`);
+    const response = await instance.get(`/v1/cryptocurrency/listings/latest`, {
+      params: {
+        start: 1,
+        limit: 10,
+        convert: 'USD' // Ensure the response is in USD
+      }
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching copy-trading data:', {
