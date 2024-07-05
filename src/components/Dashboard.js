@@ -212,7 +212,6 @@ const Dashboard = () => {
           if (isNaN(value) || !isFinite(value)) {
             console.error(`Invalid value found in Moving Average at index ${index}: ${value}`);
   useEffect(() => {
-  useEffect(() => {
     console.log('Error state updated:', error);
   }, [error]);
 
