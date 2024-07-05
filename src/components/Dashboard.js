@@ -22,8 +22,11 @@ const Dashboard = () => {
         console.log('Market Data:', response.data); // Log the market data
         setMarketData(response.data);
       } catch (err) {
-        setError(err.message);
-        console.log('Error set in getMarketData:', err.message);
+        setError(`Error: ${err.message}`);
+        console.log('Full error object in getMarketData:', err);
+        console.log('Error stack trace in getMarketData:', err.stack);
+        console.log('Error name in getMarketData:', err.name);
+        console.log('Error message in getMarketData:', err.message);
       } finally {
         setLoading(false);
       }
@@ -36,8 +39,8 @@ const Dashboard = () => {
     const loadAndTrainModel = async () => {
       try {
         // Clear any previous errors
+        console.log('Clearing error state before starting loadAndTrainModel');
         setError(null);
-        console.log('Error state cleared at start of loadAndTrainModel:', error);
 
         // Load and preprocess the historical data
         const response = await fetch('/Binance_1INCHBTC_d.csv');
@@ -133,15 +136,16 @@ const Dashboard = () => {
         setEvaluationResult(evaluation);
 
         // Clear any previous errors after successful operations
+        console.log('Clearing error state after successful operations');
         setError(null);
-        console.log('Error state cleared after successful operations:', error);
       } catch (err) {
         console.error('Error during fetch operation:', err);
+        console.log('Setting error state with message:', err.message);
         setError(`Error: ${err.message}`);
-        console.log('Full error object:', err);
-        console.log('Error stack trace:', err.stack);
-        console.log('Error name:', err.name);
-        console.log('Error message:', err.message);
+        console.log('Full error object in loadAndTrainModel:', err);
+        console.log('Error stack trace in loadAndTrainModel:', err.stack);
+        console.log('Error name in loadAndTrainModel:', err.name);
+        console.log('Error message in loadAndTrainModel:', err.message);
       } finally {
         setLoading(false);
         console.log('Loading state set to false');
@@ -150,6 +154,10 @@ const Dashboard = () => {
 
     loadAndTrainModel();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    console.log('Error state updated:', error);
+  }, [error]);
 
   if (loading) {
     return (
