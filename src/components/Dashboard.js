@@ -538,7 +538,7 @@ const Dashboard = () => {
   const testMSE = evaluationResult ? evaluationResult[1].arraySync() : null;
 
   // Format market data for MarketChart component
-  const formattedMarketData = marketData ? marketData.map(entry => ({
+  const formattedMarketData = Array.isArray(marketData) ? marketData.map(entry => ({
     date: new Date(entry.Unix * 1000), // Convert Unix timestamp to Date object
     price: entry.Close
   })) : [];
