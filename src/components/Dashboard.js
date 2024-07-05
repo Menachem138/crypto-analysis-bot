@@ -54,7 +54,7 @@ const Dashboard = () => {
         console.log('Starting to parse CSV file');
         let parsedData;
         try {
-          parsedData = tf.data.csv('/home/ubuntu/browser_downloads/Binance_1INCHBTC_d.csv', {
+          parsedData = tf.data.csv('/Binance_1INCHBTC_d.csv', {
             columnConfigs: {
               Close: { isLabel: true }
             }
