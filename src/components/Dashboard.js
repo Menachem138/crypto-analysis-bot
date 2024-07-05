@@ -205,8 +205,12 @@ const Dashboard = () => {
           console.log('Train Tensors Label Data:', trainTensors.labels.arraySync());
           try {
             console.log('Before trainModel function call');
+            console.log('Train Tensors Input Data (before training):', trainTensors.inputs.arraySync());
+            console.log('Train Tensors Label Data (before training):', trainTensors.labels.arraySync());
             const history = await trainModel(model, trainTensors.inputs, trainTensors.labels);
             console.log('After trainModel function call');
+            console.log('Train Tensors Input Data (after training):', trainTensors.inputs.arraySync());
+            console.log('Train Tensors Label Data (after training):', trainTensors.labels.arraySync());
             console.log('trainModel function completed');
             console.log('Model trained successfully:', history);
             console.log('Training history:', history.history);
