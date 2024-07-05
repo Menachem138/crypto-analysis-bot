@@ -8,6 +8,7 @@ const CopyTrading = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log("CopyTrading component mounted");
     const fetchCopyTradingData = async () => {
       try {
         const data = await getCopyTradingData();

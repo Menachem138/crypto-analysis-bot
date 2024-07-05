@@ -5,6 +5,7 @@ import { createModel, trainModel, evaluateModel } from '../aiModel';
 import * as tf from '@tensorflow/tfjs';
 import { calculateMovingAverage, calculateRSI, calculateMACD } from '../technicalAnalysis';
 import MarketChart from './MarketChart';
+import CopyTrading from './CopyTrading';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -559,6 +560,7 @@ const Dashboard = () => {
           </Box>
         )}
         <MarketChart data={formattedMarketData} />
+        <CopyTrading />
         {trainingResult && (
           <Box>
             <Heading as="h2" size="lg" mt={6}>
