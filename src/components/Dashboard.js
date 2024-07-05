@@ -6,6 +6,36 @@ import * as tf from '@tensorflow/tfjs';
 import { calculateMovingAverage, calculateRSI, calculateMACD } from '../technicalAnalysis';
 import MarketChart from './MarketChart';
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught an error", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Box textAlign="center" py={10} px={6}>
+          <Heading as="h1" size="xl" mb={6}>
+            Something went wrong.
+          </Heading>
+          <Text>Please try again later.</Text>
+        </Box>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 const Dashboard = () => {
   const [marketData, setMarketData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -423,6 +453,9 @@ const Dashboard = () => {
       } finally {
         setLoading(false);
         console.log('Loading state set to false');
+        console.log('Final marketData state:', marketData);
+        console.log('Final trainingResult state:', trainingResult);
+        console.log('Final evaluationResult state:', evaluationResult);
       }
     };
 
@@ -466,43 +499,45 @@ const Dashboard = () => {
   })) : [];
 
   return (
-    <Box textAlign="center" py={10} px={6}>
-      <Heading as="h1" size="xl" mb={6}>
-        Cryptocurrency Market Data
-      </Heading>
-      {marketData && (
-        <Box>
-          {marketData.market_cap && marketData.market_cap.usd !== undefined && (
-            <Text>Market Cap: ${marketData.market_cap.usd}</Text>
-          )}
-          {marketData.total_volume && marketData.total_volume.usd !== undefined && (
-            <Text>24h Volume: ${marketData.total_volume.usd}</Text>
-          )}
-          {marketData.market_cap_percentage && marketData.market_cap_percentage.btc !== undefined && (
-            <Text>Bitcoin Dominance: {marketData.market_cap_percentage.btc}%</Text>
-          )}
-        </Box>
-      )}
-      <MarketChart data={formattedMarketData} />
-      {trainingResult && (
-        <Box>
-          <Heading as="h2" size="lg" mt={6}>
-            Model Training Result
-          </Heading>
-          <Text>Training Loss: {trainingLoss}</Text>
-          <Text>Validation Loss: {validationLoss}</Text>
-        </Box>
-      )}
-      {evaluationResult && (
-        <Box>
-          <Heading as="h2" size="lg" mt={6}>
-            Model Evaluation Result
-          </Heading>
-          <Text>Test Loss: {testLoss}</Text>
-          <Text>Test MSE: {testMSE}</Text>
-        </Box>
-      )}
-    </Box>
+    <ErrorBoundary>
+      <Box textAlign="center" py={10} px={6}>
+        <Heading as="h1" size="xl" mb={6}>
+          Cryptocurrency Market Data
+        </Heading>
+        {marketData && (
+          <Box>
+            {marketData.market_cap && marketData.market_cap.usd !== undefined && (
+              <Text>Market Cap: ${marketData.market_cap.usd}</Text>
+            )}
+            {marketData.total_volume && marketData.total_volume.usd !== undefined && (
+              <Text>24h Volume: ${marketData.total_volume.usd}</Text>
+            )}
+            {marketData.market_cap_percentage && marketData.market_cap_percentage.btc !== undefined && (
+              <Text>Bitcoin Dominance: {marketData.market_cap_percentage.btc}%</Text>
+            )}
+          </Box>
+        )}
+        <MarketChart data={formattedMarketData} />
+        {trainingResult && (
+          <Box>
+            <Heading as="h2" size="lg" mt={6}>
+              Model Training Result
+            </Heading>
+            <Text>Training Loss: {trainingLoss}</Text>
+            <Text>Validation Loss: {validationLoss}</Text>
+          </Box>
+        )}
+        {evaluationResult && (
+          <Box>
+            <Heading as="h2" size="lg" mt={6}>
+              Model Evaluation Result
+            </Heading>
+            <Text>Test Loss: {testLoss}</Text>
+            <Text>Test MSE: {testMSE}</Text>
+          </Box>
+        )}
+      </Box>
+    </ErrorBoundary>
   );
 };
 
