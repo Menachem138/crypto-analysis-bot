@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Heading, Text, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
-import apiService from '../services/apiService';
-import { createModel, trainModel, evaluateModel } from '../aiModel';
-import * as tf from '@tensorflow/tfjs';
-import { calculateMovingAverage, calculateRSI, calculateMACD } from '../technicalAnalysis';
 import MarketChart from './MarketChart';
 import CopyTrading from './CopyTrading';
 
@@ -39,15 +35,15 @@ class ErrorBoundary extends React.Component {
 
 const Dashboard = () => {
   console.log('Dashboard component is rendering');
-  const [marketData, setMarketData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [marketData, /* setMarketData */] = useState(null);
+  const [loading, /* setLoading */] = useState(true);
+  const [error, /* setError */] = useState(null);
   console.log('Initial error state:', error);
   console.log('Initial loading state:', loading);
-  const [trainingResult, setTrainingResult] = useState(null);
-  const [evaluationResult, setEvaluationResult] = useState(null);
-  console.log('Initial training result:', trainingResult);
-  console.log('Initial evaluation result:', evaluationResult);
+  // const [trainingResult, setTrainingResult] = useState(null);
+  // const [evaluationResult, setEvaluationResult] = useState(null);
+  // console.log('Initial training result:', trainingResult);
+  // console.log('Initial evaluation result:', evaluationResult);
 
   // Add logging for state updates
   useEffect(() => {
@@ -62,34 +58,35 @@ const Dashboard = () => {
     console.log('Updated loading state:', loading);
   }, [loading]);
 
-  useEffect(() => {
-    console.log('Updated trainingResult state:', trainingResult);
-  }, [trainingResult]);
+  // useEffect(() => {
+  //   console.log('Updated trainingResult state:', trainingResult);
+  // }, [trainingResult]);
 
-  useEffect(() => {
-    console.log('Updated evaluationResult state:', evaluationResult);
-  }, [evaluationResult]);
+  // useEffect(() => {
+  //   console.log('Updated evaluationResult state:', evaluationResult);
+  // }, [evaluationResult]);
 
-  useEffect(() => {
-    const getMarketData = async () => {
-      try {
-        const response = await apiService.getMarketData();
-        console.log('Market Data:', response.data); // Log the market data
-        setMarketData(response.data);
-      } catch (err) {
-        setError(`Error: ${err.message}`);
-        console.log('Full error object in getMarketData:', err);
-        console.log('Error stack trace in getMarketData:', err.stack);
-        console.log('Error name in getMarketData:', err.name);
-        console.log('Error message in getMarketData:', err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const getMarketData = async () => {
+  //     try {
+  //       const response = await apiService.getMarketData();
+  //       console.log('Market Data:', response.data); // Log the market data
+  //       setMarketData(response.data);
+  //     } catch (err) {
+  //       setError(`Error: ${err.message}`);
+  //       console.log('Full error object in getMarketData:', err);
+  //       console.log('Error stack trace in getMarketData:', err.stack);
+  //       console.log('Error name in getMarketData:', err.name);
+  //       console.log('Error message in getMarketData:', err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    getMarketData();
-  }, []);
+  //   getMarketData();
+  // }, []);
 
+  /*
   useEffect(() => {
     console.log('Starting loadAndTrainModel function');
     const loadAndTrainModel = async () => {
@@ -214,296 +211,8 @@ const Dashboard = () => {
         // Check for NaN or infinite values in Moving Average
         movingAverageValues.forEach((value, index) => {
           if (isNaN(value) || !isFinite(value)) {
-            console.error(`Invalid Moving Average value at index ${index}: ${value}`);
-          }
-        });
-
-        // Calculate MACD
-        const macdValues = calculateMACD(cleanedDataArray);
-        console.log('MACD Values before assignment:', macdValues.slice(0, 5)); // Log the first 5 MACD values before assignment
-        cleanedDataArray.forEach((row, index) => {
-          row.MACD = macdValues[index];
-        });
-        console.log('MACD Values after assignment:', cleanedDataArray.slice(0, 5).map(row => row.MACD)); // Log the first 5 MACD values after assignment
-
-        // Check for NaN or infinite values in MACD
-        macdValues.forEach((value, index) => {
-          if (isNaN(value) || !isFinite(value)) {
-            console.error(`Invalid MACD value at index ${index}: ${value}`);
-          }
-        });
-
-        console.log('Cleaned Data Array before tensor creation:', cleanedDataArray.slice(0, 5)); // Log the first 5 cleaned data rows before tensor creation
-
-        // Check for NaN or infinite values in cleaned data array before tensor creation
-        cleanedDataArray.forEach((row, index) => {
-          Object.keys(row).forEach(key => {
-            if (isNaN(row[key]) || !isFinite(row[key])) {
-              console.error(`Invalid value found in key: ${key}, value: ${row[key]} at row index: ${index}`); // Log the key, value, and row index if NaN or infinite is found
-              row[key] = 0; // Replace NaN or infinite values with zero
-            }
-          });
-        });
-
-        console.log('Starting tensor creation from cleaned data array');
-        const dataTensor = tf.tensor2d(cleanedDataArray.map(row => [
-          row.Open,
-          row.High,
-          row.Low,
-          row['Volume 1INCH'],
-          row['Volume BTC'],
-          row.tradecount,
-          (row.High + row.Low) / 2, // Average of High and Low prices
-          row.Open - row.Close, // Difference between Open and Close prices
-          row.Unix / 1e9, // Scale Unix timestamp to a more suitable range
-          row.Relative_Strength_Index // Add the Relative Strength Index feature
-        ]));
-        console.log('Data Tensor created:', dataTensor.arraySync());
-
-        // Check for NaN or infinite values in dataTensor
-        const hasNaNDataTensor = tf.any(tf.isNaN(dataTensor)).dataSync()[0];
-        const hasInfDataTensor = tf.any(tf.isInf(dataTensor)).dataSync()[0];
-        console.log('hasNaNDataTensor:', hasNaNDataTensor);
-        console.log('hasInfDataTensor:', hasInfDataTensor);
-        if (hasNaNDataTensor || hasInfDataTensor) {
-          console.log('Data Tensor contains NaN or infinite values:', dataTensor.arraySync());
-          throw new Error('Data Tensor contains NaN or infinite values');
-        }
-
-        // Calculate mean and standard deviation for each feature
-        console.log('Calculating mean tensor');
-        const meanTensor = tf.mean(dataTensor, 0);
-        console.log('Mean Tensor:', meanTensor.arraySync());
-
-        console.log('Calculating standard deviation tensor');
-        const stdTensor = tf.moments(dataTensor, 0).variance.sqrt().add(tf.scalar(1e-8)); // Add small constant to prevent division by zero
-        console.log('Standard Deviation Tensor:', stdTensor.arraySync());
-
-        // Check for NaN values in mean and standard deviation tensors
-        const hasNaNMeanTensor = tf.any(tf.isNaN(meanTensor)).dataSync()[0];
-        const hasNaNStdTensor = tf.any(tf.isNaN(stdTensor)).dataSync()[0];
-        console.log('hasNaNMeanTensor:', hasNaNMeanTensor);
-        console.log('hasNaNStdTensor:', hasNaNStdTensor);
-        if (hasNaNMeanTensor || hasNaNStdTensor) {
-          console.log('Mean or Standard Deviation Tensor contains NaN values:', {
-            meanTensor: meanTensor.arraySync(),
-            stdTensor: stdTensor.arraySync()
-          });
-          throw new Error('Mean or Standard Deviation Tensor contains NaN values');
-        }
-
-        // Check for zero standard deviation values and replace them with a small constant
-        const adjustedStdTensor = tf.where(tf.equal(stdTensor, 0), tf.scalar(1e-8), stdTensor);
-        console.log('Adjusted Standard Deviation Tensor:', adjustedStdTensor.arraySync());
-
-        // Perform normalization
-        console.log('Starting normalization');
-        const normalizedTensor = dataTensor.sub(meanTensor).div(adjustedStdTensor);
-        console.log('Normalized Tensor before NaN replacement:', normalizedTensor.arraySync());
-
-        // Check for NaN values in the normalized tensor before replacement
-        const hasNaNBeforeReplacement = tf.any(tf.isNaN(normalizedTensor)).dataSync()[0];
-        console.log('hasNaNBeforeReplacement:', hasNaNBeforeReplacement);
-        if (hasNaNBeforeReplacement) {
-          console.log('Normalized Tensor contains NaN values before replacement');
-        }
-
-        // Replace NaN values in the normalized tensor with zeros
-        const cleanedNormalizedTensor = tf.where(tf.isNaN(normalizedTensor), tf.zerosLike(normalizedTensor), normalizedTensor);
-        console.log('Final Normalized Tensor:', cleanedNormalizedTensor.arraySync());
-
-        // Check for NaN values after normalization
-        const hasNaNAfterNormalization = tf.any(tf.isNaN(cleanedNormalizedTensor)).dataSync()[0];
-        console.log('hasNaNAfterNormalization:', hasNaNAfterNormalization);
-        if (hasNaNAfterNormalization) {
-          console.log('Final Normalized Tensor contains NaN values after normalization:', cleanedNormalizedTensor.arraySync());
-          throw new Error('Final Normalized Tensor contains NaN values after normalization');
-        }
-
-        // Log the final normalized tensor
-        console.log('Final Normalized Tensor after NaN replacement:', cleanedNormalizedTensor.arraySync());
-
-        // Log the normalized features
-        const normalizedFeatures = cleanedNormalizedTensor.arraySync();
-        console.log('Normalized Features:', normalizedFeatures.slice(0, 5)); // Log the first 5 normalized feature sets
-
-        // Convert the normalized tensor back to an array
-        const features = cleanedNormalizedTensor.arraySync();
-
-        console.log('Features:', features.slice(0, 5)); // Log the first 5 feature sets
-
-        // Check for NaN values in features
-        const cleanedFeatures = features.map(featureSet => featureSet.map(value => isNaN(value) ? 0 : value));
-        const hasNaNFeatures = cleanedFeatures.some(featureSet => featureSet.some(value => isNaN(value)));
-        if (hasNaNFeatures) {
-          throw new Error('Cleaned features contain NaN values');
-        }
-
-        const labels = dataArray.map(row => row.Close);
-        const cleanedLabels = labels.map(label => isNaN(label) ? 0 : label);
-        const hasNaNLabels = cleanedLabels.some(label => isNaN(label));
-        if (hasNaNLabels) {
-          throw new Error('Cleaned labels contain NaN values');
-        }
-
-        console.log('Extracted Features:', features.slice(0, 5)); // Log the first 5 extracted feature sets
-        console.log('Extracted Labels:', labels.slice(0, 5)); // Log the first 5 extracted labels
-
-        console.log('Features and labels extracted successfully');
-        console.log('Features:', cleanedFeatures.slice(0, 5)); // Log the first 5 feature sets
-        console.log('Labels:', cleanedLabels.slice(0, 5)); // Log the first 5 labels
-
-        // Split the data into training and testing sets
-        console.log('Starting to split data into training and testing sets');
-        const trainSize = Math.floor(features.length * 0.8);
-        const trainFeatures = features.slice(0, trainSize);
-        const trainLabels = cleanedLabels.slice(0, trainSize);
-        const testFeatures = features.slice(trainSize);
-        const testLabels = cleanedLabels.slice(trainSize);
-        console.log('Data split into training and testing sets');
-
-        // Convert the data to tensors
-        console.log('Starting to convert data to tensors');
-        const convertToTensor = (data, labels) => {
-          return tf.tidy(() => {
-            console.log('Data before shuffling:', data);
-            console.log('Labels before shuffling:', labels);
-            try {
-              tf.util.shuffle(data);
-              tf.util.shuffle(labels);
-              console.log('Data after shuffling:', data);
-              console.log('Labels after shuffling:', labels);
-            } catch (error) {
-              console.error('Error during data shuffling:', error);
-              throw new Error(`Data Shuffling Error: ${error.message}`);
-            }
-
-            let inputTensor, labelTensor;
-            try {
-              console.log('Data before tensor creation:', data);
-              console.log('Labels before tensor creation:', labels);
-              inputTensor = tf.tensor2d(data, [data.length, data[0].length]);
-              labelTensor = tf.tensor2d(labels, [labels.length, 1]);
-              console.log('Input Tensor Shape:', inputTensor.shape);
-              console.log('Label Tensor Shape:', labelTensor.shape);
-              console.log('Input Tensor Data:', inputTensor.arraySync());
-              console.log('Label Tensor Data:', labelTensor.arraySync());
-
-              // Check for NaN or infinite values in tensors
-              const hasNaN = (tensor) => tf.any(tf.isNaN(tensor)).dataSync()[0];
-              const hasInf = (tensor) => tf.any(tf.isInf(tensor)).dataSync()[0];
-              if (hasNaN(inputTensor) || hasNaN(labelTensor) || hasInf(inputTensor) || hasInf(labelTensor)) {
-                console.error('Tensor contains NaN or infinite values');
-                console.log('Input Tensor Data with NaN or Inf:', inputTensor.arraySync());
-                console.log('Label Tensor Data with NaN or Inf:', labelTensor.arraySync());
-                throw new Error('Tensor contains NaN or infinite values');
-              }
-            } catch (error) {
-              console.error('Error during tensor creation:', error);
-              throw new Error(`Tensor Creation Error: ${error.message}`);
-            }
-
-            console.log('Tensors created successfully');
-            return {
-              inputs: inputTensor,
-              labels: labelTensor
-            };
-          });
-        };
-
-        try {
-          console.log('Calling convertToTensor for training data');
-          const trainTensors = convertToTensor(trainFeatures, trainLabels);
-          console.log('Train Tensors:', trainTensors);
-          console.log('Train Tensors Input Shape:', trainTensors.inputs.shape);
-          console.log('Train Tensors Label Shape:', trainTensors.labels.shape);
-          console.log('Train Tensors Input Data:', trainTensors.inputs.arraySync());
-          console.log('Train Tensors Label Data:', trainTensors.labels.arraySync());
-
-          console.log('Calling convertToTensor for testing data');
-          const testTensors = convertToTensor(testFeatures, testLabels);
-          console.log('Test Tensors:', testTensors);
-          console.log('Test Tensors Input Shape:', testTensors.inputs.shape);
-          console.log('Test Tensors Label Shape:', testTensors.labels.shape);
-          console.log('Test Tensors Input Data:', testTensors.inputs.arraySync());
-          console.log('Test Tensors Label Data:', testTensors.labels.arraySync());
-
-          console.log('Data converted to tensors');
-          console.log('Calling trainModel function');
-
-          // Create and train the model
-          console.log('Starting to create the model');
-          const model = createModel();
-          console.log('Model created:', model);
-          model.summary(); // Log the model summary
-
-          console.log('Calling trainModel function');
-          console.log('Train Tensors Input Shape:', trainTensors.inputs.shape);
-          console.log('Train Tensors Label Shape:', trainTensors.labels.shape);
-          console.log('Train Tensors Input Data:', trainTensors.inputs.arraySync());
-          console.log('Train Tensors Label Data:', trainTensors.labels.arraySync());
-          console.log('Train Tensors Input Shape:', trainTensors.inputs.shape);
-          console.log('Train Tensors Label Shape:', trainTensors.labels.shape);
-          console.log('Train Tensors Input Data:', trainTensors.inputs.arraySync());
-          console.log('Train Tensors Label Data:', trainTensors.labels.arraySync());
-          try {
-            console.log('Before trainModel function call');
-            console.log('Train Tensors Input Data (before training):', trainTensors.inputs.arraySync());
-            console.log('Train Tensors Label Data (before training):', trainTensors.labels.arraySync());
-            console.log('Calling trainModel function now');
-            const history = await trainModel(model, trainTensors.inputs, trainTensors.labels);
-            console.log('After trainModel function call');
-            console.log('Train Tensors Input Data (after training):', trainTensors.inputs.arraySync());
-            console.log('Train Tensors Label Data (after training):', trainTensors.labels.arraySync());
-            console.log('trainModel function completed');
-            console.log('Model trained successfully:', history);
-            console.log('Training history:', history.history);
-            setTrainingResult(history);
-          } catch (error) {
-            console.error('Error during model training:', error);
-            console.log('Error stack trace during model training:', error.stack);
-            console.log('Error name during model training:', error.name);
-            console.log('Error message during model training:', error.message);
-            throw new Error(`Model Training Error: ${error.message}`);
-          }
-
-          // Evaluate the model
-          console.log('Starting to evaluate the model');
-          console.log('Test Tensors Input Shape:', testTensors.inputs.shape);
-          console.log('Test Tensors Label Shape:', testTensors.labels.shape);
-          console.log('Test Tensors Input Data:', testTensors.inputs.arraySync());
-          console.log('Test Tensors Label Data:', testTensors.labels.arraySync());
-          const evaluation = await evaluateModel(model, testTensors.inputs, testTensors.labels);
-          console.log('Model evaluated successfully:', evaluation);
-          console.log('Evaluation result:', evaluation);
-          setEvaluationResult(evaluation);
-
-          // Clear any previous errors after successful operations
-          console.log('Clearing error state after successful operations');
-          setError(null);
-        } catch (error) {
-          console.error('Error during tensor conversion or model training:', error);
-          throw error;
-        }
-      } catch (err) {
-        console.error('Error during loadAndTrainModel execution:', err);
-        console.log('Setting error state with message:', err.message);
-        setError(`Error: ${err.message}`);
-        console.log('Full error object in loadAndTrainModel:', err);
-        console.log('Error stack trace in loadAndTrainModel:', err.stack);
-        console.log('Error name in loadAndTrainModel:', err.name);
-        console.log('Error message in loadAndTrainModel:', err.message);
-      } finally {
-        setLoading(false);
-        console.log('Loading state set to false');
-        console.log('Final marketData state:', marketData);
-        console.log('Final trainingResult state:', trainingResult);
-        console.log('Final evaluationResult state:', evaluationResult);
-      }
-    };
-
-    loadAndTrainModel();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+            console.error(`Invalid
+  */
 
   useEffect(() => {
     console.log('Error state updated:', error);
@@ -530,10 +239,10 @@ const Dashboard = () => {
   }
 
   // Convert tensor data to arrays before rendering
-  const trainingLoss = trainingResult ? trainingResult.history.loss[trainingResult.history.loss.length - 1] : null;
-  const validationLoss = trainingResult ? trainingResult.history.val_loss[trainingResult.history.val_loss.length - 1] : null;
-  const testLoss = evaluationResult ? evaluationResult[0].arraySync() : null;
-  const testMSE = evaluationResult ? evaluationResult[1].arraySync() : null;
+  // const trainingLoss = trainingResult ? trainingResult.history.loss[trainingResult.history.loss.length - 1] : null;
+  // const validationLoss = trainingResult ? trainingResult.history.val_loss[trainingResult.history.val_loss.length - 1] : null;
+  // const testLoss = evaluationResult ? evaluationResult[0].arraySync() : null;
+  // const testMSE = evaluationResult ? evaluationResult[1].arraySync() : null;
 
   // Format market data for MarketChart component
   const formattedMarketData = Array.isArray(marketData) ? marketData.map(entry => ({
@@ -562,7 +271,7 @@ const Dashboard = () => {
         )}
         <MarketChart data={formattedMarketData} />
         <CopyTrading />
-        {trainingResult && (
+        {/* {trainingResult && (
           <Box>
             <Heading as="h2" size="lg" mt={6}>
               Model Training Result
@@ -579,7 +288,7 @@ const Dashboard = () => {
             <Text>Test Loss: {testLoss}</Text>
             <Text>Test MSE: {testMSE}</Text>
           </Box>
-        )}
+        )} */}
       </Box>
     </ErrorBoundary>
   );
