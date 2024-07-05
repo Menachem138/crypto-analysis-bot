@@ -35,8 +35,14 @@ const trainModel = async (model, trainData, trainLabels) => {
       batchSize: 32,
       validationSplit: 0.2,
       callbacks: {
+        onEpochBegin: (epoch, logs) => {
+          console.log(`Epoch ${epoch + 1} starting...`);
+        },
         onEpochEnd: (epoch, logs) => {
           console.log(`Epoch ${epoch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
+        },
+        onBatchEnd: (batch, logs) => {
+          console.log(`Batch ${batch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
         },
       },
     });
