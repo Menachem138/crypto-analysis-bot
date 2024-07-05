@@ -35,9 +35,9 @@ class ErrorBoundary extends React.Component {
 
 const Dashboard = () => {
   console.log('Dashboard component is rendering');
-  const [marketData, /* setMarketData */] = useState(null);
-  const [loading, /* setLoading */] = useState(true);
-  const [error, /* setError */] = useState(null);
+  const [marketData, setMarketData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   console.log('Initial error state:', error);
   console.log('Initial loading state:', loading);
   // const [trainingResult, setTrainingResult] = useState(null);
@@ -66,27 +66,26 @@ const Dashboard = () => {
   //   console.log('Updated evaluationResult state:', evaluationResult);
   // }, [evaluationResult]);
 
-  // useEffect(() => {
-  //   const getMarketData = async () => {
-  //     try {
-  //       const response = await apiService.getMarketData();
-  //       console.log('Market Data:', response.data); // Log the market data
-  //       setMarketData(response.data);
-  //     } catch (err) {
-  //       setError(`Error: ${err.message}`);
-  //       console.log('Full error object in getMarketData:', err);
-  //       console.log('Error stack trace in getMarketData:', err.stack);
-  //       console.log('Error name in getMarketData:', err.name);
-  //       console.log('Error message in getMarketData:', err.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+  useEffect(() => {
+    const getMarketData = async () => {
+      try {
+        const response = await apiService.getMarketData();
+        console.log('Market Data:', response.data); // Log the market data
+        setMarketData(response.data);
+      } catch (err) {
+        setError(`Error: ${err.message}`);
+        console.log('Full error object in getMarketData:', err);
+        console.log('Error stack trace in getMarketData:', err.stack);
+        console.log('Error name in getMarketData:', err.name);
+        console.log('Error message in getMarketData:', err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  //   getMarketData();
-  // }, []);
+    getMarketData();
+  }, []);
 
-  /*
   useEffect(() => {
     console.log('Starting loadAndTrainModel function');
     const loadAndTrainModel = async () => {
@@ -211,9 +210,8 @@ const Dashboard = () => {
         // Check for NaN or infinite values in Moving Average
         movingAverageValues.forEach((value, index) => {
           if (isNaN(value) || !isFinite(value)) {
-            console.error(`Invalid
-  */
-
+            console.error(`Invalid value found in Moving Average at index ${index}: ${value}`);
+  useEffect(() => {
   useEffect(() => {
     console.log('Error state updated:', error);
   }, [error]);
@@ -259,10 +257,10 @@ const Dashboard = () => {
         {marketData && (
           <Box>
             {marketData.market_cap && marketData.market_cap.usd !== undefined && (
-              <Text>Market Cap: ${marketData.market_cap.usd}</Text>
+              <Text>Market Cap: {marketData.market_cap.usd}</Text>
             )}
             {marketData.total_volume && marketData.total_volume.usd !== undefined && (
-              <Text>24h Volume: ${marketData.total_volume.usd}</Text>
+              <Text>24h Volume: {marketData.total_volume.usd}</Text>
             )}
             {marketData.market_cap_percentage && marketData.market_cap_percentage.btc !== undefined && (
               <Text>Bitcoin Dominance: {marketData.market_cap_percentage.btc}%</Text>
@@ -271,24 +269,6 @@ const Dashboard = () => {
         )}
         <MarketChart data={formattedMarketData} />
         <CopyTrading />
-        {/* {trainingResult && (
-          <Box>
-            <Heading as="h2" size="lg" mt={6}>
-              Model Training Result
-            </Heading>
-            <Text>Training Loss: {trainingLoss}</Text>
-            <Text>Validation Loss: {validationLoss}</Text>
-          </Box>
-        )}
-        {evaluationResult && (
-          <Box>
-            <Heading as="h2" size="lg" mt={6}>
-              Model Evaluation Result
-            </Heading>
-            <Text>Test Loss: {testLoss}</Text>
-            <Text>Test MSE: {testMSE}</Text>
-          </Box>
-        )} */}
       </Box>
     </ErrorBoundary>
   );
