@@ -231,22 +231,28 @@ const Dashboard = () => {
           }
         });
 
+        console.log('Cleaned Data Array before tensor creation:', cleanedDataArray.slice(0, 5)); // Log the first 5 cleaned data rows before tensor creation
+
         // Starting tensor creation from cleaned data array
         console.log('Starting tensor creation from cleaned data array');
-        const dataTensor = tf.tensor2d(cleanedDataArray.map(row => [
-          row.Open,
-          row.High,
-          row.Low,
-          row['Volume 1INCH'],
-          row['Volume BTC'],
-          row.tradecount,
-          (row.High + row.Low) / 2, // Average of High and Low prices
-          row.Open - row.Close, // Difference between Open and Close prices
-          row.Unix / 1e9, // Scale Unix timestamp to a more suitable range
-          row.Relative_Strength_Index, // Add the Relative Strength Index feature
-          row.Moving_Average, // Add the Moving Average feature
-          row.MACD // Add the MACD feature
-        ]));
+        const dataTensor = tf.tensor2d(cleanedDataArray.map(row => {
+          const tensorRow = [
+            row.Open,
+            row.High,
+            row.Low,
+            row['Volume 1INCH'],
+            row['Volume BTC'],
+            row.tradecount,
+            (row.High + row.Low) / 2, // Average of High and Low prices
+            row.Open - row.Close, // Difference between Open and Close prices
+            row.Unix / 1e9, // Scale Unix timestamp to a more suitable range
+            row.Relative_Strength_Index, // Add the Relative Strength Index feature
+            row.Moving_Average, // Add the Moving Average feature
+            row.MACD // Add the MACD feature
+          ];
+          console.log('Tensor Row:', tensorRow); // Log each tensor row
+          return tensorRow;
+        }));
         console.log('Data Tensor created:', dataTensor.arraySync());
 
         // Check for NaN or infinite values in dataTensor
