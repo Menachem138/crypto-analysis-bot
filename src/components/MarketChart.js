@@ -1,13 +1,21 @@
 import React, { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
+import 'chartjs-adapter-date-fns';
 
 const MarketChart = ({ data }) => {
   const chartRef = useRef(null);
+  const chartInstanceRef = useRef(null);
 
   useEffect(() => {
     if (chartRef.current) {
       const ctx = chartRef.current.getContext('2d');
-      new Chart(ctx, {
+
+      // Destroy existing chart instance if it exists
+      if (chartInstanceRef.current) {
+        chartInstanceRef.current.destroy();
+      }
+
+      chartInstanceRef.current = new Chart(ctx, {
         type: 'line',
         data: {
           labels: data.map((entry) => entry.date),
@@ -37,6 +45,13 @@ const MarketChart = ({ data }) => {
         },
       });
     }
+
+    // Cleanup function to destroy chart instance on unmount
+    return () => {
+      if (chartInstanceRef.current) {
+        chartInstanceRef.current.destroy();
+      }
+    };
   }, [data]);
 
   return <canvas ref={chartRef} />;
