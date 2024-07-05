@@ -54,19 +54,24 @@ const Dashboard = () => {
         console.log('Starting to parse CSV file');
         let parsedData;
         try {
-          parsedData = await tf.data.csv('/Binance_1INCHBTC_d.csv', {
-            columnConfigs: {
-              Close: { isLabel: true }
-            }
+          const csvText = await response.text();
+          const rows = csvText.split('\n').slice(1); // Remove header row
+          parsedData = rows.map(row => {
+            const values = row.split(',');
+            return {
+              Unix: values[0],
+              Date: values[1],
+              Symbol: values[2],
+              Open: parseFloat(values[3]),
+              High: parseFloat(values[4]),
+              Low: parseFloat(values[5]),
+              Close: parseFloat(values[6]),
+              'Volume 1INCH': parseFloat(values[7]),
+              'Volume BTC': parseFloat(values[8]),
+              tradecount: parseInt(values[9], 10)
+            };
           });
           console.log('CSV file parsed successfully');
-          await parsedData.setColumnNames(['Unix', 'Date', 'Symbol', 'Open', 'High', 'Low', 'Close', 'Volume 1INCH', 'Volume BTC', 'tradecount']);
-          const columnNames = await parsedData.columnNames();
-          console.log('Parsed column names:', columnNames);
-          if (!columnNames.includes('Close')) {
-            console.error('Parsed column names do not include "Close":', columnNames);
-            throw new Error('Parsed column names do not include "Close"');
-          }
         } catch (error) {
           console.error('Error during CSV parsing:', error);
           throw new Error(`CSV Parsing Error: ${error.message}`);
@@ -74,19 +79,7 @@ const Dashboard = () => {
 
         // Convert the data to arrays
         console.log('Starting to convert parsed data to arrays');
-        const dataArray = [];
-        try {
-          console.log('Before forEachAsync call');
-          await parsedData.forEachAsync(row => {
-            console.log('Row data:', row);
-            dataArray.push(row);
-          });
-          console.log('After forEachAsync call');
-          console.log('Data array created successfully');
-        } catch (error) {
-          console.error('Error during data conversion:', error);
-          throw new Error(`Data Conversion Error: ${error.message}`);
-        }
+        const dataArray = parsedData;
 
         // Extract features and labels
         console.log('Starting to extract features and labels');
@@ -96,7 +89,11 @@ const Dashboard = () => {
           row.Low,
           row['Volume 1INCH'],
           row['Volume BTC'],
-          row.tradecount
+          row.tradecount,
+          (row.High + row.Low) / 2, // Average of High and Low prices
+          row.Open - row.Close, // Difference between Open and Close prices
+          row.Unix, // Unix timestamp
+          row.tradecount // tradecount as an additional feature
         ]);
         const labels = dataArray.map(row => row.Close);
         console.log('Features and labels extracted successfully');
