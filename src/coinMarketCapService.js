@@ -1,10 +1,7 @@
 import axios from 'axios';
 
-const API_KEY = process.env.REACT_APP_COINMARKETCAP_API_KEY;
-
 const instance = axios.create({
-  baseURL: 'http://localhost:5000/api',
-  headers: {'X-CMC_PRO_API_KEY': API_KEY}
+  baseURL: 'http://localhost:5000/api'
 });
 
 const getMarketData = async (symbol) => {
