@@ -233,7 +233,6 @@ const Dashboard = () => {
 
         // Starting tensor creation from cleaned data array
         console.log('Starting tensor creation from cleaned data array');
-        console.log('Cleaned Data Array before tensor creation:', cleanedDataArray.slice(0, 5)); // Log the first 5 cleaned data rows
         const dataTensor = tf.tensor2d(cleanedDataArray.map(row => [
           row.Open,
           row.High,
