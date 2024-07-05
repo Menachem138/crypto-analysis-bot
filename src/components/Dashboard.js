@@ -134,16 +134,16 @@ const Dashboard = () => {
           console.log('Raw Features:', rawFeatures);
 
           const normalizedFeatures = [
-            (row.Open - meanOpen) / stdOpen,
-            (row.High - meanHigh) / stdHigh,
-            (row.Low - meanLow) / stdLow,
-            (row['Volume 1INCH'] - meanVolume1INCH) / stdVolume1INCH,
-            (row['Volume BTC'] - meanVolumeBTC) / stdVolumeBTC,
-            (row.tradecount - meanTradecount) / stdTradecount,
-            ((row.High + row.Low) / 2 - meanAvgPrice) / stdAvgPrice, // Average of High and Low prices
-            (row.Open - row.Close - meanOpenCloseDiff) / stdOpenCloseDiff, // Difference between Open and Close prices
-            row.Unix / maxUnix, // Normalized Unix timestamp
-            (row.tradecount - meanTradecount) / stdTradecount // tradecount as an additional feature
+            tf.tensor(row.Open).sub(meanOpen).div(stdOpen).dataSync()[0],
+            tf.tensor(row.High).sub(meanHigh).div(stdHigh).dataSync()[0],
+            tf.tensor(row.Low).sub(meanLow).div(stdLow).dataSync()[0],
+            tf.tensor(row['Volume 1INCH']).sub(meanVolume1INCH).div(stdVolume1INCH).dataSync()[0],
+            tf.tensor(row['Volume BTC']).sub(meanVolumeBTC).div(stdVolumeBTC).dataSync()[0],
+            tf.tensor(row.tradecount).sub(meanTradecount).div(stdTradecount).dataSync()[0],
+            tf.tensor((row.High + row.Low) / 2).sub(meanAvgPrice).div(stdAvgPrice).dataSync()[0], // Average of High and Low prices
+            tf.tensor(row.Open - row.Close).sub(meanOpenCloseDiff).div(stdOpenCloseDiff).dataSync()[0], // Difference between Open and Close prices
+            tf.tensor(row.Unix).div(maxUnix).dataSync()[0], // Normalized Unix timestamp
+            tf.tensor(row.tradecount).sub(meanTradecount).div(stdTradecount).dataSync()[0] // tradecount as an additional feature
           ];
 
           console.log('Normalized Features:', normalizedFeatures);
