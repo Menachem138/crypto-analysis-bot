@@ -4,6 +4,7 @@ import apiService from '../services/apiService';
 import { createModel, trainModel, evaluateModel } from '../aiModel';
 import * as tf from '@tensorflow/tfjs';
 import { calculateMovingAverage, calculateRSI, calculateMACD } from '../technicalAnalysis';
+import MarketChart from './MarketChart';
 
 const Dashboard = () => {
   const [marketData, setMarketData] = useState(null);
@@ -437,6 +438,12 @@ const Dashboard = () => {
   const testLoss = evaluationResult ? evaluationResult[0].arraySync() : null;
   const testMSE = evaluationResult ? evaluationResult[1].arraySync() : null;
 
+  // Format market data for MarketChart component
+  const formattedMarketData = marketData ? marketData.map(entry => ({
+    date: new Date(entry.Unix * 1000), // Convert Unix timestamp to Date object
+    price: entry.Close
+  })) : [];
+
   return (
     <Box textAlign="center" py={10} px={6}>
       <Heading as="h1" size="xl" mb={6}>
@@ -455,6 +462,7 @@ const Dashboard = () => {
           )}
         </Box>
       )}
+      <MarketChart data={formattedMarketData} />
       {trainingResult && (
         <Box>
           <Heading as="h2" size="lg" mt={6}>
