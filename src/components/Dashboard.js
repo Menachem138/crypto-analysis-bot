@@ -62,6 +62,10 @@ const Dashboard = () => {
           console.log('CSV file parsed successfully');
           const columnNames = await parsedData.columnNames();
           console.log('Parsed column names:', columnNames);
+          if (!columnNames.includes('Close')) {
+            console.error('Parsed column names do not include "Close":', columnNames);
+            throw new Error('Parsed column names do not include "Close"');
+          }
         } catch (error) {
           console.error('Error during CSV parsing:', error);
           throw new Error(`CSV Parsing Error: ${error.message}`);
