@@ -55,8 +55,8 @@ const calculateRSI = (data, period = 14) => {
 // Calculate Moving Average Convergence Divergence (MACD)
 const calculateMACD = (data, shortPeriod = 12, longPeriod = 26, signalPeriod = 9) => {
   const closePrices = data.map(row => row.Close);
-  const macd = ta.MACD(closePrices, shortPeriod, longPeriod, signalPeriod);
-  return macd;
+  const macdResult = ta.MACD(closePrices, shortPeriod, longPeriod, signalPeriod);
+  return macdResult.macd; // Return only the MACD array
 };
 
 module.exports = {
