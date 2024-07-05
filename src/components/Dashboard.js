@@ -161,16 +161,19 @@ const Dashboard = () => {
         cleanedDataArray.forEach((row, index) => {
           row.Relative_Strength_Index = rsiValues[index];
         });
+        console.log('RSI Values:', rsiValues.slice(0, 5)); // Log the first 5 RSI values
 
         const movingAverageValues = calculateMovingAverage(cleanedDataArray);
         cleanedDataArray.forEach((row, index) => {
           row.Moving_Average = movingAverageValues[index];
         });
+        console.log('Moving Average Values:', movingAverageValues.slice(0, 5)); // Log the first 5 Moving Average values
 
         const macdValues = calculateMACD(cleanedDataArray);
         cleanedDataArray.forEach((row, index) => {
           row.MACD = macdValues[index];
         });
+        console.log('MACD Values:', macdValues.slice(0, 5)); // Log the first 5 MACD values
 
         console.log('Starting tensor creation from cleaned data array');
         const dataTensor = tf.tensor2d(cleanedDataArray.map(row => [
@@ -240,6 +243,7 @@ const Dashboard = () => {
         const hasNaNAfterNormalization = tf.any(tf.isNaN(cleanedNormalizedTensor)).dataSync()[0];
         console.log('hasNaNAfterNormalization:', hasNaNAfterNormalization);
         if (hasNaNAfterNormalization) {
+          console.log('Final Normalized Tensor contains NaN values after normalization');
           throw new Error('Final Normalized Tensor contains NaN values after normalization');
         }
 
