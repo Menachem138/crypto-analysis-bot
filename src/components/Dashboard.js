@@ -43,6 +43,7 @@ const Dashboard = () => {
         setError(null);
 
         // Load and preprocess the historical data
+        console.log('Starting to fetch CSV file');
         const response = await fetch('/Binance_1INCHBTC_d.csv');
         console.log('Fetch response status:', response.status);
         if (!response.ok) {
@@ -61,11 +62,13 @@ const Dashboard = () => {
         console.log('CSV file parsed successfully');
 
         // Convert the data to arrays
+        console.log('Starting to convert parsed data to arrays');
         const dataArray = [];
         await parsedData.forEachAsync(row => dataArray.push(row));
         console.log('Data array created successfully');
 
         // Extract features and labels
+        console.log('Starting to extract features and labels');
         const features = dataArray.map(row => [
           row.Open_Close_diff,
           row.High_Low_diff,
@@ -84,6 +87,7 @@ const Dashboard = () => {
         console.log('Labels:', labels.slice(0, 5)); // Log the first 5 labels
 
         // Split the data into training and testing sets
+        console.log('Starting to split data into training and testing sets');
         const trainSize = Math.floor(features.length * 0.8);
         const trainFeatures = features.slice(0, trainSize);
         const trainLabels = labels.slice(0, trainSize);
@@ -92,6 +96,7 @@ const Dashboard = () => {
         console.log('Data split into training and testing sets');
 
         // Convert the data to tensors
+        console.log('Starting to convert data to tensors');
         const convertToTensor = (data, labels) => {
           return tf.tidy(() => {
             tf.util.shuffle(data);
@@ -120,16 +125,19 @@ const Dashboard = () => {
         console.log('Data converted to tensors');
 
         // Create and train the model
+        console.log('Starting to create the model');
         const model = createModel();
         console.log('Model created:', model);
         model.summary(); // Log the model summary
 
+        console.log('Starting to train the model');
         const history = await trainModel(model, trainTensors.inputs, trainTensors.labels);
         console.log('Model trained successfully:', history);
         console.log('Training history:', history.history);
         setTrainingResult(history);
 
         // Evaluate the model
+        console.log('Starting to evaluate the model');
         const evaluation = await evaluateModel(model, testTensors.inputs, testTensors.labels);
         console.log('Model evaluated successfully:', evaluation);
         console.log('Evaluation result:', evaluation);
