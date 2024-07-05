@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Heading, Text, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
-import MarketChart from './MarketChart';
-import CopyTrading from './CopyTrading';
+import MarketChart from './MarketChart.js';
+import CopyTrading from './CopyTrading.js';
 import { getMarketData } from '../coinMarketCapService';
-import { calculateRSI, calculateMovingAverage } from '../technicalAnalysis';
+import { calculateRSI, calculateMovingAverage } from '../technicalAnalysis.js';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
