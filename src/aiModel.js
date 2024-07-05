@@ -27,6 +27,8 @@ const createModel = () => {
 // Train the model
 const trainModel = async (model, trainData, trainLabels) => {
   console.log('Starting model training...');
+  console.log('Training data shape:', trainData.shape);
+  console.log('Training labels shape:', trainLabels.shape);
   console.log('Training data:', trainData.arraySync());
   console.log('Training labels:', trainLabels.arraySync());
   try {
