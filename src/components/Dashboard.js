@@ -113,16 +113,26 @@ const Dashboard = () => {
         const convertToTensor = (data, labels) => {
           return tf.tidy(() => {
             console.log('Data before shuffling:', data);
-            tf.util.shuffle(data);
-            console.log('Data after shuffling:', data);
+            try {
+              tf.util.shuffle(data);
+              console.log('Data after shuffling:', data);
+            } catch (error) {
+              console.error('Error during data shuffling:', error);
+              throw new Error(`Data Shuffling Error: ${error.message}`);
+            }
 
-            const inputTensor = tf.tensor2d(data, [data.length, data[0].length]);
-            const labelTensor = tf.tensor2d(labels, [labels.length, 1]);
-
-            console.log('Input Tensor Shape:', inputTensor.shape);
-            console.log('Label Tensor Shape:', labelTensor.shape);
-            console.log('Input Tensor Data:', inputTensor.arraySync());
-            console.log('Label Tensor Data:', labelTensor.arraySync());
+            let inputTensor, labelTensor;
+            try {
+              inputTensor = tf.tensor2d(data, [data.length, data[0].length]);
+              labelTensor = tf.tensor2d(labels, [labels.length, 1]);
+              console.log('Input Tensor Shape:', inputTensor.shape);
+              console.log('Label Tensor Shape:', labelTensor.shape);
+              console.log('Input Tensor Data:', inputTensor.arraySync());
+              console.log('Label Tensor Data:', labelTensor.arraySync());
+            } catch (error) {
+              console.error('Error during tensor creation:', error);
+              throw new Error(`Tensor Creation Error: ${error.message}`);
+            }
 
             return {
               inputs: inputTensor,
