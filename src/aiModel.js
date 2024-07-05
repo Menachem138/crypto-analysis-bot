@@ -52,6 +52,9 @@ const trainModel = async (model, trainData, trainLabels) => {
     return history;
   } catch (error) {
     console.error('Error during model training:', error);
+    console.log('Error stack trace during model training:', error.stack);
+    console.log('Error name during model training:', error.name);
+    console.log('Error message during model training:', error.message);
     throw error;
   }
 };
