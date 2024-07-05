@@ -188,10 +188,11 @@ const Dashboard = () => {
 
         // Calculate RSI with the corrected rolling calculation
         const rsiValues = calculateRSI(cleanedDataArray);
+        console.log('RSI Values before assignment:', rsiValues.slice(0, 5)); // Log the first 5 RSI values before assignment
         cleanedDataArray.forEach((row, index) => {
           row.Relative_Strength_Index = rsiValues[index];
         });
-        console.log('RSI Values:', rsiValues.slice(0, 5)); // Log the first 5 RSI values
+        console.log('RSI Values after assignment:', cleanedDataArray.slice(0, 5).map(row => row.Relative_Strength_Index)); // Log the first 5 RSI values after assignment
 
         // Check for NaN or infinite values in RSI
         rsiValues.forEach((value, index) => {
@@ -202,10 +203,11 @@ const Dashboard = () => {
 
         // Calculate Moving Average
         const movingAverageValues = calculateMovingAverage(cleanedDataArray);
+        console.log('Moving Average Values before assignment:', movingAverageValues.slice(0, 5)); // Log the first 5 Moving Average values before assignment
         cleanedDataArray.forEach((row, index) => {
           row.Moving_Average = movingAverageValues[index];
         });
-        console.log('Moving Average Values:', movingAverageValues.slice(0, 5)); // Log the first 5 Moving Average values
+        console.log('Moving Average Values after assignment:', cleanedDataArray.slice(0, 5).map(row => row.Moving_Average)); // Log the first 5 Moving Average values after assignment
 
         // Check for NaN or infinite values in Moving Average
         movingAverageValues.forEach((value, index) => {
@@ -216,10 +218,11 @@ const Dashboard = () => {
 
         // Calculate MACD
         const macdValues = calculateMACD(cleanedDataArray);
+        console.log('MACD Values before assignment:', macdValues.slice(0, 5)); // Log the first 5 MACD values before assignment
         cleanedDataArray.forEach((row, index) => {
           row.MACD = macdValues[index];
         });
-        console.log('MACD Values:', macdValues.slice(0, 5)); // Log the first 5 MACD values
+        console.log('MACD Values after assignment:', cleanedDataArray.slice(0, 5).map(row => row.MACD)); // Log the first 5 MACD values after assignment
 
         // Check for NaN or infinite values in MACD
         macdValues.forEach((value, index) => {
@@ -230,6 +233,7 @@ const Dashboard = () => {
 
         // Starting tensor creation from cleaned data array
         console.log('Starting tensor creation from cleaned data array');
+        console.log('Cleaned Data Array before tensor creation:', cleanedDataArray.slice(0, 5)); // Log the first 5 cleaned data rows
         const dataTensor = tf.tensor2d(cleanedDataArray.map(row => [
           row.Open,
           row.High,
@@ -295,6 +299,7 @@ const Dashboard = () => {
         }
 
         // Replace NaN values in the normalized tensor with zeros
+        // Replace NaN values in the normalized tensor with zeros
         const cleanedNormalizedTensor = tf.where(tf.isNaN(normalizedTensor), tf.zerosLike(normalizedTensor), normalizedTensor);
         console.log('Final Normalized Tensor:', cleanedNormalizedTensor.arraySync());
 
@@ -307,7 +312,7 @@ const Dashboard = () => {
         }
 
         // Log the final normalized tensor
-        console.log('Final Normalized Tensor:', cleanedNormalizedTensor.arraySync());
+        console.log('Final Normalized Tensor after NaN replacement:', cleanedNormalizedTensor.arraySync());
 
         // Log the normalized features
         const normalizedFeatures = cleanedNormalizedTensor.arraySync();
