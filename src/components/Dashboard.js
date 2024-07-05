@@ -52,14 +52,22 @@ const Dashboard = () => {
         console.log('CSV file fetched successfully');
         const csv = await response.text();
         console.log('CSV file content:', csv.slice(0, 100)); // Log the first 100 characters of the CSV content
-        const parsedData = tf.data.csv(csv, {
-          columnConfigs: {
-            Close: {
-              isLabel: true
+
+        console.log('Starting to parse CSV file');
+        let parsedData;
+        try {
+          parsedData = tf.data.csv(csv, {
+            columnConfigs: {
+              Close: {
+                isLabel: true
+              }
             }
-          }
-        });
-        console.log('CSV file parsed successfully');
+          });
+          console.log('CSV file parsed successfully');
+        } catch (error) {
+          console.error('Error during CSV parsing:', error);
+          throw new Error(`CSV Parsing Error: ${error.message}`);
+        }
 
         // Convert the data to arrays
         console.log('Starting to convert parsed data to arrays');
@@ -69,7 +77,7 @@ const Dashboard = () => {
           console.log('Data array created successfully');
         } catch (error) {
           console.error('Error during data conversion:', error);
-          throw error;
+          throw new Error(`Data Conversion Error: ${error.message}`);
         }
 
         // Extract features and labels
@@ -104,7 +112,9 @@ const Dashboard = () => {
         console.log('Starting to convert data to tensors');
         const convertToTensor = (data, labels) => {
           return tf.tidy(() => {
+            console.log('Data before shuffling:', data);
             tf.util.shuffle(data);
+            console.log('Data after shuffling:', data);
 
             const inputTensor = tf.tensor2d(data, [data.length, data[0].length]);
             const labelTensor = tf.tensor2d(labels, [labels.length, 1]);
@@ -139,6 +149,7 @@ const Dashboard = () => {
           console.log('Test Tensors Label Data:', testTensors.labels.arraySync());
 
           console.log('Data converted to tensors');
+          console.log('Calling trainModel function');
 
           // Create and train the model
           console.log('Starting to create the model');
@@ -164,7 +175,7 @@ const Dashboard = () => {
             console.log('Error stack trace during model training:', error.stack);
             console.log('Error name during model training:', error.name);
             console.log('Error message during model training:', error.message);
-            throw error;
+            throw new Error(`Model Training Error: ${error.message}`);
           }
 
           // Evaluate the model
