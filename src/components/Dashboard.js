@@ -55,7 +55,7 @@ const Dashboard = () => {
         let parsedData;
         try {
           const csvText = await response.text();
-          const rows = csvText.split('\n').slice(1); // Remove header row
+          const rows = csvText.split('\n').slice(2); // Remove the first two lines (URL and header row)
           parsedData = rows.map(row => {
             const values = row.split(',');
             return {
