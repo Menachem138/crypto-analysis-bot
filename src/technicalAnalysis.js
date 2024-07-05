@@ -1,4 +1,4 @@
-const ta = require('ta-lib');
+import ta from 'ta-lib';
 
 // Calculate Moving Average
 const calculateMovingAverage = (data, period = 14) => {
@@ -59,7 +59,7 @@ const calculateMACD = (data, shortPeriod = 12, longPeriod = 26, signalPeriod = 9
   return macdResult.macd; // Return only the MACD array
 };
 
-module.exports = {
+export {
   calculateMovingAverage,
   calculateRSI,
   calculateMACD
