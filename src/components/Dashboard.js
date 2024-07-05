@@ -130,7 +130,7 @@ const Dashboard = () => {
         console.log('Model created:', model);
         model.summary(); // Log the model summary
 
-        console.log('Starting to train the model');
+        console.log('Calling trainModel function');
         const history = await trainModel(model, trainTensors.inputs, trainTensors.labels);
         console.log('Model trained successfully:', history);
         console.log('Training history:', history.history);
