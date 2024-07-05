@@ -17,6 +17,27 @@ const Dashboard = () => {
   console.log('Initial training result:', trainingResult);
   console.log('Initial evaluation result:', evaluationResult);
 
+  // Add logging for state updates
+  useEffect(() => {
+    console.log('Updated marketData state:', marketData);
+  }, [marketData]);
+
+  useEffect(() => {
+    console.log('Updated error state:', error);
+  }, [error]);
+
+  useEffect(() => {
+    console.log('Updated loading state:', loading);
+  }, [loading]);
+
+  useEffect(() => {
+    console.log('Updated trainingResult state:', trainingResult);
+  }, [trainingResult]);
+
+  useEffect(() => {
+    console.log('Updated evaluationResult state:', evaluationResult);
+  }, [evaluationResult]);
+
   useEffect(() => {
     const getMarketData = async () => {
       try {
