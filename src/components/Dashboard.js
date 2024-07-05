@@ -56,7 +56,7 @@ const Dashboard = () => {
         try {
           const csvText = await response.text();
           console.log('Fetched CSV Text:', csvText.split('\n').slice(0, 5)); // Log the first 5 lines of the fetched CSV text
-          const rows = csvText.split('\n').slice(2); // Remove the first two lines (URL and header row)
+          const rows = csvText.split('\n').slice(2).filter(row => row.trim() !== ''); // Remove the first two lines (URL and header row) and filter out any empty rows
           parsedData = rows.map(row => {
             const values = row.split(',');
             if (values.length === 10) { // Ensure the row has the expected number of columns
