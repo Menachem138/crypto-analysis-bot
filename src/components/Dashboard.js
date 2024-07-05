@@ -55,8 +55,8 @@ const Dashboard = () => {
         let parsedData;
         try {
           const csvText = await response.text();
-          console.log('Fetched CSV Text:', csvText.split('\n').slice(0, 5)); // Log the first 5 lines of the fetched CSV text
-          const rows = csvText.split('\n').slice(2).filter(row => row.trim() !== '' && row.split(',').length === 10 && !isNaN(parseInt(row.split(',')[0], 10))); // Remove the first two lines (URL and header row), filter out any empty rows, ensure each row has the expected number of columns, and skip rows with NaN Unix values
+          console.log('Fetched CSV Text (first few rows):', csvText.split('\n').slice(0, 5));
+          const rows = csvText.split('\n').slice(2).filter(row => row.trim() !== '' && row.split(',').length === 10 && !isNaN(parseInt(row.split(',')[0], 10)));
           console.log('Filtered Rows:', rows.slice(0, 5)); // Log the first 5 rows after filtering
           parsedData = rows.map(row => {
             const values = row.split(',');
@@ -132,7 +132,42 @@ const Dashboard = () => {
 
         console.log('Cleaned raw data array before tensor creation:', cleanedDataArray.slice(0, 5)); // Log the first 5 cleaned raw data rows
 
-        // Convert the cleaned data to tensors
+        const calculateRSI = (data, period = 14) => {
+          let rsi = [];
+
+          for (let i = 0; i < data.length; i++) {
+            if (i < period) {
+              rsi.push(0); // RSI is not defined for the first 'period' values
+              continue;
+            }
+
+            let gain = 0;
+            let loss = 0;
+
+            for (let j = i - period + 1; j <= i; j++) {
+              const change = data[j].Close - data[j - 1].Close;
+              if (change > 0) {
+                gain += change;
+              } else {
+                loss -= change;
+              }
+            }
+
+            const avgGain = gain / period;
+            const avgLoss = loss / period;
+            const rs = avgGain / (avgLoss + 1e-8); // Add small constant to prevent division by zero
+            rsi.push(100 - (100 / (1 + rs)));
+          }
+
+          return rsi;
+        };
+
+        // Calculate RSI with the corrected rolling calculation
+        const rsiValues = calculateRSI(cleanedDataArray);
+        cleanedDataArray.forEach((row, index) => {
+          row.Relative_Strength_Index = rsiValues[index];
+        });
+
         console.log('Starting tensor creation from cleaned data array');
         const dataTensor = tf.tensor2d(cleanedDataArray.map(row => [
           row.Open,
