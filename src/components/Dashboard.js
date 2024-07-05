@@ -84,7 +84,6 @@ const Dashboard = () => {
           row.Open,
           row.High,
           row.Low,
-          row.Close,
           row['Volume 1INCH'],
           row['Volume BTC'],
           row.tradecount
