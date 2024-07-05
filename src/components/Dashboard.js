@@ -229,6 +229,7 @@ const Dashboard = () => {
   }, [error]);
 
   if (loading) {
+    console.log('Loading state is true, displaying loading spinner');
     return (
       <Box textAlign="center" py={10} px={6}>
         <Spinner size="xl" />
@@ -238,6 +239,7 @@ const Dashboard = () => {
   }
 
   if (error) {
+    console.log('Error state is true, displaying error message:', error);
     return (
       <Box textAlign="center" py={10} px={6}>
         <Alert status="error">
@@ -248,13 +250,9 @@ const Dashboard = () => {
     );
   }
 
-  // Convert tensor data to arrays before rendering
-  // const trainingLoss = trainingResult ? trainingResult.history.loss[trainingResult.history.loss.length - 1] : null;
-  // const validationLoss = trainingResult ? trainingResult.history.val_loss[trainingResult.history.val_loss.length - 1] : null;
-  // const testLoss = evaluationResult ? evaluationResult[0].arraySync() : null;
-  // const testMSE = evaluationResult ? evaluationResult[1].arraySync() : null;
+  console.log('Rendering market data and charts');
+  console.log('Market Data:', marketData);
 
-  // Format market data for MarketChart component
   const formattedMarketData = Array.isArray(marketData) ? marketData.map(entry => ({
     date: new Date(entry.Unix * 1000), // Convert Unix timestamp to Date object
     price: entry.Close
