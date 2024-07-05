@@ -45,6 +45,7 @@ const trainModel = async (model, trainData, trainLabels) => {
   }
 
   try {
+    console.log('Before model.fit call');
     const history = await model.fit(trainData, trainLabels, {
       epochs: 50,
       batchSize: 32,

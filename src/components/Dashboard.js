@@ -36,6 +36,7 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
+    console.log('Starting loadAndTrainModel function');
     const loadAndTrainModel = async () => {
       try {
         // Clear any previous errors
@@ -371,6 +372,7 @@ const Dashboard = () => {
             console.log('Before trainModel function call');
             console.log('Train Tensors Input Data (before training):', trainTensors.inputs.arraySync());
             console.log('Train Tensors Label Data (before training):', trainTensors.labels.arraySync());
+            console.log('Calling trainModel function now');
             const history = await trainModel(model, trainTensors.inputs, trainTensors.labels);
             console.log('After trainModel function call');
             console.log('Train Tensors Input Data (after training):', trainTensors.inputs.arraySync());
