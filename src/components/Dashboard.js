@@ -128,10 +128,10 @@ const Dashboard = () => {
         console.log('Raw Features:', rawFeatures.slice(0, 5)); // Log the first 5 raw feature sets
 
         // Calculate mean and standard deviation for each feature
-        const meanTensor = await safeMean(dataTensor);
+        const meanTensor = safeMean(dataTensor);
         console.log('Mean Tensor:', meanTensor.arraySync());
 
-        const stdTensor = await safeStd(dataTensor);
+        const stdTensor = safeStd(dataTensor);
         console.log('Standard Deviation Tensor:', stdTensor.arraySync());
 
         // Check for NaN values in mean and standard deviation tensors
