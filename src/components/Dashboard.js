@@ -59,7 +59,7 @@ const Dashboard = () => {
           parsedData = rows.map(row => {
             const values = row.split(',');
             return {
-              Unix: values[0],
+              Unix: parseInt(values[0], 10),
               Date: values[1],
               Symbol: values[2],
               Open: parseFloat(values[3]),
@@ -83,30 +83,52 @@ const Dashboard = () => {
 
         // Extract features and labels
         console.log('Starting to extract features and labels');
+        const maxUnix = Math.max(...dataArray.map(row => row.Unix));
+        const meanOpen = tf.mean(dataArray.map(row => row.Open));
+        const stdOpen = tf.moments(dataArray.map(row => row.Open)).variance.sqrt();
+        const meanHigh = tf.mean(dataArray.map(row => row.High));
+        const stdHigh = tf.moments(dataArray.map(row => row.High)).variance.sqrt();
+        const meanLow = tf.mean(dataArray.map(row => row.Low));
+        const stdLow = tf.moments(dataArray.map(row => row.Low)).variance.sqrt();
+        const meanVolume1INCH = tf.mean(dataArray.map(row => row['Volume 1INCH']));
+        const stdVolume1INCH = tf.moments(dataArray.map(row => row['Volume 1INCH'])).variance.sqrt();
+        const meanVolumeBTC = tf.mean(dataArray.map(row => row['Volume BTC']));
+        const stdVolumeBTC = tf.moments(dataArray.map(row => row['Volume BTC'])).variance.sqrt();
+        const meanTradecount = tf.mean(dataArray.map(row => row.tradecount));
+        const stdTradecount = tf.moments(dataArray.map(row => row.tradecount)).variance.sqrt();
+        const meanAvgHighLow = tf.mean(dataArray.map(row => (row.High + row.Low) / 2));
+        const stdAvgHighLow = tf.moments(dataArray.map(row => (row.High + row.Low) / 2)).variance.sqrt();
+        const meanOpenCloseDiff = tf.mean(dataArray.map(row => row.Open - row.Close));
+        const stdOpenCloseDiff = tf.moments(dataArray.map(row => row.Open - row.Close)).variance.sqrt();
+
         const features = dataArray.map(row => [
-          row.Open,
-          row.High,
-          row.Low,
-          row['Volume 1INCH'],
-          row['Volume BTC'],
-          row.tradecount,
-          (row.High + row.Low) / 2, // Average of High and Low prices
-          row.Open - row.Close, // Difference between Open and Close prices
-          row.Unix, // Unix timestamp
-          row.tradecount // tradecount as an additional feature
+          (row.Open - meanOpen) / stdOpen,
+          (row.High - meanHigh) / stdHigh,
+          (row.Low - meanLow) / stdLow,
+          (row['Volume 1INCH'] - meanVolume1INCH) / stdVolume1INCH,
+          (row['Volume BTC'] - meanVolumeBTC) / stdVolumeBTC,
+          (row.tradecount - meanTradecount) / stdTradecount,
+          ((row.High + row.Low) / 2 - meanAvgHighLow) / stdAvgHighLow, // Average of High and Low prices
+          (row.Open - row.Close - meanOpenCloseDiff) / stdOpenCloseDiff, // Difference between Open and Close prices
+          row.Unix / maxUnix, // Normalized Unix timestamp
+          (row.tradecount - meanTradecount) / stdTradecount // tradecount as an additional feature
         ]);
         const labels = dataArray.map(row => row.Close);
+
+        // Replace NaN values in labels with zeros
+        const cleanedLabels = labels.map(label => isNaN(label) ? 0 : label);
+
         console.log('Features and labels extracted successfully');
         console.log('Features:', features.slice(0, 5)); // Log the first 5 feature sets
-        console.log('Labels:', labels.slice(0, 5)); // Log the first 5 labels
+        console.log('Labels:', cleanedLabels.slice(0, 5)); // Log the first 5 labels
 
         // Split the data into training and testing sets
         console.log('Starting to split data into training and testing sets');
         const trainSize = Math.floor(features.length * 0.8);
         const trainFeatures = features.slice(0, trainSize);
-        const trainLabels = labels.slice(0, trainSize);
+        const trainLabels = cleanedLabels.slice(0, trainSize);
         const testFeatures = features.slice(trainSize);
-        const testLabels = labels.slice(trainSize);
+        const testLabels = cleanedLabels.slice(trainSize);
         console.log('Data split into training and testing sets');
 
         // Convert the data to tensors
@@ -114,9 +136,12 @@ const Dashboard = () => {
         const convertToTensor = (data, labels) => {
           return tf.tidy(() => {
             console.log('Data before shuffling:', data);
+            console.log('Labels before shuffling:', labels);
             try {
               tf.util.shuffle(data);
+              tf.util.shuffle(labels);
               console.log('Data after shuffling:', data);
+              console.log('Labels after shuffling:', labels);
             } catch (error) {
               console.error('Error during data shuffling:', error);
               throw new Error(`Data Shuffling Error: ${error.message}`);
