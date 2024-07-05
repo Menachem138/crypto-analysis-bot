@@ -146,6 +146,23 @@ const Dashboard = () => {
             tf.tensor(row.tradecount).sub(meanTradecount).div(stdTradecount).dataSync()[0] // tradecount as an additional feature
           ];
 
+          console.log('Mean Open:', meanOpen.dataSync()[0]);
+          console.log('Std Open:', stdOpen.dataSync()[0]);
+          console.log('Mean High:', meanHigh.dataSync()[0]);
+          console.log('Std High:', stdHigh.dataSync()[0]);
+          console.log('Mean Low:', meanLow.dataSync()[0]);
+          console.log('Std Low:', stdLow.dataSync()[0]);
+          console.log('Mean Volume 1INCH:', meanVolume1INCH.dataSync()[0]);
+          console.log('Std Volume 1INCH:', stdVolume1INCH.dataSync()[0]);
+          console.log('Mean Volume BTC:', meanVolumeBTC.dataSync()[0]);
+          console.log('Std Volume BTC:', stdVolumeBTC.dataSync()[0]);
+          console.log('Mean Tradecount:', meanTradecount.dataSync()[0]);
+          console.log('Std Tradecount:', stdTradecount.dataSync()[0]);
+          console.log('Mean Avg Price:', meanAvgPrice.dataSync()[0]);
+          console.log('Std Avg Price:', stdAvgPrice.dataSync()[0]);
+          console.log('Mean Open Close Diff:', meanOpenCloseDiff.dataSync()[0]);
+          console.log('Std Open Close Diff:', stdOpenCloseDiff.dataSync()[0]);
+
           console.log('Normalized Features:', normalizedFeatures);
 
           return normalizedFeatures;
