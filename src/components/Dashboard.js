@@ -148,7 +148,9 @@ const Dashboard = () => {
         }
 
         // Normalize the data
+        console.log('Data Tensor before normalization:', dataTensor.arraySync());
         const normalizedTensor = dataTensor.sub(meanTensor).div(stdTensor);
+        console.log('Normalized Tensor:', normalizedTensor.arraySync());
 
         // Log the normalized features
         const normalizedFeatures = normalizedTensor.arraySync();
