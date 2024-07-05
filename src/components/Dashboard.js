@@ -81,16 +81,13 @@ const Dashboard = () => {
         // Extract features and labels
         console.log('Starting to extract features and labels');
         const features = dataArray.map(row => [
-          row.Open_Close_diff,
-          row.High_Low_diff,
-          row.Average_Price,
-          row.Price_Range,
-          row.Volume_Change,
-          row.Close_Change,
-          row.Rolling_Mean_Close,
-          row.Rolling_Std_Close,
-          row.Exponential_Moving_Avg,
-          row.Relative_Strength_Index
+          row.Open,
+          row.High,
+          row.Low,
+          row.Close,
+          row['Volume 1INCH'],
+          row['Volume BTC'],
+          row.tradecount
         ]);
         const labels = dataArray.map(row => row.Close);
         console.log('Features and labels extracted successfully');
