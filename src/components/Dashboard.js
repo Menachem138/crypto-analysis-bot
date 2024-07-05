@@ -83,10 +83,6 @@ const Dashboard = () => {
 
         // Extract features and labels
         console.log('Starting to extract features and labels');
-        const maxUnix = Math.max(...dataArray.map(row => row.Unix));
-
-        // Check for zero standard deviation and replace with a small constant
-        const replaceZeroStd = (std) => std.dataSync()[0] === 0 ? tf.scalar(1e-8) : std;
 
         // Ensure mean and standard deviation calculations are valid
         const safeMean = (values) => {
@@ -99,74 +95,31 @@ const Dashboard = () => {
           return isNaN(std.dataSync()[0]) ? tf.scalar(1e-8) : std;
         };
 
+        // Convert the data to tensors
+        const dataTensor = tf.tensor2d(dataArray.map(row => [
+          row.Open,
+          row.High,
+          row.Low,
+          row['Volume 1INCH'],
+          row['Volume BTC'],
+          row.tradecount,
+          (row.High + row.Low) / 2, // Average of High and Low prices
+          row.Open - row.Close, // Difference between Open and Close prices
+          row.Unix,
+          row.tradecount // tradecount as an additional feature
+        ]));
+
         // Calculate mean and standard deviation for each feature
-        const meanOpen = safeMean(dataArray.map(r => r.Open));
-        const stdOpen = replaceZeroStd(safeStd(dataArray.map(r => r.Open)));
-        const meanHigh = safeMean(dataArray.map(r => r.High));
-        const stdHigh = replaceZeroStd(safeStd(dataArray.map(r => r.High)));
-        const meanLow = safeMean(dataArray.map(r => r.Low));
-        const stdLow = replaceZeroStd(safeStd(dataArray.map(r => r.Low)));
-        const meanVolume1INCH = safeMean(dataArray.map(r => r['Volume 1INCH']));
-        const stdVolume1INCH = replaceZeroStd(safeStd(dataArray.map(r => r['Volume 1INCH'])));
-        const meanVolumeBTC = safeMean(dataArray.map(r => r['Volume BTC']));
-        const stdVolumeBTC = replaceZeroStd(safeStd(dataArray.map(r => r['Volume BTC'])));
-        const meanTradecount = safeMean(dataArray.map(r => r.tradecount));
-        const stdTradecount = replaceZeroStd(safeStd(dataArray.map(r => r.tradecount)));
-        const meanAvgPrice = safeMean(dataArray.map(r => (r.High + r.Low) / 2));
-        const stdAvgPrice = replaceZeroStd(safeStd(dataArray.map(r => (r.High + r.Low) / 2)));
-        const meanOpenCloseDiff = safeMean(dataArray.map(r => r.Open - r.Close));
-        const stdOpenCloseDiff = replaceZeroStd(safeStd(dataArray.map(r => r.Open - r.Close)));
+        const meanTensor = safeMean(dataTensor);
+        const stdTensor = safeStd(dataTensor);
 
-        const features = dataArray.map(row => {
-          const rawFeatures = [
-            row.Open,
-            row.High,
-            row.Low,
-            row['Volume 1INCH'],
-            row['Volume BTC'],
-            row.tradecount,
-            (row.High + row.Low) / 2, // Average of High and Low prices
-            row.Open - row.Close, // Difference between Open and Close prices
-            row.Unix,
-            row.tradecount // tradecount as an additional feature
-          ];
+        // Normalize the data
+        const normalizedTensor = dataTensor.sub(meanTensor).div(stdTensor);
 
-          console.log('Raw Features:', rawFeatures);
+        // Convert the normalized tensor back to an array
+        const features = normalizedTensor.arraySync();
 
-          const normalizedFeatures = [
-            tf.tensor(row.Open).sub(meanOpen).div(stdOpen).dataSync()[0],
-            tf.tensor(row.High).sub(meanHigh).div(stdHigh).dataSync()[0],
-            tf.tensor(row.Low).sub(meanLow).div(stdLow).dataSync()[0],
-            tf.tensor(row['Volume 1INCH']).sub(meanVolume1INCH).div(stdVolume1INCH).dataSync()[0],
-            tf.tensor(row['Volume BTC']).sub(meanVolumeBTC).div(stdVolumeBTC).dataSync()[0],
-            tf.tensor(row.tradecount).sub(meanTradecount).div(stdTradecount).dataSync()[0],
-            tf.tensor((row.High + row.Low) / 2).sub(meanAvgPrice).div(stdAvgPrice).dataSync()[0], // Average of High and Low prices
-            tf.tensor(row.Open - row.Close).sub(meanOpenCloseDiff).div(stdOpenCloseDiff).dataSync()[0], // Difference between Open and Close prices
-            tf.tensor(row.Unix).div(maxUnix).dataSync()[0], // Normalized Unix timestamp
-            tf.tensor(row.tradecount).sub(meanTradecount).div(stdTradecount).dataSync()[0] // tradecount as an additional feature
-          ];
-
-          console.log('Mean Open:', meanOpen.dataSync()[0]);
-          console.log('Std Open:', stdOpen.dataSync()[0]);
-          console.log('Mean High:', meanHigh.dataSync()[0]);
-          console.log('Std High:', stdHigh.dataSync()[0]);
-          console.log('Mean Low:', meanLow.dataSync()[0]);
-          console.log('Std Low:', stdLow.dataSync()[0]);
-          console.log('Mean Volume 1INCH:', meanVolume1INCH.dataSync()[0]);
-          console.log('Std Volume 1INCH:', stdVolume1INCH.dataSync()[0]);
-          console.log('Mean Volume BTC:', meanVolumeBTC.dataSync()[0]);
-          console.log('Std Volume BTC:', stdVolumeBTC.dataSync()[0]);
-          console.log('Mean Tradecount:', meanTradecount.dataSync()[0]);
-          console.log('Std Tradecount:', stdTradecount.dataSync()[0]);
-          console.log('Mean Avg Price:', meanAvgPrice.dataSync()[0]);
-          console.log('Std Avg Price:', stdAvgPrice.dataSync()[0]);
-          console.log('Mean Open Close Diff:', meanOpenCloseDiff.dataSync()[0]);
-          console.log('Std Open Close Diff:', stdOpenCloseDiff.dataSync()[0]);
-
-          console.log('Normalized Features:', normalizedFeatures);
-
-          return normalizedFeatures;
-        });
+        console.log('Features:', features.slice(0, 5)); // Log the first 5 feature sets
 
         // Check for NaN values in features
         const cleanedFeatures = features.map(featureSet => featureSet.map(value => isNaN(value) ? 0 : value));
