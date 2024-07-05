@@ -31,6 +31,19 @@ const trainModel = async (model, trainData, trainLabels) => {
   console.log('Training labels shape:', trainLabels.shape);
   console.log('Training data:', trainData.arraySync());
   console.log('Training labels:', trainLabels.arraySync());
+
+  // Check for NaN or infinite values in the input data
+  const hasNaN = (tensor) => tf.any(tf.isNaN(tensor)).dataSync()[0];
+  const hasInf = (tensor) => tf.any(tf.isInf(tensor)).dataSync()[0];
+
+  if (hasNaN(trainData) || hasNaN(trainLabels)) {
+    throw new Error('Training data contains NaN values');
+  }
+
+  if (hasInf(trainData) || hasInf(trainLabels)) {
+    throw new Error('Training data contains infinite values');
+  }
+
   try {
     const history = await model.fit(trainData, trainLabels, {
       epochs: 50,
