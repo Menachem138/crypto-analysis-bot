@@ -43,13 +43,13 @@ const Dashboard = () => {
         setError(null);
 
         // Load and preprocess the historical data
-        console.log('Starting to fetch CSV file from path: Binance_1INCHBTC_d.csv');
-        const response = await fetch('Binance_1INCHBTC_d.csv');
+        console.log('Starting to fetch CSV file from path: /home/ubuntu/browser_downloads/Binance_1INCHBTC_d.csv');
+        const response = await fetch('/home/ubuntu/browser_downloads/Binance_1INCHBTC_d.csv');
         console.log('Fetch response status:', response.status);
         if (!response.ok) {
           throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
         }
-        console.log('CSV file fetched successfully from path: Binance_1INCHBTC_d.csv');
+        console.log('CSV file fetched successfully from path: /home/ubuntu/browser_downloads/Binance_1INCHBTC_d.csv');
 
         console.log('Starting to parse CSV file');
         let parsedData;
