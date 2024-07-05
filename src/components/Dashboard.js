@@ -82,6 +82,7 @@ const Dashboard = () => {
         console.log('Error message in fetchMarketData:', err.message);
       } finally {
         setLoading(false);
+        console.log('Loading state set to false');
       }
     };
 
