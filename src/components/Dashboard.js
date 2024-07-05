@@ -219,6 +219,9 @@ const Dashboard = () => {
       } catch (err) {
         setError(`Error: ${err.message}`);
         console.error('Error in loadAndTrainModel:', err);
+      } finally {
+        setLoading(false);
+        console.log('Loading state set to false in loadAndTrainModel finally block');
       }
     };
 
