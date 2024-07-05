@@ -14,6 +14,12 @@ app.use('/api', createProxyMiddleware({
     // Add the CoinMarketCap API key to the request headers
     proxyReq.setHeader('X-CMC_PRO_API_KEY', '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f');
   },
+  onProxyRes: (proxyRes, req, res) => {
+    // Add CORS headers to the response
+    proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+    proxyRes.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
+    proxyRes.headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization';
+  },
 }));
 
 app.listen(PORT, () => {
