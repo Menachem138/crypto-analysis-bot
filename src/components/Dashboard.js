@@ -116,6 +116,7 @@ const Dashboard = () => {
           });
         };
 
+        console.log('Calling convertToTensor for training data');
         const trainTensors = convertToTensor(trainFeatures, trainLabels);
         console.log('Train Tensors:', trainTensors);
         console.log('Train Tensors Input Shape:', trainTensors.inputs.shape);
@@ -123,6 +124,7 @@ const Dashboard = () => {
         console.log('Train Tensors Input Data:', trainTensors.inputs.arraySync());
         console.log('Train Tensors Label Data:', trainTensors.labels.arraySync());
 
+        console.log('Calling convertToTensor for testing data');
         const testTensors = convertToTensor(testFeatures, testLabels);
         console.log('Test Tensors:', testTensors);
         console.log('Test Tensors Input Shape:', testTensors.inputs.shape);
