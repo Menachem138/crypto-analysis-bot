@@ -131,11 +131,15 @@ const Dashboard = () => {
         model.summary(); // Log the model summary
 
         console.log('Calling trainModel function');
-        const history = await trainModel(model, trainTensors.inputs, trainTensors.labels);
-        console.log('trainModel function completed');
-        console.log('Model trained successfully:', history);
-        console.log('Training history:', history.history);
-        setTrainingResult(history);
+        try {
+          const history = await trainModel(model, trainTensors.inputs, trainTensors.labels);
+          console.log('trainModel function completed');
+          console.log('Model trained successfully:', history);
+          console.log('Training history:', history.history);
+          setTrainingResult(history);
+        } catch (error) {
+          console.error('Error during model training:', error);
+        }
 
         // Evaluate the model
         console.log('Starting to evaluate the model');
