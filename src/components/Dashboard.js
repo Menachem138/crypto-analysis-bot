@@ -177,6 +177,9 @@ const Dashboard = () => {
           throw new Error('Cleaned labels contain NaN values');
         }
 
+        console.log('Extracted Features:', features.slice(0, 5)); // Log the first 5 extracted feature sets
+        console.log('Extracted Labels:', labels.slice(0, 5)); // Log the first 5 extracted labels
+
         console.log('Features and labels extracted successfully');
         console.log('Features:', cleanedFeatures.slice(0, 5)); // Log the first 5 feature sets
         console.log('Labels:', cleanedLabels.slice(0, 5)); // Log the first 5 labels
