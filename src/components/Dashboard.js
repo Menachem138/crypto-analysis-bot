@@ -116,6 +116,10 @@ const Dashboard = () => {
         // Normalize the data
         const normalizedTensor = dataTensor.sub(meanTensor).div(stdTensor);
 
+        // Log the normalized features
+        const normalizedFeatures = normalizedTensor.arraySync();
+        console.log('Normalized Features:', normalizedFeatures.slice(0, 5)); // Log the first 5 normalized feature sets
+
         // Convert the normalized tensor back to an array
         const features = normalizedTensor.arraySync();
 
