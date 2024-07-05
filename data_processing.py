@@ -4,6 +4,16 @@ import pandas as pd
 def load_data(file_path):
     data = pd.read_csv(file_path, skiprows=1)  # Skip the first row
     print("Data Columns:", data.columns)  # Print the columns of the DataFrame
+    print("Initial Data Head:")
+    print(data.head())
+    print("Checking for NaN values in the initial data:")
+    print(data.isna().sum())
+
+    # Check for NaN values in the first row of actual data and drop it if necessary
+    if data.iloc[0].isna().any():
+        print("First row contains NaN values, dropping the first row.")
+        data = data.iloc[1:]
+
     return data
 
 # Perform data cleaning and preprocessing
@@ -33,6 +43,7 @@ def preprocess_data(data):
     close_change_mean = data['Close_Change'].rolling(window=14).mean()
     close_change_std = data['Close_Change'].rolling(window=14).std().replace(0, 1e-8)  # Replace zero std with a small constant
     data['Relative_Strength_Index'] = 100 - (100 / (1 + close_change_mean / close_change_std))
+    data['Relative_Strength_Index'] = data['Relative_Strength_Index'].fillna(0)  # Replace any NaN values in RSI with zeros
 
     print("Data after feature engineering:")
     print(data.head())
