@@ -66,6 +66,14 @@ app.use('/api', createProxyMiddleware({
     const apiKeyHeaderLog = `X-CMC_PRO_API_KEY header value: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}\n`;
     fs.appendFileSync(logFilePath, apiKeyHeaderLog);
     console.log(apiKeyHeaderLog); // Console log for debugging
+
+    // Additional logging right before the request is sent
+    const finalHeadersLog = `Final outgoing request headers: ${JSON.stringify(proxyReq.getHeaders())}\n`;
+    fs.appendFileSync(logFilePath, finalHeadersLog);
+    console.log(finalHeadersLog); // Console log for debugging
+
+    // Log the outgoing request headers to the console
+    console.log('Outgoing request headers:', proxyReq.getHeaders());
   },
   onProxyRes: (proxyRes, req, res) => {
     // Add CORS headers to the response
