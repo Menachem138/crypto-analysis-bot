@@ -83,6 +83,9 @@ app.use('/api', createProxyMiddleware({
   }
 }));
 
+// Log environment variables for debugging
+console.log('Environment Variables:', process.env);
+
 app.listen(PORT, () => {
   console.log(`Proxy server is running on http://localhost:${PORT}`);
 });
