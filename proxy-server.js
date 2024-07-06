@@ -29,6 +29,7 @@ if (!fs.existsSync(logFilePath)) {
 app.use((req, res, next) => {
   const logEntry = `Incoming request: ${req.method} ${req.url}\nHeaders: ${JSON.stringify(req.headers)}\n`;
   fs.appendFileSync(logFilePath, logEntry);
+  console.log(logEntry); // Console log for debugging
   next();
 });
 
@@ -45,6 +46,7 @@ app.use('/api', createProxyMiddleware({
     // Log the outgoing request headers to a file
     const logEntry = `Outgoing request headers: ${JSON.stringify(proxyReq.getHeaders())}\n`;
     fs.appendFileSync(logFilePath, logEntry);
+    console.log(logEntry); // Console log for debugging
   },
   onProxyRes: (proxyRes, req, res) => {
     // Add CORS headers to the response
@@ -54,11 +56,13 @@ app.use('/api', createProxyMiddleware({
     // Log the response headers and status code
     const logEntry = `Response status: ${proxyRes.statusCode}\nResponse headers: ${JSON.stringify(proxyRes.headers)}\n`;
     fs.appendFileSync(logFilePath, logEntry);
+    console.log(logEntry); // Console log for debugging
   },
   onError: (err, req, res) => {
     // Log any errors that occur during the request forwarding process
     const logEntry = `Error during request forwarding: ${err.message}\n`;
     fs.appendFileSync(logFilePath, logEntry);
+    console.log(logEntry); // Console log for debugging
     res.status(500).send('Proxy error');
   }
 }));
