@@ -27,6 +27,8 @@ const getMarketData = async (symbol) => {
         data: error.response.data
       } : null
     });
+    console.log('Full error object:', error);
+    console.log('Request config:', error.config);
     throw error;
   }
 };
@@ -56,6 +58,8 @@ const getCopyTradingData = async () => {
         data: error.response.data
       } : null
     });
+    console.log('Full error object:', error);
+    console.log('Request config:', error.config);
     throw error;
   }
 };
