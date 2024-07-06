@@ -28,7 +28,8 @@ app.use('/api', createProxyMiddleware({
   },
   onProxyReq: (proxyReq, req, res) => {
     // Add the CoinMarketCap API key to the request headers
-    proxyReq.setHeader('X-CMC_PRO_API_KEY', '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f');
+    const apiKey = process.env.REACT_APP_COINMARKETCAP_API_KEY;
+    proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
     // Log the outgoing request headers to a file
     const logEntry = `Outgoing request headers: ${JSON.stringify(proxyReq.getHeaders())}\n`;
     fs.appendFileSync(logFilePath, logEntry);
