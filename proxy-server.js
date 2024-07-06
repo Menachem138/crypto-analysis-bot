@@ -40,9 +40,14 @@ app.use('/api', createProxyMiddleware({
     '^/api': '', // remove /api prefix when forwarding to the target
   },
   onProxyReq: (proxyReq, req, res) => {
-    // Add the CoinMarketCap API key to the request headers
+    // Use the CoinMarketCap API key from the environment variable
     const apiKey = process.env.REACT_APP_COINMARKETCAP_API_KEY;
-    proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
+    console.log(`API Key: ${apiKey}`); // Log the API key for debugging
+    if (apiKey) {
+      proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
+    } else {
+      console.error('API key is missing');
+    }
     // Log the outgoing request headers to a file
     const logEntry = `Outgoing request headers: ${JSON.stringify(proxyReq.getHeaders())}\n`;
     fs.appendFileSync(logFilePath, logEntry);
@@ -57,6 +62,17 @@ app.use('/api', createProxyMiddleware({
     const logEntry = `Response status: ${proxyRes.statusCode}\nResponse headers: ${JSON.stringify(proxyRes.headers)}\n`;
     fs.appendFileSync(logFilePath, logEntry);
     console.log(logEntry); // Console log for debugging
+
+    // Log the response body
+    let responseBody = '';
+    proxyRes.on('data', (chunk) => {
+      responseBody += chunk;
+    });
+    proxyRes.on('end', () => {
+      const logEntry = `Response body: ${responseBody}\n`;
+      fs.appendFileSync(logFilePath, logEntry);
+      console.log(logEntry); // Console log for debugging
+    });
   },
   onError: (err, req, res) => {
     // Log any errors that occur during the request forwarding process
