@@ -40,7 +40,7 @@ app.use('/api', createProxyMiddleware({
     '^/api': '', // remove /api prefix when forwarding to the target
   },
   onProxyReq: (proxyReq, req, res) => {
-    // Use the CoinMarketCap API key from the environment variable
+    // Use the CoinMarketCap API key from environment variables
     const apiKey = process.env.REACT_APP_COINMARKETCAP_API_KEY;
     console.log(`API Key: ${apiKey}`); // Log the API key for debugging
     if (apiKey) {
