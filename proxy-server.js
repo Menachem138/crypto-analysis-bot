@@ -25,6 +25,13 @@ if (!fs.existsSync(logFilePath)) {
   fs.writeFileSync(logFilePath, '');
 }
 
+// Add logging for incoming requests
+app.use((req, res, next) => {
+  const logEntry = `Incoming request: ${req.method} ${req.url}\nHeaders: ${JSON.stringify(req.headers)}\n`;
+  fs.appendFileSync(logFilePath, logEntry);
+  next();
+});
+
 app.use('/api', createProxyMiddleware({
   target: 'https://pro-api.coinmarketcap.com',
   changeOrigin: true,
