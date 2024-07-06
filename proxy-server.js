@@ -20,6 +20,11 @@ app.use((req, res, next) => {
 
 const logFilePath = path.join(__dirname, 'proxy-logs.txt');
 
+// Ensure the log file is created if it does not exist
+if (!fs.existsSync(logFilePath)) {
+  fs.writeFileSync(logFilePath, '');
+}
+
 app.use('/api', createProxyMiddleware({
   target: 'https://pro-api.coinmarketcap.com',
   changeOrigin: true,
