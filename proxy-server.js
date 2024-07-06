@@ -40,7 +40,7 @@ app.use('/api', createProxyMiddleware({
     '^/api': '', // remove /api prefix when forwarding to the target
   },
   onProxyReq: (proxyReq, req, res) => {
-    // Hard-code the API key for testing
+    // Use a hard-coded API key for testing
     const apiKey = '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f';
     console.log(`API Key: ${apiKey}`); // Log the API key for debugging
     if (apiKey) {
@@ -94,6 +94,9 @@ console.log('Environment Variables:', process.env);
 
 // Additional log entry to confirm server restart
 console.log('Proxy server is starting...');
+
+// Log statement to confirm file reload
+console.log('Proxy server file reloaded with latest changes.');
 
 app.listen(PORT, () => {
   console.log(`Proxy server is running on http://localhost:${PORT}`);
