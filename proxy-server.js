@@ -48,7 +48,7 @@ app.use('/api', createProxyMiddleware({
     if (!apiKey) {
       console.error('API Key is missing!'); // Log an error if the API key is not set
     } else {
-      proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
+      proxyReq.setHeader('X-CMC_PRO_API_KEY', '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f');
       console.log(`Set X-CMC_PRO_API_KEY header: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`); // Log the actual header value
     }
     console.log('Outgoing request headers after setting API key:', proxyReq.getHeaders()); // Log headers after setting API key
