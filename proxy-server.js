@@ -53,6 +53,11 @@ app.use('/api', createProxyMiddleware({
     const logEntry = `Outgoing request headers: ${JSON.stringify(proxyReq.getHeaders())}\n`;
     fs.appendFileSync(logFilePath, logEntry);
     console.log(logEntry); // Console log for debugging
+
+    // Additional logging to capture the entire proxyReq object
+    const fullProxyReqLog = `Full proxyReq object: ${JSON.stringify(proxyReq, null, 2)}\n`;
+    fs.appendFileSync(logFilePath, fullProxyReqLog);
+    console.log(fullProxyReqLog); // Console log for debugging
   },
   onProxyRes: (proxyRes, req, res) => {
     // Add CORS headers to the response
