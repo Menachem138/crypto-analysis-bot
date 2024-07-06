@@ -42,14 +42,11 @@ app.use('/api', createProxyMiddleware({
   // Add the API key to the request headers
   onProxyReq: (proxyReq, req, res) => {
     console.log('onProxyReq function called'); // Log statement to confirm function execution
-    const apiKey = process.env.REACT_APP_COINMARKETCAP_API_KEY; // Use environment variable for API key
-    console.log(`API Key from environment variable: ${apiKey}`); // Log the API key for debugging
-    if (apiKey) {
-      proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
-      console.log(`Set X-CMC_PRO_API_KEY header: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`); // Log the actual header value
-    } else {
-      console.error('API key is missing');
-    }
+    const apiKey = '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f'; // Hard-coded API key for testing
+    console.log(`Hard-coded API Key: ${apiKey}`); // Log the hard-coded API key for debugging
+    proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
+    console.log(`Set X-CMC_PRO_API_KEY header: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`); // Log the actual header value
+
     // Log the outgoing request headers to a file
     const logEntry = `Outgoing request headers after setting API key: ${JSON.stringify(proxyReq.getHeaders())}\n`;
     fs.appendFileSync(logFilePath, logEntry);
