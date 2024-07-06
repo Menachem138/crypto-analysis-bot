@@ -43,15 +43,24 @@ app.use('/api', createProxyMiddleware({
   onProxyReq: (proxyReq, req, res) => {
     console.log('onProxyReq function called'); // Log statement to confirm function execution
     const apiKey = process.env.REACT_APP_COINMARKETCAP_API_KEY; // Use environment variable for API key
-    console.log(`Environment Variable API Key: ${apiKey}`); // Log the environment variable API key for debugging
+    console.log(`Environment API Key: ${apiKey}`); // Log the environment API key for debugging
     console.log('Outgoing request headers before setting API key:', proxyReq.getHeaders()); // Log headers before setting API key
     if (!apiKey) {
-      console.error('API Key is missing!'); // Log an error if the API key is not set
+      console.error('API Key is missing! Stopping the server.'); // Log an error if the API key is not set
+      process.exit(1); // Stop the server if the API key is missing
     } else {
-      proxyReq.setHeader('X-CMC_PRO_API_KEY', '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f');
-      console.log(`Set X-CMC_PRO_API_KEY header: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`); // Log the actual header value
+      try {
+        proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
+        console.log(`Set X-CMC_PRO_API_KEY header: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`); // Log the actual header value
+      } catch (error) {
+        console.error('Error setting X-CMC_PRO_API_KEY header:', error);
+      }
     }
     console.log('Outgoing request headers after setting API key:', proxyReq.getHeaders()); // Log headers after setting API key
+    console.log('Final outgoing request headers:', proxyReq.getHeaders()); // Log final headers before sending the request
+    // Additional diagnostic logging
+    console.log('Checking if X-CMC_PRO_API_KEY header is present:', proxyReq.getHeader('X-CMC_PRO_API_KEY') !== undefined);
+    console.log('X-CMC_PRO_API_KEY header value:', proxyReq.getHeader('X-CMC_PRO_API_KEY')); // Log the header value for confirmation
 
     // Log the outgoing request headers to a file
     const logEntry = `Outgoing request headers after setting API key: ${JSON.stringify(proxyReq.getHeaders())}\n`;
