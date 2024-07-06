@@ -51,6 +51,9 @@ app.use('/api', createProxyMiddleware({
     proxyRes.headers['Access-Control-Allow-Origin'] = '*';
     proxyRes.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
     proxyRes.headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization';
+    // Log the response headers and status code
+    const logEntry = `Response status: ${proxyRes.statusCode}\nResponse headers: ${JSON.stringify(proxyRes.headers)}\n`;
+    fs.appendFileSync(logFilePath, logEntry);
   },
   onError: (err, req, res) => {
     // Log any errors that occur during the request forwarding process
