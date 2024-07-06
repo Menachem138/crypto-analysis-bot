@@ -14,6 +14,7 @@ const getMarketData = async (symbol) => {
     const response = await instance.get(`/v1/cryptocurrency/quotes/latest`, {
       params: requestParams
     });
+    console.log('Full request URL:', response.config.url);
     console.log('Received response from CoinMarketCap API:', response);
     return response.data;
   } catch (error) {
@@ -42,6 +43,7 @@ const getCopyTradingData = async () => {
     const response = await instance.get(`/v1/cryptocurrency/listings/latest`, {
       params: requestParams
     });
+    console.log('Full request URL:', response.config.url);
     console.log('Received response from CoinMarketCap API:', response);
     return response.data;
   } catch (error) {
