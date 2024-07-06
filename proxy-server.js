@@ -40,8 +40,9 @@ app.use('/api', createProxyMiddleware({
     '^/api': '', // remove /api prefix when forwarding to the target
   },
   onProxyReq: (proxyReq, req, res) => {
-    // Use a hard-coded API key for testing
-    const apiKey = '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f';
+    console.log('onProxyReq function called'); // Log statement to confirm function execution
+    // Use the API key from the environment variable
+    const apiKey = process.env.REACT_APP_COINMARKETCAP_API_KEY;
     console.log(`API Key: ${apiKey}`); // Log the API key for debugging
     if (apiKey) {
       proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
@@ -50,14 +51,14 @@ app.use('/api', createProxyMiddleware({
       console.error('API key is missing');
     }
     // Log the outgoing request headers to a file
-    const logEntry = `Outgoing request headers: ${JSON.stringify(proxyReq.getHeaders())}\n`;
+    const logEntry = `Outgoing request headers after setting API key: ${JSON.stringify(proxyReq.getHeaders())}\n`;
     fs.appendFileSync(logFilePath, logEntry);
     console.log(logEntry); // Console log for debugging
 
-    // Additional logging to capture the entire proxyReq object
-    const fullProxyReqLog = `Full proxyReq object: ${JSON.stringify(proxyReq, null, 2)}\n`;
-    fs.appendFileSync(logFilePath, fullProxyReqLog);
-    console.log(fullProxyReqLog); // Console log for debugging
+    // Log the entire request object for debugging
+    const fullRequestLog = `Full request object: ${JSON.stringify(proxyReq)}\n`;
+    fs.appendFileSync(logFilePath, fullRequestLog);
+    console.log(fullRequestLog); // Console log for debugging
   },
   onProxyRes: (proxyRes, req, res) => {
     // Add CORS headers to the response
