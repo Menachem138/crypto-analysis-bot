@@ -42,10 +42,14 @@ app.use('/api', createProxyMiddleware({
   // Add the API key to the request headers
   onProxyReq: (proxyReq, req, res) => {
     console.log('onProxyReq function called'); // Log statement to confirm function execution
-    const apiKey = '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f'; // Hard-coded API key for testing
-    console.log(`Hard-coded API Key: ${apiKey}`); // Log the hard-coded API key for debugging
-    proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
-    console.log(`Set X-CMC_PRO_API_KEY header: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`); // Log the actual header value
+    const apiKey = '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f'; // Hardcoded API key for testing
+    console.log(`Hardcoded API Key: ${apiKey}`); // Log the hardcoded API key for debugging
+    if (!apiKey) {
+      console.error('API Key is missing!'); // Log an error if the API key is not set
+    } else {
+      proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
+      console.log(`Set X-CMC_PRO_API_KEY header: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`); // Log the actual header value
+    }
 
     // Log the outgoing request headers to a file
     const logEntry = `Outgoing request headers after setting API key: ${JSON.stringify(proxyReq.getHeaders())}\n`;
