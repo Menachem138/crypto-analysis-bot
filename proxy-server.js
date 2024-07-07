@@ -42,7 +42,7 @@ app.use('/api', createProxyMiddleware({
   // Add the API key to the request headers
   onProxyReq: (proxyReq, req, res) => {
     console.log('onProxyReq function called'); // Log statement to confirm function execution
-    const apiKey = '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f'; // Directly set the API key for testing
+    const apiKey = process.env.REACT_APP_COINMARKETCAP_API_KEY; // Use the environment variable for the API key
     console.log(`API Key: ${apiKey}`); // Log the API key for debugging
     console.log('Outgoing request headers before setting API key:', proxyReq.getHeaders()); // Log headers before setting API key
     try {
@@ -95,6 +95,9 @@ console.log('Proxy server is starting...');
 
 // Log statement to confirm file reload
 console.log('Proxy server file reloaded with latest changes.');
+
+// Unique log statement to confirm file reload
+console.log('Unique log statement: Proxy server code is up to date.');
 
 app.listen(PORT, () => {
   console.log(`Proxy server is running on http://localhost:${PORT}`);
