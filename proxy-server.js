@@ -16,9 +16,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 5000;
 
-// Add helmet middleware for CSP
-app.use(helmet.contentSecurityPolicy({
-  directives: {
+// Add logging for CSP directives
+app.use((req, res, next) => {
+  console.log('CSP Directives:', {
     defaultSrc: ["'self'"],
     scriptSrc: [
       "'self'",
@@ -51,8 +51,60 @@ app.use(helmet.contentSecurityPolicy({
       "https://fonts.gstatic.com"
     ],
     upgradeInsecureRequests: true
+  });
+  next();
+});
+
+// Add helmet middleware for CSP
+app.use((req, res, next) => {
+  const cspDirectives = {
+    defaultSrc: ["'self'"],
+    scriptSrc: [
+      "'self'",
+      "https://trusted-script-source.com",
+      "https://www.googletagmanager.com",
+      "https://www.google-analytics.com"
+    ],
+    styleSrc: [
+      "'self'",
+      "https://trusted-style-source.com",
+      "https://fonts.googleapis.com"
+    ],
+    frameSrc: [
+      "'self'",
+      "https://form.typeform.com",
+      "https://www.typeform.com"
+    ],
+    imgSrc: [
+      "'self'",
+      "https://www.google-analytics.com"
+    ],
+    connectSrc: [
+      "'self'",
+      "https://pro-api.coinmarketcap.com",
+      "https://api.binance.com",
+      "https://www.google-analytics.com"
+    ],
+    fontSrc: [
+      "'self'",
+      "https://fonts.gstatic.com"
+    ],
+    upgradeInsecureRequests: true
+  };
+
+  console.log('CSP Directives before applying helmet:', cspDirectives);
+
+  try {
+    app.use(helmet.contentSecurityPolicy({
+      directives: cspDirectives
+    }));
+    console.log('Helmet applied successfully with CSP directives.');
+  } catch (error) {
+    console.error('Error applying helmet with CSP directives:', error);
   }
-}));
+
+  next();
+});
 
 // Add CORS headers middleware
 app.use((req, res, next) => {
