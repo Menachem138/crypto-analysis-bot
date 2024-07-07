@@ -90,9 +90,10 @@ app.use('/api', createProxyMiddleware({
     let responseBody = '';
     proxyRes.on('data', (chunk) => {
       responseBody += chunk;
+      console.log(`Received chunk: ${chunk}`); // Log each chunk for debugging
     });
     proxyRes.on('end', () => {
-      const logEntry = `Response body: ${responseBody}\n`;
+      const logEntry = `Complete response body: ${responseBody}\n`;
       fs.appendFileSync(logFilePath, logEntry);
       console.log(logEntry); // Console log for debugging
     });

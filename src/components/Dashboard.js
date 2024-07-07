@@ -254,10 +254,21 @@ const Dashboard = () => {
   console.log('Rendering market data and charts');
   console.log('Market Data:', marketData);
 
-  const formattedMarketData = marketData && typeof marketData === 'object' ? Object.keys(marketData).map(key => ({
-    date: new Date(marketData[key].Unix * 1000), // Convert Unix timestamp to Date object
-    price: marketData[key].Close
-  })) : [];
+  const formattedMarketData = marketData && typeof marketData === 'object' ? Object.keys(marketData).map(key => {
+    const dataPoint = marketData[key];
+    console.log('Data Point:', dataPoint); // Log each data point
+    if (dataPoint && dataPoint.quote && dataPoint.quote.USD && dataPoint.quote.USD.price && dataPoint.quote.USD.last_updated) {
+      const date = new Date(dataPoint.quote.USD.last_updated);
+      console.log('Converted Date:', date); // Log the converted date
+      return {
+        date: date, // Convert last_updated to Date object
+        price: dataPoint.quote.USD.price
+      };
+    } else {
+      console.log('Invalid data point:', dataPoint); // Log invalid data points
+      return null;
+    }
+  }).filter(dataPoint => dataPoint !== null) : [];
 
   console.log('Formatted Market Data:', formattedMarketData);
 
