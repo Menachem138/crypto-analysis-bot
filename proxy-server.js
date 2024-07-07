@@ -58,6 +58,7 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Content-Security-Policy', "default-src 'self'; script-src 'self' https://trusted-script-source.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' https://trusted-style-source.com https://fonts.googleapis.com; frame-src 'self' https://form.typeform.com https://www.typeform.com; img-src 'self' https://www.google-analytics.com; connect-src 'self' https://pro-api.coinmarketcap.com https://api.binance.com https://www.google-analytics.com; font-src 'self' https://fonts.gstatic.com");
   next();
 });
 
