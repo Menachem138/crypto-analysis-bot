@@ -46,11 +46,8 @@ app.use('/api', createProxyMiddleware({
   },
   // Add the API key to the request headers
   onProxyReq: (proxyReq, req, res) => {
-    console.log('API Key before onProxyReq function:', '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f');
-    console.log('onProxyReq function called'); // Log statement to confirm function execution
-    const apiKey = '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f'; // Hardcoded API key for testing
-    console.log(`API Key from hardcoded value at onProxyReq start: ${apiKey}`); // Log the API key for debugging
-    console.log(`API Key from hardcoded value: ${apiKey}`); // Log the API key for debugging
+    const apiKey = process.env.REACT_APP_COINMARKETCAP_API_KEY; // Use environment variable for API key
+    console.log(`API Key from environment variable at onProxyReq start: ${apiKey}`); // Log the API key for debugging
     try {
       console.log('Attempting to set X-CMC_PRO_API_KEY header'); // Additional log before setting the header
       console.log('Headers before setting API key:', proxyReq.getHeaders()); // Log headers before setting the API key
