@@ -45,10 +45,6 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   console.log('Initial error state:', error);
   console.log('Initial loading state:', loading);
-  const [trainingResult, setTrainingResult] = useState(null);
-  const [evaluationResult, setEvaluationResult] = useState(null);
-  console.log('Initial training result:', trainingResult);
-  console.log('Initial evaluation result:', evaluationResult);
 
   // Add logging for state updates
   useEffect(() => {
@@ -62,14 +58,6 @@ const Dashboard = () => {
   useEffect(() => {
     console.log('Updated loading state:', loading);
   }, [loading]);
-
-  useEffect(() => {
-    console.log('Updated trainingResult state:', trainingResult);
-  }, [trainingResult]);
-
-  useEffect(() => {
-    console.log('Updated evaluationResult state:', evaluationResult);
-  }, [evaluationResult]);
 
   useEffect(() => {
     const fetchMarketData = async () => {
@@ -225,9 +213,6 @@ const Dashboard = () => {
             console.error(`Invalid Moving Average value at index ${index}: ${value}`);
           }
         });
-
-        // Additional code for training the model and setting the trainingResult and evaluationResult states
-        // ...
 
       } catch (err) {
         setError(`Error: ${err.message}`);
