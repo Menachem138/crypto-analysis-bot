@@ -45,24 +45,27 @@ app.use('/api', createProxyMiddleware({
   onProxyReq: (proxyReq, req, res) => {
     console.log('onProxyReq function called'); // Log statement to confirm function execution
     const apiKey = process.env.REACT_APP_COINMARKETCAP_API_KEY; // Use environment variable for API key
-    console.log(`Environment Variable API Key: ${apiKey}`); // Log the environment variable API key for debugging
-    if (apiKey) {
-      try {
-        console.log('Attempting to set X-CMC_PRO_API_KEY header'); // Additional log before setting the header
+    console.log(`API Key from environment variable: ${apiKey}`); // Log the API key for debugging
+    try {
+      console.log('Attempting to set X-CMC_PRO_API_KEY header'); // Additional log before setting the header
+      console.log('Headers before setting API key:', proxyReq.getHeaders()); // Log headers before setting the API key
+      if (apiKey) {
         proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
         console.log(`Header 'X-CMC_PRO_API_KEY' set with value: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`); // Log the header value after setting it
-        console.log('Final outgoing request object:', proxyReq); // Log the entire proxyReq object
-      } catch (error) {
-        console.error(`Error setting X-CMC_PRO_API_KEY header:`, error);
+      } else {
+        console.error('API Key is undefined or empty');
       }
-    } else {
-      console.error('API Key is not defined. Cannot set X-CMC_PRO_API_KEY header.');
+      console.log('Headers after setting API key:', proxyReq.getHeaders()); // Log headers after setting the API key
+    } catch (error) {
+      console.error(`Error setting X-CMC_PRO_API_KEY header:`, error);
     }
     console.log('Final outgoing request headers before sending:', proxyReq.getHeaders()); // Log final headers before sending the request
     // Additional log to confirm the presence of the X-CMC_PRO_API_KEY header
     console.log(`Confirming X-CMC_PRO_API_KEY header: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`);
-    // Log the entire proxyReq object to capture all details
-    console.log('Outgoing request details:', proxyReq);
+    // Log the entire outgoing request for debugging
+    const logEntry = `Outgoing request: ${proxyReq.method} ${proxyReq.path}\nHeaders: ${JSON.stringify(proxyReq.getHeaders())}\n`;
+    fs.appendFileSync(logFilePath, logEntry);
+    console.log(logEntry); // Console log for debugging
   },
   onProxyRes: (proxyRes, req, res) => {
     // Add CORS headers to the response
