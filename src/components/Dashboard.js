@@ -254,9 +254,9 @@ const Dashboard = () => {
   console.log('Rendering market data and charts');
   console.log('Market Data:', marketData);
 
-  const formattedMarketData = Array.isArray(marketData) ? marketData.map(entry => ({
-    date: new Date(entry.Unix * 1000), // Convert Unix timestamp to Date object
-    price: entry.Close
+  const formattedMarketData = marketData && typeof marketData === 'object' ? Object.keys(marketData).map(key => ({
+    date: new Date(marketData[key].Unix * 1000), // Convert Unix timestamp to Date object
+    price: marketData[key].Close
   })) : [];
 
   console.log('Formatted Market Data:', formattedMarketData);
@@ -282,7 +282,7 @@ const Dashboard = () => {
         )}
         <MarketChart data={formattedMarketData} />
         <CopyTrading />
-        <Widget id="your-form-id" style={{ width: '100%', height: '500px' }} className="my-form" />
+        <Widget id="449162832" style={{ width: '100%', height: '500px' }} className="my-form" />
       </Box>
     </ErrorBoundary>
   );
