@@ -44,8 +44,8 @@ app.use('/api', createProxyMiddleware({
   // Add the API key to the request headers
   onProxyReq: (proxyReq, req, res) => {
     console.log('onProxyReq function called'); // Log statement to confirm function execution
-    const apiKey = '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f'; // Hardcoded API key for testing
-    console.log(`API Key: ${apiKey}`); // Log the API key for debugging
+    const apiKey = process.env.REACT_APP_COINMARKETCAP_API_KEY; // Use environment variable for API key
+    console.log(`API Key from environment variable: ${apiKey}`); // Log the API key for debugging
     console.log('Outgoing request headers before setting API key:', proxyReq.getHeaders()); // Log headers before setting API key
     try {
       proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
@@ -58,6 +58,10 @@ app.use('/api', createProxyMiddleware({
     console.log('Full request object:', req); // Log the entire request object for debugging
     // Additional logging to confirm function execution
     console.log('onProxyReq function execution completed');
+    // Write the outgoing request headers to the log file
+    const logEntry = `Outgoing request headers: ${JSON.stringify(proxyReq.getHeaders())}\n`;
+    fs.appendFileSync(logFilePath, logEntry);
+    console.log(logEntry); // Console log for debugging
   },
   onProxyRes: (proxyRes, req, res) => {
     // Add CORS headers to the response
@@ -104,3 +108,4 @@ console.log('Unique log statement: Proxy server code is up to date.');
 app.listen(PORT, () => {
   console.log(`Proxy server is running on http://localhost:${PORT}`);
 });
+console.log('Direct log of REACT_APP_COINMARKETCAP_API_KEY:', process.env.REACT_APP_COINMARKETCAP_API_KEY);
