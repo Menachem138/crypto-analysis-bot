@@ -42,23 +42,18 @@ app.use('/api', createProxyMiddleware({
   // Add the API key to the request headers
   onProxyReq: (proxyReq, req, res) => {
     console.log('onProxyReq function called'); // Log statement to confirm function execution
-    console.log('Environment Variables at onProxyReq:', process.env); // Log environment variables at function call
-    const apiKey = process.env.REACT_APP_COINMARKETCAP_API_KEY || '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f'; // Use environment variable or hardcoded API key for testing
+    const apiKey = '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f'; // Directly set the API key for testing
     console.log(`API Key: ${apiKey}`); // Log the API key for debugging
     console.log('Outgoing request headers before setting API key:', proxyReq.getHeaders()); // Log headers before setting API key
-    if (!apiKey) {
-      console.error('API Key is missing! Stopping the server.'); // Log an error if the API key is not set
-      process.exit(1); // Stop the server if the API key is missing
-    } else {
-      try {
-        proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
-        console.log(`Set X-CMC_PRO_API_KEY header: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`); // Log the actual header value
-      } catch (error) {
-        console.error('Error setting X-CMC_PRO_API_KEY header:', error);
-      }
+    try {
+      proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
+      console.log(`Set X-CMC_PRO_API_KEY header: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`); // Log the actual header value
+    } catch (error) {
+      console.error('Error setting X-CMC_PRO_API_KEY header:', error);
     }
     console.log('Outgoing request headers after setting API key:', proxyReq.getHeaders()); // Log headers after setting API key
     console.log('Final outgoing request headers:', proxyReq.getHeaders()); // Log final headers before sending the request
+    console.log('Full request object:', req); // Log the entire request object for debugging
     // Additional logging to confirm function execution
     console.log('onProxyReq function execution completed');
   },
