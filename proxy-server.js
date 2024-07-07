@@ -44,34 +44,20 @@ app.use('/api', createProxyMiddleware({
   // Add the API key to the request headers
   onProxyReq: (proxyReq, req, res) => {
     console.log('onProxyReq function called'); // Log statement to confirm function execution
-    const apiKey = '155ec3b4-cd0a-485a-9e03-b5147fdf8e7f'; // Hardcoded API key for testing
-    console.log(`Hardcoded API Key: ${apiKey}`); // Log the hardcoded API key for debugging
-    console.log('Outgoing request headers before setting API key:', proxyReq.getHeaders()); // Log headers before setting API key
+    const apiKey = process.env.REACT_APP_COINMARKETCAP_API_KEY; // Use environment variable for API key
+    console.log(`Environment Variable API Key: ${apiKey}`); // Log the environment variable API key for debugging
     if (apiKey) {
       try {
         console.log('Attempting to set X-CMC_PRO_API_KEY header'); // Additional log before setting the header
         proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
         console.log(`Header 'X-CMC_PRO_API_KEY' set with value: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`); // Log the header value after setting it
-        console.log('Outgoing request headers after setting API key:', proxyReq.getHeaders()); // Log headers after setting API key
-        fs.appendFileSync(logFilePath, `Set X-CMC_PRO_API_KEY header: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}\n`); // Log to file
-        fs.appendFileSync(logFilePath, `Outgoing request headers after setting API key: ${JSON.stringify(proxyReq.getHeaders())}\n`); // Log to file
-        fs.appendFileSync(logFilePath, `Outgoing request headers after setting API key: ${JSON.stringify(proxyReq.getHeaders())}\n`); // Log to file
       } catch (error) {
         console.error(`Error setting X-CMC_PRO_API_KEY header:`, error);
-        fs.appendFileSync(logFilePath, `Error setting X-CMC_PRO_API_KEY header: ${error.message}\n`); // Log error to file
       }
     } else {
       console.error('API Key is not defined. Cannot set X-CMC_PRO_API_KEY header.');
-      fs.appendFileSync(logFilePath, 'API Key is not defined. Cannot set X-CMC_PRO_API_KEY header.\n'); // Log error to file
     }
     console.log('Final outgoing request headers:', proxyReq.getHeaders()); // Log final headers before sending the request
-    console.log('Full request object:', req); // Log the entire request object for debugging
-    // Additional logging to confirm function execution
-    console.log('onProxyReq function execution completed');
-    // Write the outgoing request headers to the log file
-    const logEntry = `Outgoing request headers: ${JSON.stringify(proxyReq.getHeaders())}\n`;
-    fs.appendFileSync(logFilePath, logEntry);
-    console.log(logEntry); // Console log for debugging
   },
   onProxyRes: (proxyRes, req, res) => {
     // Add CORS headers to the response
