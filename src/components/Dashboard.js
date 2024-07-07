@@ -4,6 +4,7 @@ import MarketChart from './MarketChart.js';
 import CopyTrading from './CopyTrading.js';
 import { getMarketData } from '../coinMarketCapService.js';
 import { calculateRSI, calculateMovingAverage } from '../technicalAnalysis.js';
+import { Widget } from '@typeform/embed-react';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -282,6 +283,7 @@ const Dashboard = () => {
         )}
         <MarketChart data={formattedMarketData} />
         <CopyTrading />
+        <Widget id="your-form-id" style={{ width: '100%', height: '500px' }} className="my-form" />
       </Box>
     </ErrorBoundary>
   );
