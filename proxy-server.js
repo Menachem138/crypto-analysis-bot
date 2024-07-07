@@ -49,7 +49,8 @@ app.use(helmet.contentSecurityPolicy({
     fontSrc: [
       "'self'",
       "https://fonts.gstatic.com"
-    ]
+    ],
+    upgradeInsecureRequests: []
   }
 }));
 
