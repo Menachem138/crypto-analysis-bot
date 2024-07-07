@@ -54,6 +54,7 @@ app.use('/api', createProxyMiddleware({
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
           proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
+          console.log(`Header 'X-CMC_PRO_API_KEY' set with value: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`); // Log the header value after setting it
           console.log(`Set X-CMC_PRO_API_KEY header: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`); // Log the actual header value
           console.log('Outgoing request headers after setting API key:', proxyReq.getHeaders()); // Log headers after setting API key
           fs.appendFileSync(logFilePath, `Set X-CMC_PRO_API_KEY header: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}\n`); // Log to file
