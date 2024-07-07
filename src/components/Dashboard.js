@@ -299,6 +299,18 @@ const Dashboard = () => {
         )}
         <MarketChart data={formattedMarketData} />
         <CopyTrading />
+        <Box mt={6}>
+          <Heading as="h2" size="lg" mb={4}>
+            Significant News
+          </Heading>
+          <NewsFeed />
+        </Box>
+        <Box mt={6}>
+          <Heading as="h2" size="lg" mb={4}>
+            Personalized Financial Advice
+          </Heading>
+          <FinancialAdvice />
+        </Box>
         <Widget id="449162832" style={{ width: '100%', height: '500px' }} className="my-form" />
       </Box>
     </ErrorBoundary>
