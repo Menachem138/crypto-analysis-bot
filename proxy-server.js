@@ -4,6 +4,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+console.log('REACT_APP_COINMARKETCAP_API_KEY:', process.env.REACT_APP_COINMARKETCAP_API_KEY);
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -54,6 +56,7 @@ app.use('/api', createProxyMiddleware({
     }
     console.log('Outgoing request headers after setting API key:', proxyReq.getHeaders()); // Log headers after setting API key
     console.log('Final outgoing request headers:', proxyReq.getHeaders()); // Log final headers before sending the request
+    console.log('Final outgoing request headers before sending:', proxyReq.getHeaders()); // Log final headers before sending the request
     console.log('Full request object:', req); // Log the entire request object for debugging
     // Additional logging to confirm function execution
     console.log('onProxyReq function execution completed');
