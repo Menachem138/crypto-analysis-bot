@@ -52,6 +52,12 @@ app.use('/api', createProxyMiddleware({
       if (apiKey) {
         proxyReq.setHeader('X-CMC_PRO_API_KEY', apiKey);
         console.log(`Header 'X-CMC_PRO_API_KEY' set with value: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`); // Log the header value after setting it
+        // Additional check to confirm the header is set
+        if (proxyReq.getHeader('X-CMC_PRO_API_KEY') === apiKey) {
+          console.log('X-CMC_PRO_API_KEY header successfully set.');
+        } else {
+          console.error('Failed to set X-CMC_PRO_API_KEY header.');
+        }
       } else {
         console.error('API Key is undefined or empty');
       }
