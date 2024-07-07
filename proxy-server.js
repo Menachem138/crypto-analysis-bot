@@ -33,7 +33,8 @@ app.use(helmet.contentSecurityPolicy({
     ],
     frameSrc: [
       "'self'",
-      "https://form.typeform.com"
+      "https://form.typeform.com",
+      "https://www.typeform.com"
     ],
     imgSrc: [
       "'self'",
