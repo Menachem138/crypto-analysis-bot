@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, startTransition } from 'react';
 import { Box, Heading, Text, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
 import MarketChart from './MarketChart.js';
 import CopyTrading from './CopyTrading.js';
@@ -73,15 +73,21 @@ const Dashboard = () => {
       try {
         const response = await getMarketData('BTC'); // Pass a default symbol for testing
         console.log('Market Data:', response.data); // Log the market data
-        setMarketData(response.data);
+        startTransition(() => {
+          setMarketData(response.data);
+        });
       } catch (err) {
-        setError(`Error: ${err.message}`);
+        startTransition(() => {
+          setError(`Error: ${err.message}`);
+        });
         console.log('Full error object in fetchMarketData:', err);
         console.log('Error stack trace in fetchMarketData:', err.stack);
         console.log('Error name in fetchMarketData:', err.name);
         console.log('Error message in fetchMarketData:', err.message);
       } finally {
-        setLoading(false);
+        startTransition(() => {
+          setLoading(false);
+        });
         console.log('Loading state set to false');
         console.log('Loading state set to false in fetchMarketData finally block');
       }

@@ -3,6 +3,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import helmet from 'helmet'; // Import helmet
 
 // Log the API key immediately when the server starts
 console.log('Initial log of REACT_APP_COINMARKETCAP_API_KEY:', process.env.REACT_APP_COINMARKETCAP_API_KEY);
@@ -14,6 +15,42 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 5000;
+
+// Add helmet middleware for CSP
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: [
+      "'self'",
+      "https://trusted-script-source.com",
+      "https://www.googletagmanager.com",
+      "https://www.google-analytics.com"
+    ],
+    styleSrc: [
+      "'self'",
+      "https://trusted-style-source.com",
+      "https://fonts.googleapis.com"
+    ],
+    frameSrc: [
+      "'self'",
+      "https://form.typeform.com"
+    ],
+    imgSrc: [
+      "'self'",
+      "https://www.google-analytics.com"
+    ],
+    connectSrc: [
+      "'self'",
+      "https://pro-api.coinmarketcap.com",
+      "https://api.binance.com",
+      "https://www.google-analytics.com"
+    ],
+    fontSrc: [
+      "'self'",
+      "https://fonts.gstatic.com"
+    ]
+  }
+}));
 
 // Add CORS headers middleware
 app.use((req, res, next) => {
