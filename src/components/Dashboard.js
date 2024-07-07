@@ -218,18 +218,25 @@ const Dashboard = () => {
 
         // Check for NaN or infinite values in Moving Average
         movingAverageValues.forEach((value, index) => {
-          if (
-        } catch (err) {
-          setError(`Error: ${err.message}`);
-          console.error('Error in loadAndTrainModel:', err);
-        } finally {
-          setLoading(false);
-          console.log('Loading state set to false in loadAndTrainModel finally block');
-        }
-      };
+          if (isNaN(value) || !isFinite(value)) {
+            console.error(`Invalid Moving Average value at index ${index}: ${value}`);
+          }
+        });
 
-      loadAndTrainModel();
-    }, []);
+        // Additional code for training the model and setting the trainingResult and evaluationResult states
+        // ...
+
+      } catch (err) {
+        setError(`Error: ${err.message}`);
+        console.error('Error in loadAndTrainModel:', err);
+      } finally {
+        setLoading(false);
+        console.log('Loading state set to false in loadAndTrainModel finally block');
+      }
+    };
+
+    loadAndTrainModel();
+  }, []);
 
   useEffect(() => {
     console.log('Error state updated:', error);
