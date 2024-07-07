@@ -59,6 +59,8 @@ app.use('/api', createProxyMiddleware({
       console.error('API Key is not defined. Cannot set X-CMC_PRO_API_KEY header.');
     }
     console.log('Final outgoing request headers:', proxyReq.getHeaders()); // Log final headers before sending the request
+    // Additional log to confirm the presence of the X-CMC_PRO_API_KEY header
+    console.log(`Confirming X-CMC_PRO_API_KEY header: ${proxyReq.getHeader('X-CMC_PRO_API_KEY')}`);
   },
   onProxyRes: (proxyRes, req, res) => {
     // Add CORS headers to the response
