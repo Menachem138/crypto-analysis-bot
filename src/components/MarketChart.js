@@ -15,6 +15,8 @@ const MarketChart = ({ data }) => {
         chartInstanceRef.current.destroy();
       }
 
+      console.log('Creating new chart instance with data:', data); // Log the data being passed to the chart
+
       chartInstanceRef.current = new Chart(ctx, {
         type: 'line',
         data: {
@@ -44,6 +46,8 @@ const MarketChart = ({ data }) => {
           },
         },
       });
+
+      console.log('Chart instance created:', chartInstanceRef.current); // Log the created chart instance
     }
 
     // Cleanup function to destroy chart instance on unmount
