@@ -10,7 +10,7 @@ const NewsFeed = () => {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const response = await axios.get('https://newsapi.org/v2/everything?q=cryptocurrency&apiKey=YOUR_NEWS_API_KEY');
+        const response = await axios.get('https://newsapi.org/v2/everything?q=cryptocurrency&apiKey=YOUR_ACTUAL_NEWS_API_KEY');
         setNews(response.data.articles);
       } catch (err) {
         setError(`Error: ${err.message}`);
