@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+console.log('Environment variable REACT_APP_COINLAYER_API_KEY:', process.env.REACT_APP_COINLAYER_API_KEY);
+
 const instance = axios.create({
   baseURL: 'https://api.coinlayer.com',
   headers: {
