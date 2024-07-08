@@ -2,7 +2,7 @@ import React, { useState, useEffect, startTransition } from 'react';
 import { Box, Heading, Text, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
 import MarketChart from './MarketChart.js';
 import CopyTrading from './CopyTrading.js';
-import { getMarketData } from '../coinMarketCapService.js';
+import { getMarketData } from '../coinlayerService.js';
 import { calculateRSI, calculateMovingAverage } from '../technicalAnalysis.js';
 import NewsFeed from './NewsFeed.js';
 import FinancialAdvice from './FinancialAdvice.js';
