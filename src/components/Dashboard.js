@@ -144,19 +144,6 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       });
     });
 
-    // Convert cleanedDataArray to tensors
-    const featureTensor = tf.tensor2d(cleanedDataArray.map(row => [
-      row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average
-    ]));
-    const labelTensor = tf.tensor2d(cleanedDataArray.map(row => [row.Close]));
-
-    // Log the contents of the tensors to ensure they are created correctly
-    console.log('Feature Tensor Data:', featureTensor.arraySync().slice(0, 5)); // Log the first 5 rows of the feature tensor
-    console.log('Label Tensor Data:', labelTensor.arraySync().slice(0, 5)); // Log the first 5 rows of the label tensor
-
-    console.log('Feature Tensor Shape:', featureTensor.shape);
-    console.log('Label Tensor Shape:', labelTensor.shape);
-
     // Calculate RSI with the corrected rolling calculation
     const rsiValues = calculateRSI(cleanedDataArray);
     console.log('RSI Values before assignment:', rsiValues.slice(0, 5)); // Log the first 5 RSI values before assignment
@@ -197,6 +184,10 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average
     ]));
     const labelTensor = tf.tensor2d(cleanedDataArray.map(row => [row.Close]));
+
+    // Log the contents of the tensors to ensure they are created correctly
+    console.log('Feature Tensor Data:', featureTensor.arraySync().slice(0, 5)); // Log the first 5 rows of the feature tensor
+    console.log('Label Tensor Data:', labelTensor.arraySync().slice(0, 5)); // Log the first 5 rows of the label tensor
 
     console.log('Feature Tensor Shape:', featureTensor.shape);
     console.log('Label Tensor Shape:', labelTensor.shape);
