@@ -3,14 +3,14 @@ import axios from 'axios';
 const instance = axios.create({
   baseURL: 'https://api.coinlayer.com',
   headers: {
-    'apikey': '11fea5cda29c95e1ec2945a380495a01'
+    'apikey': process.env.REACT_APP_COINLAYER_API_KEY
   }
 });
 
 const getMarketData = async (symbol) => {
   try {
     const requestParams = {
-      access_key: '11fea5cda29c95e1ec2945a380495a01',
+      access_key: process.env.REACT_APP_COINLAYER_API_KEY,
       target: 'USD',
       symbols: symbol
     };
@@ -39,7 +39,7 @@ const getMarketData = async (symbol) => {
 const getCopyTradingData = async () => {
   try {
     const requestParams = {
-      access_key: '11fea5cda29c95e1ec2945a380495a01',
+      access_key: process.env.REACT_APP_COINLAYER_API_KEY,
       target: 'USD'
     };
     console.log('Making request to Coinlayer API with parameters:', requestParams);
