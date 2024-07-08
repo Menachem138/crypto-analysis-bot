@@ -263,7 +263,7 @@ const Dashboard = () => {
     };
 
     fetchMarketData();
-    loadAndTrainModel(setError, setMarketData, setLoading);
+    // loadAndTrainModel(setError, setMarketData, setLoading);
   }, [loadAndTrainModel]);
 
   useEffect(() => {
