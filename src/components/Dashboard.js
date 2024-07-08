@@ -40,7 +40,7 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-const loadAndTrainModel = async () => {
+const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
   try {
     // Clear any previous errors
     console.log('Clearing error state before starting loadAndTrainModel');
@@ -259,7 +259,7 @@ const Dashboard = () => {
     };
 
     fetchMarketData();
-    loadAndTrainModel();
+    loadAndTrainModel(setError, setMarketData, setLoading);
   }, [loadAndTrainModel]);
 
   useEffect(() => {
