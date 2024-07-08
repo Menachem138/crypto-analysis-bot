@@ -185,13 +185,6 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     ]));
     const labelTensor = tf.tensor2d(cleanedDataArray.map(row => [row.Close]));
 
-    // Log the contents of the tensors to ensure they are created correctly
-    console.log('Feature Tensor Data:', featureTensor.arraySync().slice(0, 5)); // Log the first 5 rows of the feature tensor
-    console.log('Label Tensor Data:', labelTensor.arraySync().slice(0, 5)); // Log the first 5 rows of the label tensor
-
-    console.log('Feature Tensor Shape:', featureTensor.shape);
-    console.log('Label Tensor Shape:', labelTensor.shape);
-
     // Train the model
     console.log('Starting to train the model');
     await trainModel(model, featureTensor, labelTensor);
@@ -199,15 +192,13 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
 
     // Evaluate the model
     console.log('Starting to evaluate the model');
-    console.log('Feature Tensor Shape before evaluation:', featureTensor.shape);
     const evaluationResults = await evaluateModel(model, featureTensor);
     console.log('Model evaluation results:', evaluationResults);
 
     // Generate predictions
     console.log('Starting to generate predictions');
-    console.log('Feature Tensor Shape before prediction:', featureTensor.shape);
     const predictions = model.predict(featureTensor);
-    console.log('Predictions generated successfully:', predictions);
+    console.log('Predictions generated successfully');
 
     // Update state with predictions
     startTransition(() => {
