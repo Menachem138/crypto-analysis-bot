@@ -135,6 +135,28 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
 
     console.log('Cleaned raw data array before tensor creation:', cleanedDataArray.slice(0, 5)); // Log the first 5 cleaned raw data rows
 
+    // Check for NaN or infinite values in cleanedDataArray before tensor creation
+    cleanedDataArray.forEach((row, index) => {
+      Object.keys(row).forEach(key => {
+        if (isNaN(row[key]) || !isFinite(row[key])) {
+          console.error(`Invalid value found in key: ${key}, value: ${row[key]} at row index: ${index}`); // Log the key, value, and row index if NaN or infinite is found
+        }
+      });
+    });
+
+    // Convert cleanedDataArray to tensors
+    const featureTensor = tf.tensor2d(cleanedDataArray.map(row => [
+      row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average
+    ]));
+    const labelTensor = tf.tensor2d(cleanedDataArray.map(row => [row.Close]));
+
+    // Log the contents of the tensors to ensure they are created correctly
+    console.log('Feature Tensor Data:', featureTensor.arraySync().slice(0, 5)); // Log the first 5 rows of the feature tensor
+    console.log('Label Tensor Data:', labelTensor.arraySync().slice(0, 5)); // Log the first 5 rows of the label tensor
+
+    console.log('Feature Tensor Shape:', featureTensor.shape);
+    console.log('Label Tensor Shape:', labelTensor.shape);
+
     // Calculate RSI with the corrected rolling calculation
     const rsiValues = calculateRSI(cleanedDataArray);
     console.log('RSI Values before assignment:', rsiValues.slice(0, 5)); // Log the first 5 RSI values before assignment
