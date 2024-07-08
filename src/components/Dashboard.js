@@ -304,8 +304,8 @@ const Dashboard = () => {
           <Heading as="h2" size="lg" mb={4}>
             Personalized Financial Advice
           </Heading>
-          {console.log('Rendering FinancialAdvice component')}
-          <FinancialAdvice />
+          {console.log('Rendering FinancialAdvice component with props:', { marketData, loading, error })}
+          <FinancialAdvice marketData={marketData} loading={loading} error={error} />
         </Box>
         <Widget id="449162832" style={{ width: '100%', height: '500px' }} className="my-form" />
       </Box>

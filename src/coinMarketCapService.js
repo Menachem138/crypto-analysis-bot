@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: 'https://pro-api.coinmarketcap.com/v1', // Updated to the correct production API endpoint
+  baseURL: 'http://localhost:5000/api', // Updated to use the local proxy server
   headers: {
     'X-CMC_PRO_API_KEY': process.env.REACT_APP_COINMARKETCAP_API_KEY
   }

@@ -191,7 +191,7 @@ app.use('/api', createProxyMiddleware({
   },
   onError: (err, req, res) => {
     // Log any errors that occur during the request forwarding process
-    const logEntry = `Error during request forwarding: ${err.message}\n`;
+    const logEntry = `Error during request forwarding: ${err.message}\nStack trace: ${err.stack}\n`;
     fs.appendFileSync(logFilePath, logEntry);
     console.log(logEntry); // Console log for debugging
     res.status(500).send('Proxy error');

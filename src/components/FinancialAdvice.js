@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import { Box, Heading, Text } from '@chakra-ui/react';
 
-const FinancialAdvice = () => {
+const FinancialAdvice = (props) => {
   useEffect(() => {
     console.log('FinancialAdvice component mounted');
-  }, []);
+    console.log('FinancialAdvice component props:', props);
+  }, [props]);
 
   return (
     <Box>
