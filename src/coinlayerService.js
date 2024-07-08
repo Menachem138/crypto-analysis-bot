@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: 'http://api.coinlayer.com',
+  baseURL: 'https://api.coinlayer.com',
   headers: {
     'apikey': '11fea5cda29c95e1ec2945a380495a01'
   }
