@@ -214,6 +214,33 @@ const Dashboard = () => {
           }
         });
 
+        // Create the model
+        console.log('Creating the model');
+        const model = createModel();
+        console.log('Model created successfully');
+
+        // Train the model
+        console.log('Starting to train the model');
+        await trainModel(model, cleanedDataArray);
+        console.log('Model trained successfully');
+
+        // Evaluate the model
+        console.log('Starting to evaluate the model');
+        const evaluationResults = await evaluateModel(model, cleanedDataArray);
+        console.log('Model evaluation results:', evaluationResults);
+
+        // Generate predictions
+        console.log('Starting to generate predictions');
+        const predictions = model.predict(cleanedDataArray);
+        console.log('Predictions generated successfully:', predictions);
+
+        // Update state with predictions
+        startTransition(() => {
+          setMarketData(prevData => ({
+            ...prevData,
+            predictions: predictions
+          }));
+        });
       } catch (err) {
         setError(`Error: ${err.message}`);
         console.error('Error in loadAndTrainModel:', err);
