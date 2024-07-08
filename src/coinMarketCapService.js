@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'https://pro-api.coinmarketcap.com/v1', // Updated to the correct production API endpoint
   headers: {
     'X-CMC_PRO_API_KEY': process.env.REACT_APP_COINMARKETCAP_API_KEY
   }
@@ -14,7 +14,7 @@ const getMarketData = async (symbol) => {
       convert: 'USD' // Ensure the response is in USD
     };
     console.log('Making request to CoinMarketCap API with parameters:', requestParams);
-    const response = await instance.get(`/v1/cryptocurrency/quotes/latest`, {
+    const response = await instance.get(`/cryptocurrency/quotes/latest`, {
       params: requestParams
     });
     console.log('Full request URL:', response.config.url);
@@ -43,7 +43,7 @@ const getCopyTradingData = async () => {
       convert: 'USD' // Ensure the response is in USD
     };
     console.log('Making request to CoinMarketCap API with parameters:', requestParams);
-    const response = await instance.get(`/v1/cryptocurrency/listings/latest`, {
+    const response = await instance.get(`/cryptocurrency/listings/latest`, {
       params: requestParams
     });
     console.log('Full request URL:', response.config.url);
