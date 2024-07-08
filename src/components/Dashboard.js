@@ -7,6 +7,7 @@ import { calculateRSI, calculateMovingAverage } from '../technicalAnalysis.js';
 import NewsFeed from './NewsFeed.js';
 import FinancialAdvice from './FinancialAdvice.js';
 import { Widget } from '@typeform/embed-react';
+import { createModel, trainModel, evaluateModel } from '../aiModel.js';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
