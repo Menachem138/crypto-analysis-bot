@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './Navbar.js';
 import Dashboard from './components/Dashboard.js';
 import MarketAnalysis from './components/MarketAnalysis.js';
@@ -14,12 +14,12 @@ function App() {
       <Router>
         <div className="App">
           <Navbar />
-          <Switch>
-            <Route exact path="/" component={Dashboard} />
-            <Route path="/market-analysis" component={MarketAnalysis} />
-            <Route path="/predictions" component={Predictions} />
-            <Route path="/copy-trading" component={CopyTrading} />
-          </Switch>
+          <Routes>
+            <Route exact path="/" element={<Dashboard />} />
+            <Route path="/market-analysis" element={<MarketAnalysis />} />
+            <Route path="/predictions" element={<Predictions />} />
+            <Route path="/copy-trading" element={<CopyTrading />} />
+          </Routes>
         </div>
       </Router>
     </ChakraProvider>
