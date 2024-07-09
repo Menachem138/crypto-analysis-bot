@@ -9,8 +9,8 @@ const createModel = () => {
   const model = tf.sequential();
 
   // Add layers to the model
-  model.add(tf.layers.dense({ inputShape: [10], units: 4, activation: 'relu' }));
-  model.add(tf.layers.dense({ units: 2, activation: 'relu' }));
+  model.add(tf.layers.dense({ inputShape: [10], units: 2, activation: 'relu' }));
+  model.add(tf.layers.dense({ units: 1, activation: 'relu' }));
   model.add(tf.layers.dense({ units: 1 }));
 
   // Compile the model
@@ -87,6 +87,10 @@ const trainModel = async (model, trainData, trainLabels) => {
 
       console.log('After model.fit within tf.tidy');
       console.log('Memory usage after model.fit within tf.tidy:', tf.memory());
+
+      // Dispose of intermediate tensors
+      cleanedTrainData.dispose();
+      cleanedTrainLabels.dispose();
 
       return fitHistory;
     });
