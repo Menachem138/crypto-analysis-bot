@@ -144,6 +144,9 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     });
     console.log("MACD calculated successfully");
 
+    // Log cleaned data before tensor conversion
+    console.log("Cleaned data before tensor conversion:", cleanedDataArray);
+
     // Create the model
     const model = createModel();
     console.log("Model created:", model);
