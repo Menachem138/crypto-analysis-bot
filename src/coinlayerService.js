@@ -5,14 +5,14 @@ console.log('Environment variable REACT_APP_COINLAYER_API_KEY:', process.env.REA
 const instance = axios.create({
   baseURL: 'https://api.coinlayer.com',
   headers: {
-    'access_key': process.env.REACT_APP_COINLAYER_API_KEY // Accessing the API key from environment variables
+    'access_key': process.env.REACT_APP_COINLAYER_API_KEY // Use environment variable for API key
   }
 });
 
 const getMarketData = async (symbol) => {
   try {
     const requestParams = {
-      access_key: process.env.REACT_APP_COINLAYER_API_KEY, // Accessing the API key from environment variables
+      access_key: process.env.REACT_APP_COINLAYER_API_KEY, // Use environment variable for API key
       target: 'USD',
       symbols: symbol
     };
@@ -41,7 +41,7 @@ const getMarketData = async (symbol) => {
 const getCopyTradingData = async () => {
   try {
     const requestParams = {
-      access_key: process.env.REACT_APP_COINLAYER_API_KEY, // Accessing the API key from environment variables
+      access_key: process.env.REACT_APP_COINLAYER_API_KEY, // Use environment variable for API key
       target: 'USD'
     };
     console.log('Making request to Coinlayer API with parameters:', requestParams);
