@@ -80,55 +80,64 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
         }
       }).filter(row => row !== null);
 
-      // Filter out rows with NaN or infinite values
       parsedData = parsedData.filter(row => {
         return Object.values(row).every(value => !isNaN(value) && isFinite(value));
       });
 
       // Log the cleaned data for verification
-      console.log('Cleaned parsed data:', parsedData);
+      console.log('Cleaned parsed data after initial filtering:', parsedData);
 
       // Additional check for NaN values before converting to tensors
       if (hasNaN(parsedData)) {
-        console.error('Parsed data contains NaN values:', parsedData);
-        throw new Error('Parsed data contains NaN values');
+        console.error('Parsed data contains NaN values after initial filtering:', parsedData);
+        throw new Error('Parsed data contains NaN values after initial filtering');
       }
+
+      // Convert the data to arrays
+      const dataArray = parsedData;
+
+      // Extract features and labels
+      const cleanedDataArray = dataArray.filter(row => {
+        return Object.values(row).every(value => !isNaN(value) && isFinite(value));
+      });
+
+      // Log the cleaned data array for verification
+      console.log('Cleaned data array after feature extraction:', cleanedDataArray);
+
+      // Calculate RSI with the corrected rolling calculation
+      const rsiValues = calculateRSI(cleanedDataArray);
+      cleanedDataArray.forEach((row, index) => {
+        row.Relative_Strength_Index = rsiValues[index];
+      });
+
+      // Log the data after RSI calculation
+      console.log('Data after RSI calculation:', cleanedDataArray);
+
+      const movingAverageValues = calculateMovingAverage(cleanedDataArray);
+      cleanedDataArray.forEach((row, index) => {
+        row.Moving_Average = movingAverageValues[index];
+      });
+
+      // Log the data after Moving Average calculation
+      console.log('Data after Moving Average calculation:', cleanedDataArray);
+
+      const macdValues = calculateMACD(cleanedDataArray);
+      cleanedDataArray.forEach((row, index) => {
+        row.MACD = macdValues[index];
+      });
+
+      // Additional check for NaN values before converting to tensors
+      if (hasNaN(cleanedDataArray)) {
+        console.error('Cleaned data contains NaN values after technical analysis calculations:', cleanedDataArray);
+        throw new Error('Cleaned data contains NaN values after technical analysis calculations');
+      }
+
+      // Log the final cleaned data array for verification
+      console.log('Final cleaned data array:', cleanedDataArray);
+
     } catch (error) {
       throw new Error(`CSV Parsing Error: ${error.message}`);
     }
-
-    // Convert the data to arrays
-    const dataArray = parsedData;
-
-    // Extract features and labels
-    const cleanedDataArray = dataArray.filter(row => {
-      return Object.values(row).every(value => !isNaN(value) && isFinite(value));
-    });
-
-    // Calculate RSI with the corrected rolling calculation
-    const rsiValues = calculateRSI(cleanedDataArray);
-    cleanedDataArray.forEach((row, index) => {
-      row.Relative_Strength_Index = rsiValues[index];
-    });
-
-    const movingAverageValues = calculateMovingAverage(cleanedDataArray);
-    cleanedDataArray.forEach((row, index) => {
-      row.Moving_Average = movingAverageValues[index];
-    });
-
-    const macdValues = calculateMACD(cleanedDataArray);
-    cleanedDataArray.forEach((row, index) => {
-      row.MACD = macdValues[index];
-    });
-
-    // Additional check for NaN values before converting to tensors
-    if (hasNaN(cleanedDataArray)) {
-      console.error('Cleaned data contains NaN values:', cleanedDataArray);
-      throw new Error('Cleaned data contains NaN values');
-    }
-
-    // Log the cleaned data array for verification
-    console.log('Final cleaned data array:', cleanedDataArray);
 
     // Create the model
     const model = createModel();
