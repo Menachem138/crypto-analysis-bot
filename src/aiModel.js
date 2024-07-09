@@ -29,8 +29,6 @@ const trainModel = async (model, trainData, trainLabels) => {
   console.log('Starting model training...');
   console.log('Training data shape:', trainData.shape);
   console.log('Training labels shape:', trainLabels.shape);
-  console.log('Training data:', trainData.arraySync());
-  console.log('Training labels:', trainLabels.arraySync());
 
   // Check for NaN or infinite values in the input data
   const hasNaN = (tensor) => tf.any(tf.isNaN(tensor)).dataSync()[0];
@@ -46,17 +44,12 @@ const trainModel = async (model, trainData, trainLabels) => {
 
   try {
     console.log('Before model.fit call');
-    console.log('Training data before model.fit:', trainData.arraySync());
-    console.log('Training labels before model.fit:', trainLabels.arraySync());
 
     // Additional check for NaN values immediately before model.fit
     const cleanedTrainData = trainData.arraySync().map(row => row.map(value => isNaN(value) ? 0 : value));
     const cleanedTrainLabels = trainLabels.arraySync().map(row => row.map(value => isNaN(value) ? 0 : value));
     const finalTrainData = tf.tensor2d(cleanedTrainData);
     const finalTrainLabels = tf.tensor2d(cleanedTrainLabels);
-
-    console.log('Cleaned training data:', finalTrainData.arraySync());
-    console.log('Cleaned training labels:', finalTrainLabels.arraySync());
 
     const history = await tf.tidy(() => {
       return model.fit(finalTrainData, finalTrainLabels, {
@@ -85,6 +78,10 @@ const trainModel = async (model, trainData, trainLabels) => {
     console.log('Error name during model training:', error.name);
     console.log('Error message during model training:', error.message);
     throw error;
+  } finally {
+    // Dispose of tensors to free up memory
+    trainData.dispose();
+    trainLabels.dispose();
   }
 };
 
@@ -98,6 +95,10 @@ const evaluateModel = async (model, testData, testLabels) => {
   } catch (error) {
     console.error('Error during model evaluation:', error);
     throw error;
+  } finally {
+    // Dispose of tensors to free up memory
+    testData.dispose();
+    testLabels.dispose();
   }
 };
 
