@@ -46,13 +46,11 @@ const trainModel = async (model, trainData, trainLabels) => {
     console.log('Before model.fit call');
 
     // Additional check for NaN values immediately before model.fit
-    const cleanedTrainData = trainData.arraySync().map(row => row.map(value => isNaN(value) ? 0 : value));
-    const cleanedTrainLabels = trainLabels.arraySync().map(row => row.map(value => isNaN(value) ? 0 : value));
-    const finalTrainData = tf.tensor2d(cleanedTrainData);
-    const finalTrainLabels = tf.tensor2d(cleanedTrainLabels);
+    const cleanedTrainData = trainData.where(tf.isNaN(trainData), tf.zerosLike(trainData));
+    const cleanedTrainLabels = trainLabels.where(tf.isNaN(trainLabels), tf.zerosLike(trainLabels));
 
     const history = await tf.tidy(() => {
-      return model.fit(finalTrainData, finalTrainLabels, {
+      return model.fit(cleanedTrainData, cleanedTrainLabels, {
         epochs: 50,
         batchSize: 32,
         validationSplit: 0.2,
