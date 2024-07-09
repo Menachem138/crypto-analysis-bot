@@ -51,8 +51,8 @@ const trainModel = async (model, trainData, trainLabels) => {
 
     const history = await tf.tidy(() => {
       return model.fit(cleanedTrainData, cleanedTrainLabels, {
-        epochs: 50,
-        batchSize: 32,
+        epochs: 20, // Reduced number of epochs
+        batchSize: 16, // Reduced batch size
         validationSplit: 0.2,
         callbacks: {
           onEpochBegin: (epoch, logs) => {

@@ -83,15 +83,15 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       console.log("CSV file parsed successfully");
       console.log("Parsed data:", parsedData);
 
-      // Check for NaN values in parsed data and replace them with zeros
-      parsedData = parsedData.map(row => {
-        Object.keys(row).forEach(key => {
+      // Filter out rows with NaN or infinite values
+      parsedData = parsedData.filter(row => {
+        return Object.keys(row).every(key => {
           if (isNaN(row[key]) || !isFinite(row[key])) {
-            console.log(`NaN or infinite value detected in parsed data at key ${key}, replacing with 0`);
-            row[key] = 0;
+            console.log(`NaN or infinite value detected in parsed data at key ${key}, filtering out row`);
+            return false;
           }
+          return true;
         });
-        return row;
       });
       console.log("Parsed data cleaned successfully");
       console.log("Cleaned parsed data:", parsedData);
@@ -103,14 +103,14 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     const dataArray = parsedData;
 
     // Extract features and labels
-    const cleanedDataArray = dataArray.map(row => {
-      Object.keys(row).forEach(key => {
+    const cleanedDataArray = dataArray.filter(row => {
+      return Object.keys(row).every(key => {
         if (isNaN(row[key]) || !isFinite(row[key])) {
-          console.log(`NaN or infinite value detected in cleaned data at key ${key}, replacing with 0`);
-          row[key] = 0;
+          console.log(`NaN or infinite value detected in cleaned data at key ${key}, filtering out row`);
+          return false;
         }
+        return true;
       });
-      return row;
     });
     console.log("Data converted to arrays successfully");
     console.log("Cleaned data array:", cleanedDataArray);
@@ -118,60 +118,24 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     // Calculate RSI with the corrected rolling calculation
     const rsiValues = calculateRSI(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
-      if (isNaN(rsiValues[index]) || !isFinite(rsiValues[index])) {
-        console.log(`NaN or infinite value detected in RSI at index ${index}, replacing with 0`);
-        row.Relative_Strength_Index = 0;
-      } else {
-        row.Relative_Strength_Index = rsiValues[index];
-      }
+      row.Relative_Strength_Index = rsiValues[index];
     });
     console.log("RSI calculated successfully");
     console.log("RSI values:", rsiValues);
 
-    // Replace NaN values in RSI
-    cleanedDataArray.forEach((row, index) => {
-      if (isNaN(row.Relative_Strength_Index) || !isFinite(row.Relative_Strength_Index)) {
-        row.Relative_Strength_Index = 0;
-      }
-    });
-
     const movingAverageValues = calculateMovingAverage(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
-      if (isNaN(movingAverageValues[index]) || !isFinite(movingAverageValues[index])) {
-        console.log(`NaN or infinite value detected in Moving Average at index ${index}, replacing with 0`);
-        row.Moving_Average = 0;
-      } else {
-        row.Moving_Average = movingAverageValues[index];
-      }
+      row.Moving_Average = movingAverageValues[index];
     });
     console.log("Moving Average calculated successfully");
     console.log("Moving Average values:", movingAverageValues);
 
-    // Replace NaN values in Moving Average
-    cleanedDataArray.forEach((row, index) => {
-      if (isNaN(row.Moving_Average) || !isFinite(row.Moving_Average)) {
-        row.Moving_Average = 0;
-      }
-    });
-
     const macdValues = calculateMACD(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
-      if (isNaN(macdValues[index]) || !isFinite(macdValues[index])) {
-        console.log(`NaN or infinite value detected in MACD at index ${index}, replacing with 0`);
-        row.MACD = 0;
-      } else {
-        row.MACD = macdValues[index];
-      }
+      row.MACD = macdValues[index];
     });
     console.log("MACD calculated successfully");
     console.log("MACD values:", macdValues);
-
-    // Replace NaN values in MACD
-    cleanedDataArray.forEach((row, index) => {
-      if (isNaN(row.MACD) || !isFinite(row.MACD)) {
-        row.MACD = 0;
-      }
-    });
 
     // Log cleaned data before tensor conversion
     console.log("Cleaned data before tensor conversion:", cleanedDataArray);
