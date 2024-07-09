@@ -18,6 +18,9 @@ const calculateMovingAverage = (data, period = 14) => {
     movingAverage.push(sum / period);
   }
 
+  // Log the moving average for verification
+  console.log('Moving Average:', movingAverage);
+
   // Check for NaN values in the moving average
   if (movingAverage.some(value => isNaN(value))) {
     console.error('Moving Average contains NaN values:', movingAverage);
@@ -55,6 +58,9 @@ const calculateRSI = (data, period = 14) => {
     rsi.push(100 - (100 / (1 + rs)));
   }
 
+  // Log the RSI for verification
+  console.log('RSI:', rsi);
+
   // Check for NaN values in the RSI
   if (rsi.some(value => isNaN(value))) {
     console.error('RSI contains NaN values:', rsi);
@@ -68,6 +74,9 @@ const calculateRSI = (data, period = 14) => {
 const calculateMACD = (data, shortPeriod = 12, longPeriod = 26, signalPeriod = 9) => {
   const closePrices = data.map(row => row.Close);
   const macdResult = ta.MACD(closePrices, shortPeriod, longPeriod, signalPeriod);
+
+  // Log the MACD for verification
+  console.log('MACD:', macdResult.macd);
 
   // Check for NaN values in the MACD
   if (macdResult.macd.some(value => isNaN(value))) {
