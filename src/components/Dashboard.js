@@ -162,6 +162,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     const model = createModel();
 
     // Convert cleanedDataArray to tensors
+    console.log('Data before tensor conversion:', cleanedDataArray);
     const featureTensor = tf.tensor2d(cleanedDataArray.map(row => [
       row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
     ]));
