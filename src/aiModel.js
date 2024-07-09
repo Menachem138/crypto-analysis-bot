@@ -46,10 +46,13 @@ const trainModel = async (model, trainData, trainLabels) => {
     console.log('Before model.fit call');
     console.log('Memory usage before training:', tf.memory());
 
-    const history = await tf.tidy(() => {
+    const history = await tf.tidy(async () => {
       const mask = tf.logicalNot(tf.isNaN(trainData));
-      const cleanedTrainData = tf.booleanMask(trainData, mask);
-      const cleanedTrainLabels = tf.booleanMask(trainLabels, mask);
+      const cleanedTrainData = await tf.booleanMaskAsync(trainData, mask);
+      const cleanedTrainLabels = await tf.booleanMaskAsync(trainLabels, mask);
+
+      console.log('Cleaned training data shape:', cleanedTrainData.shape);
+      console.log('Cleaned training labels shape:', cleanedTrainLabels.shape);
 
       return model.fit(cleanedTrainData, cleanedTrainLabels, {
         epochs: 20, // Reduced number of epochs
