@@ -113,21 +113,21 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     // Calculate RSI with the corrected rolling calculation
     const rsiValues = calculateRSI(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
-      row.Relative_Strength_Index = rsiValues[index];
+      row.Relative_Strength_Index = isNaN(rsiValues[index]) || !isFinite(rsiValues[index]) ? 0 : rsiValues[index];
     });
     console.log("RSI calculated successfully");
 
     // Calculate Moving Average
     const movingAverageValues = calculateMovingAverage(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
-      row.Moving_Average = movingAverageValues[index];
+      row.Moving_Average = isNaN(movingAverageValues[index]) || !isFinite(movingAverageValues[index]) ? 0 : movingAverageValues[index];
     });
     console.log("Moving Average calculated successfully");
 
     // Calculate MACD
     const macdValues = calculateMACD(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
-      row.MACD = macdValues[index];
+      row.MACD = isNaN(macdValues[index]) || !isFinite(macdValues[index]) ? 0 : macdValues[index];
     });
     console.log("MACD calculated successfully");
 
