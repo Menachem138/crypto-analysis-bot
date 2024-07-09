@@ -47,9 +47,10 @@ const trainModel = async (model, trainData, trainLabels) => {
     console.log('Memory usage before training:', tf.memory());
 
     const history = await tf.tidy(async () => {
-      const mask = tf.logicalNot(tf.isNaN(trainData));
-      const cleanedTrainData = await tf.booleanMaskAsync(trainData, mask);
-      const cleanedTrainLabels = await tf.booleanMaskAsync(trainLabels, mask);
+      // Remove rows with NaN values from the training data and labels
+      const mask = tf.logicalNot(tf.isNaN(trainData).any(1));
+      const cleanedTrainData = trainData.booleanMask(mask);
+      const cleanedTrainLabels = trainLabels.booleanMask(mask);
 
       // Log the cleaned tensors for verification
       console.log('Cleaned training data shape:', cleanedTrainData.shape);
