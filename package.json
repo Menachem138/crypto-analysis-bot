@@ -37,7 +37,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "dotenv -e .env react-app-rewired start --config-overrides-path ./config-overrides.js",
+    "start": "react-app-rewired start --config-overrides-path ./config-overrides.js",
     "build": "react-app-rewired build --config-overrides-path ./config-overrides.js",
     "test": "react-app-rewired test --config-overrides-path ./config-overrides.js",
     "eject": "react-scripts eject"
