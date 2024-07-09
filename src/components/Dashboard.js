@@ -221,102 +221,91 @@ const downloadModel = async (setError) => {
   }
 };
 
-const Dashboard = () => {
-  const [marketData, setMarketData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchMarketData = async () => {
-      try {
-        const response = await getMarketData('BTC'); // Pass a default symbol for testing
-        console.log('API response:', response);
-        if (response) {
-          console.log('API response data:', response.data);
-          if (response.data && response.data.rates && response.data.rates.BTC) {
-            console.log('Valid market data received:', response.data.rates.BTC);
-            startTransition(() => {
-              setMarketData(response.data.rates.BTC);
-            });
-          } else {
-            console.error('API response data is missing expected structure:', response.data);
-            throw new Error('API response data is missing expected structure');
-          }
-        } else {
-          console.error('API response is undefined or malformed:', response);
-          throw new Error('API response is undefined or malformed');
-        }
-      } catch (err) {
-        console.error('Error fetching market data:', {
-          message: err.message,
-          response: err.response ? {
-            status: err.response.status,
-            statusText: err.response.statusText,
-            data: err.response.data
-          } : null
-        });
-        console.log('Full error object:', err);
-        console.log('Request config:', err.config);
+// useEffect hook to fetch market data and load the model
+useEffect(() => {
+  const fetchMarketData = async () => {
+    try {
+      const response = await getMarketData('BTC'); // Pass a default symbol for testing
+      console.log('API response:', response);
+      if (response && response.data && response.data.rates && response.data.rates.BTC) {
+        console.log('Valid market data received:', response.data.rates.BTC);
         startTransition(() => {
-          setError(`Error: ${err.message}`);
+          setMarketData(response.data.rates.BTC);
         });
-      } finally {
-        startTransition(() => {
-          setLoading(false);
-        });
+      } else {
+        console.error('API response data is missing expected structure:', response.data);
+        throw new Error('API response data is missing expected structure');
       }
-    };
-
-    // Only call these functions when the component mounts for the first time
-    if (!marketData) {
-      fetchMarketData();
-      loadAndPredictModel(setError, setMarketData, setLoading);
+    } catch (err) {
+      console.error('Error fetching market data:', {
+        message: err.message,
+        response: err.response ? {
+          status: err.response.status,
+          statusText: err.response.statusText,
+          data: err.response.data
+        } : null
+      });
+      console.log('Full error object:', err);
+      console.log('Request config:', err.config);
+      startTransition(() => {
+        setError(`Error: ${err.message}`);
+      });
+    } finally {
+      startTransition(() => {
+        setLoading(false);
+      });
     }
-  }, []);
+  };
 
-
-  if (loading) {
-    return (
-      <Box textAlign="center" py={10} px={6}>
-        <Spinner size="xl" />
-        <Text mt={4}>Loading market data...</Text>
-      </Box>
-    );
+  // Only call these functions when the component mounts for the first time
+  if (!marketData) {
+    fetchMarketData();
+    loadAndPredictModel(setError, setMarketData, setLoading);
   }
+}, [marketData]);
 
-  if (error) {
-    return (
-      <Box textAlign="center" py={10} px={6}>
-        <Alert status="error">
-          <AlertIcon />
-          {error}
-        </Alert>
-      </Box>
-    );
-  }
-
+if (loading) {
   return (
-    <ErrorBoundary>
-      <Box textAlign="center" py={10} px={6}>
-        <Heading as="h1" size="xl" mb={6}>
-          Cryptocurrency Market Data
-        </Heading>
-        {marketData && (
-          <Box>
-            {marketData.market_cap && marketData.market_cap.usd !== undefined && (
-              <Text>Market Cap: {marketData.market_cap.usd}</Text>
-            )}
-            {marketData.total_volume && marketData.total_volume.usd !== undefined && (
-              <Text>24h Volume: {marketData.total_volume.usd}</Text>
-            )}
-            {marketData.market_cap_percentage && marketData.market_cap_percentage.btc !== undefined && (
-              <Text>Bitcoin Dominance: {marketData.market_cap_percentage.btc}%</Text>
-            )}
-          </Box>
-        )}
-      </Box>
-    </ErrorBoundary>
+    <Box textAlign="center" py={10} px={6}>
+      <Spinner size="xl" />
+      <Text mt={4}>Loading market data...</Text>
+    </Box>
   );
+}
+
+if (error) {
+  return (
+    <Box textAlign="center" py={10} px={6}>
+      <Alert status="error">
+        <AlertIcon />
+        {error}
+      </Alert>
+    </Box>
+  );
+}
+
+return (
+  <ErrorBoundary>
+    <Box textAlign="center" py={10} px={6}>
+      <Heading as="h1" size="xl" mb={6}>
+        Cryptocurrency Market Data
+      </Heading>
+      {marketData && (
+        <Box>
+          {marketData.market_cap && marketData.market_cap.usd !== undefined && (
+            <Text>Market Cap: {marketData.market_cap.usd}</Text>
+          )}
+          {marketData.total_volume && marketData.total_volume.usd !== undefined && (
+            <Text>24h Volume: {marketData.total_volume.usd}</Text>
+          )}
+          {marketData.market_cap_percentage && marketData.market_cap_percentage.btc !== undefined && (
+            <Text>Bitcoin Dominance: {marketData.market_cap_percentage.btc}%</Text>
+          )}
+        </Box>
+      )}
+    </Box>
+  </ErrorBoundary>
+);
 };
 
 export default Dashboard;
