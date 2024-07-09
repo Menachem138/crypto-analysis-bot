@@ -217,6 +217,9 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       });
     });
 
+    // Log model configuration before training
+    console.log("Model configuration before training:", model);
+
     // Train the model
     await trainModel(model, featureTensor, labelTensor);
     console.log("Model trained");
