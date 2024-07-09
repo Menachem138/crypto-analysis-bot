@@ -113,6 +113,12 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       // Log the data after RSI calculation
       console.log('Data after RSI calculation:', cleanedDataArray);
 
+      // Additional check for NaN values after RSI calculation
+      if (hasNaN(cleanedDataArray)) {
+        console.error('Data contains NaN values after RSI calculation:', cleanedDataArray);
+        throw new Error('Data contains NaN values after RSI calculation');
+      }
+
       const movingAverageValues = calculateMovingAverage(cleanedDataArray);
       cleanedDataArray.forEach((row, index) => {
         row.Moving_Average = movingAverageValues[index];
@@ -121,12 +127,18 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       // Log the data after Moving Average calculation
       console.log('Data after Moving Average calculation:', cleanedDataArray);
 
+      // Additional check for NaN values after Moving Average calculation
+      if (hasNaN(cleanedDataArray)) {
+        console.error('Data contains NaN values after Moving Average calculation:', cleanedDataArray);
+        throw new Error('Data contains NaN values after Moving Average calculation');
+      }
+
       const macdValues = calculateMACD(cleanedDataArray);
       cleanedDataArray.forEach((row, index) => {
         row.MACD = macdValues[index];
       });
 
-      // Additional check for NaN values before converting to tensors
+      // Additional check for NaN values after MACD calculation
       if (hasNaN(cleanedDataArray)) {
         console.error('Cleaned data contains NaN values after technical analysis calculations:', cleanedDataArray);
         throw new Error('Cleaned data contains NaN values after technical analysis calculations');
