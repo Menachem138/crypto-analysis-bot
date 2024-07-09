@@ -80,12 +80,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
 
       // Filter out rows with NaN or infinite values
       parsedData = parsedData.filter(row => {
-        return Object.keys(row).every(key => {
-          if (isNaN(row[key]) || !isFinite(row[key])) {
-            return false;
-          }
-          return true;
-        });
+        return Object.values(row).every(value => !isNaN(value) && isFinite(value));
       });
     } catch (error) {
       throw new Error(`CSV Parsing Error: ${error.message}`);
@@ -96,12 +91,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
 
     // Extract features and labels
     const cleanedDataArray = dataArray.filter(row => {
-      return Object.keys(row).every(key => {
-        if (isNaN(row[key]) || !isFinite(row[key])) {
-          return false;
-        }
-        return true;
-      });
+      return Object.values(row).every(value => !isNaN(value) && isFinite(value));
     });
 
     // Calculate RSI with the corrected rolling calculation
