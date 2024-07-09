@@ -66,8 +66,8 @@ const trainModel = async (model, trainData, trainLabels) => {
       console.log('Memory usage before model.fit within tf.tidy:', tf.memory());
 
       const fitHistory = await model.fit(cleanedTrainData, cleanedTrainLabels, {
-        epochs: 3, // Further reduced number of epochs
-        batchSize: 2, // Further reduced batch size
+        epochs: 1, // Further reduced number of epochs
+        batchSize: 1, // Further reduced batch size
         validationSplit: 0.2,
         callbacks: {
           onEpochBegin: (epoch, logs) => {
