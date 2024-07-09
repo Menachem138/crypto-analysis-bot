@@ -18,6 +18,12 @@ const calculateMovingAverage = (data, period = 14) => {
     movingAverage.push(sum / period);
   }
 
+  // Check for NaN values in the moving average
+  if (movingAverage.some(value => isNaN(value))) {
+    console.error('Moving Average contains NaN values:', movingAverage);
+    throw new Error('Moving Average contains NaN values');
+  }
+
   return movingAverage;
 };
 
@@ -49,6 +55,12 @@ const calculateRSI = (data, period = 14) => {
     rsi.push(100 - (100 / (1 + rs)));
   }
 
+  // Check for NaN values in the RSI
+  if (rsi.some(value => isNaN(value))) {
+    console.error('RSI contains NaN values:', rsi);
+    throw new Error('RSI contains NaN values');
+  }
+
   return rsi;
 };
 
@@ -56,6 +68,13 @@ const calculateRSI = (data, period = 14) => {
 const calculateMACD = (data, shortPeriod = 12, longPeriod = 26, signalPeriod = 9) => {
   const closePrices = data.map(row => row.Close);
   const macdResult = ta.MACD(closePrices, shortPeriod, longPeriod, signalPeriod);
+
+  // Check for NaN values in the MACD
+  if (macdResult.macd.some(value => isNaN(value))) {
+    console.error('MACD contains NaN values:', macdResult.macd);
+    throw new Error('MACD contains NaN values');
+  }
+
   return macdResult.macd; // Return only the MACD array
 };
 

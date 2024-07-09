@@ -2,7 +2,7 @@ import React, { useState, useEffect, startTransition } from 'react';
 import { Box, Heading, Text, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
 import { getMarketData } from '../coinlayerService.js';
 import { calculateRSI, calculateMovingAverage, calculateMACD } from '../technicalAnalysis.js';
-import { createModel, trainModel, evaluateModel } from '../aiModel.js';
+import { createModel, trainModel } from '../aiModel.js';
 import * as tf from '@tensorflow/tfjs';
 
 class ErrorBoundary extends React.Component {
@@ -52,6 +52,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
 
     // Parse and clean the CSV data
     let parsedData;
+    let cleanedDataArray;
     try {
       const csvText = await response.text();
       const rows = csvText.split('\n').slice(2).filter(row => row.trim() !== '' && row.split(',').length === 10 && !isNaN(parseInt(row.split(',')[0], 10)));
@@ -92,7 +93,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       const dataArray = parsedData;
 
       // Extract features and labels
-      const cleanedDataArray = dataArray.filter(row => {
+      cleanedDataArray = dataArray.filter(row => {
         return Object.values(row).every(value => !isNaN(value) && isFinite(value));
       });
 
@@ -100,6 +101,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       console.log('Cleaned data array after feature extraction:', cleanedDataArray);
 
       // Calculate RSI with the corrected rolling calculation
+      console.log('Data before RSI calculation:', cleanedDataArray);
       const rsiValues = calculateRSI(cleanedDataArray);
       cleanedDataArray.forEach((row, index) => {
         row.Relative_Strength_Index = rsiValues[index];
@@ -114,6 +116,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
         throw new Error('Data contains NaN values after RSI calculation');
       }
 
+      console.log('Data before Moving Average calculation:', cleanedDataArray);
       const movingAverageValues = calculateMovingAverage(cleanedDataArray);
       cleanedDataArray.forEach((row, index) => {
         row.Moving_Average = movingAverageValues[index];
@@ -128,10 +131,14 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
         throw new Error('Data contains NaN values after Moving Average calculation');
       }
 
+      console.log('Data before MACD calculation:', cleanedDataArray);
       const macdValues = calculateMACD(cleanedDataArray);
       cleanedDataArray.forEach((row, index) => {
         row.MACD = macdValues[index];
       });
+
+      // Log the data after MACD calculation
+      console.log('Data after MACD calculation:', cleanedDataArray);
 
       // Additional check for NaN values after MACD calculation
       if (hasNaN(cleanedDataArray)) {
@@ -244,19 +251,6 @@ const Dashboard = () => {
     );
   }
 
-  const formattedMarketData = marketData && typeof marketData === 'object' ? Object.keys(marketData).map(key => {
-    const dataPoint = marketData[key];
-    if (dataPoint && dataPoint.quote && dataPoint.quote.USD && dataPoint.quote.USD.price && dataPoint.quote.USD.last_updated) {
-      const date = new Date(dataPoint.quote.USD.last_updated);
-      return {
-        date: date, // Convert last_updated to Date object
-        price: dataPoint.quote.USD.price
-      };
-    } else {
-      return null;
-    }
-  }).filter(dataPoint => dataPoint !== null) : [];
-
   return (
     <ErrorBoundary>
       <Box textAlign="center" py={10} px={6}>
@@ -276,21 +270,6 @@ const Dashboard = () => {
             )}
           </Box>
         )}
-        {/* <MarketChart data={formattedMarketData} />
-        <CopyTrading />
-        <Box mt={6}>
-          <Heading as="h2" size="lg" mb={4}>
-            Significant News
-          </Heading>
-          <NewsFeed />
-        </Box>
-        <Box mt={6}>
-          <Heading as="h2" size="lg" mb={4}>
-            Personalized Financial Advice
-          </Heading>
-          {console.log('Rendering FinancialAdvice component with props:', { marketData, loading, error })}
-          <FinancialAdvice marketData={marketData} loading={loading} error={error} />
-        </Box> */}
       </Box>
     </ErrorBoundary>
   );
