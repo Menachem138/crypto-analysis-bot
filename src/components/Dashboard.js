@@ -113,6 +113,8 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       row.Moving_Average = movingAverageValues[index];
     });
 
+    // Commenting out TensorFlow.js related code
+    /*
     // Create the model
     const model = createModel();
 
@@ -138,6 +140,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
         predictions: predictions
       }));
     });
+    */
   } catch (err) {
     setError(`Error: ${err.message}`);
   } finally {
@@ -192,7 +195,7 @@ const Dashboard = () => {
     };
 
     fetchMarketData();
-    loadAndTrainModel(setError, setMarketData, setLoading);
+    // loadAndTrainModel(setError, setMarketData, setLoading);
   }, [loadAndTrainModel]);
 
   useEffect(() => {
