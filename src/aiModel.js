@@ -51,8 +51,11 @@ const trainModel = async (model, trainData, trainLabels) => {
       const cleanedTrainData = await tf.booleanMaskAsync(trainData, mask);
       const cleanedTrainLabels = await tf.booleanMaskAsync(trainLabels, mask);
 
+      // Log the cleaned tensors for verification
       console.log('Cleaned training data shape:', cleanedTrainData.shape);
       console.log('Cleaned training labels shape:', cleanedTrainLabels.shape);
+      console.log('Cleaned training data:', cleanedTrainData.arraySync());
+      console.log('Cleaned training labels:', cleanedTrainLabels.arraySync());
 
       return model.fit(cleanedTrainData, cleanedTrainLabels, {
         epochs: 20, // Reduced number of epochs
