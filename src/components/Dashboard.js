@@ -154,6 +154,15 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
       // Log the final cleaned data array for verification
       console.log('Final cleaned data array:', cleanedDataArray);
 
+      // Additional check for NaN values before sending to the server
+      if (hasNaN(cleanedDataArray)) {
+        console.error('Final cleaned data contains NaN values:', cleanedDataArray);
+        throw new Error('Final cleaned data contains NaN values');
+      }
+
+      // Log the data being sent to the server for predictions
+      console.log('Data being sent to the server for predictions:', cleanedDataArray);
+
     } catch (error) {
       throw new Error(`CSV Parsing Error: ${error.message}`);
     }
