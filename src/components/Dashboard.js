@@ -267,8 +267,11 @@ const Dashboard = () => {
       }
     };
 
-    fetchMarketData();
-    loadAndPredictModel(setError, setMarketData, setLoading);
+    // Only call these functions when the component mounts for the first time
+    if (!marketData) {
+      fetchMarketData();
+      loadAndPredictModel(setError, setMarketData, setLoading);
+    }
   }, []);
 
 
