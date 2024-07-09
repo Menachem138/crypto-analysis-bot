@@ -76,6 +76,8 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
         }
       }).filter(row => row !== null);
 
+      console.log('Parsed data:', parsedData);
+
       parsedData = parsedData.filter(row => {
         return Object.values(row).every(value => !isNaN(value) && isFinite(value));
       });
