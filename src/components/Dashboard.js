@@ -80,6 +80,11 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
         return Object.values(row).every(value => !isNaN(value) && isFinite(value));
       });
 
+      // Additional step to remove any rows with NaN values
+      parsedData = parsedData.filter(row => {
+        return !hasNaN([row]);
+      });
+
       // Log the cleaned data for verification
       console.log('Cleaned parsed data after initial filtering:', parsedData);
 
