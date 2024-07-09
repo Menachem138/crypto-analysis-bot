@@ -44,7 +44,6 @@ class ErrorBoundary extends React.Component {
 
 const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
   try {
-    console.log("Starting loadAndTrainModel function");
     // Clear any previous errors
     setError(null);
 
@@ -150,8 +149,8 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     // Dispose of tensors to free up memory
     featureTensor.dispose();
     labelTensor.dispose();
+    predictions.dispose(); // Dispose of predictions tensor
   } catch (err) {
-    console.log("Error in loadAndTrainModel function:", err);
     setError(`Error: ${err.message}`);
   } finally {
     setLoading(false);
@@ -159,31 +158,14 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
 };
 
 const Dashboard = () => {
-  console.log('Dashboard component is rendering');
   const [marketData, setMarketData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  console.log('Initial error state:', error);
-  console.log('Initial loading state:', loading);
-
-  // Add logging for state updates
-  useEffect(() => {
-    console.log('Updated marketData state:', marketData);
-  }, [marketData]);
-
-  useEffect(() => {
-    console.log('Updated error state:', error);
-  }, [error]);
-
-  useEffect(() => {
-    console.log('Updated loading state:', loading);
-  }, [loading]);
 
   useEffect(() => {
     const fetchMarketData = async () => {
       try {
         const response = await getMarketData('BTC'); // Pass a default symbol for testing
-        console.log('Market Data:', response.data); // Log the market data
         startTransition(() => {
           setMarketData(response.data);
         });
@@ -191,30 +173,19 @@ const Dashboard = () => {
         startTransition(() => {
           setError(`Error: ${err.message}`);
         });
-        console.log('Full error object in fetchMarketData:', err);
-        console.log('Error stack trace in fetchMarketData:', err.stack);
-        console.log('Error name in fetchMarketData:', err.name);
-        console.log('Error message in fetchMarketData:', err.message);
       } finally {
         startTransition(() => {
           setLoading(false);
         });
-        console.log('Loading state set to false');
-        console.log('Loading state set to false in fetchMarketData finally block');
       }
     };
 
     fetchMarketData();
     loadAndTrainModel(setError, setMarketData, setLoading);
-    // <Widget id="449162832" style={{ width: '100%', height: '500px' }} className="my-form" />
   }, [loadAndTrainModel]);
 
-  useEffect(() => {
-    console.log('Error state updated:', error);
-  }, [error]);
 
   if (loading) {
-    console.log('Loading state is true, displaying loading spinner');
     return (
       <Box textAlign="center" py={10} px={6}>
         <Spinner size="xl" />
@@ -224,7 +195,6 @@ const Dashboard = () => {
   }
 
   if (error) {
-    console.log('Error state is true, displaying error message:', error);
     return (
       <Box textAlign="center" py={10} px={6}>
         <Alert status="error">
@@ -235,26 +205,18 @@ const Dashboard = () => {
     );
   }
 
-  console.log('Rendering market data and charts');
-  console.log('Market Data:', marketData);
-
   const formattedMarketData = marketData && typeof marketData === 'object' ? Object.keys(marketData).map(key => {
     const dataPoint = marketData[key];
-    console.log('Data Point:', dataPoint); // Log each data point
     if (dataPoint && dataPoint.quote && dataPoint.quote.USD && dataPoint.quote.USD.price && dataPoint.quote.USD.last_updated) {
       const date = new Date(dataPoint.quote.USD.last_updated);
-      console.log('Converted Date:', date); // Log the converted date
       return {
         date: date, // Convert last_updated to Date object
         price: dataPoint.quote.USD.price
       };
     } else {
-      console.log('Invalid data point:', dataPoint); // Log invalid data points
       return null;
     }
   }).filter(dataPoint => dataPoint !== null) : [];
-
-  console.log('Formatted Market Data:', formattedMarketData);
 
   return (
     <ErrorBoundary>
