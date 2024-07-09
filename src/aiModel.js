@@ -9,8 +9,8 @@ const createModel = () => {
   const model = tf.sequential();
 
   // Add layers to the model
-  model.add(tf.layers.dense({ inputShape: [10], units: 64, activation: 'relu' }));
-  model.add(tf.layers.dense({ units: 32, activation: 'relu' }));
+  model.add(tf.layers.dense({ inputShape: [10], units: 16, activation: 'relu' }));
+  model.add(tf.layers.dense({ units: 8, activation: 'relu' }));
   model.add(tf.layers.dense({ units: 1 }));
 
   // Compile the model
