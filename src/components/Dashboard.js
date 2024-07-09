@@ -39,7 +39,7 @@ class ErrorBoundary extends React.Component {
 
 const hasNaN = (array) => array.some(row => Object.values(row).some(value => isNaN(value)));
 
-const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
+const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
   try {
     // Clear any previous errors
     setError(null);
@@ -158,60 +158,66 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       throw new Error(`CSV Parsing Error: ${error.message}`);
     }
 
-    // Create the model
-    const model = createModel();
+    // Send data to the server for predictions
+    const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        features: cleanedDataArray.map(row => [
+          row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
+        ]),
+      }),
+    });
 
-    // Convert cleanedDataArray to tensors
-    console.log('Data before tensor conversion:', cleanedDataArray);
-    const featureTensor = tf.tensor2d(cleanedDataArray.map(row => [
-      row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
-    ]));
-    const labelTensor = tf.tensor2d(cleanedDataArray.map(row => [row.Close]));
-
-    // Log the tensors for verification
-    console.log('Feature tensor:', featureTensor);
-    console.log('Label tensor:', labelTensor);
-
-    // Additional check for NaN values in tensors
-    if (hasNaN(featureTensor) || hasNaN(labelTensor)) {
-      console.error('Tensors contain NaN values:', { featureTensor: featureTensor.arraySync(), labelTensor: labelTensor.arraySync() });
-      throw new Error('Tensors contain NaN values');
+    if (!predictResponse.ok) {
+      throw new Error(`Server error: ${predictResponse.statusText}`);
     }
 
-    // Log memory usage before training
-    console.log('Memory usage before training:', tf.memory());
-
-    // Train the model
-    await trainModel(model, featureTensor, labelTensor);
-
-    // Log memory usage after training
-    console.log('Memory usage after training:', tf.memory());
-
-    // Generate predictions
-    const predictions = model.predict(featureTensor);
-
-    // Log memory usage after predictions
-    console.log('Memory usage after predictions:', tf.memory());
+    const result = await predictResponse.json();
+    console.log('Predictions received from the server:', result);
 
     // Update state with predictions
     startTransition(() => {
       setMarketData(prevData => ({
         ...prevData,
-        predictions: predictions
+        predictions: result.predictions
       }));
     });
 
-    // Dispose of tensors to free up memory
-    featureTensor.dispose();
-    labelTensor.dispose();
-    predictions.dispose(); // Dispose of predictions tensor
-
-    // Log memory usage after tensor disposal
-    console.log('Memory usage after tensor disposal:', tf.memory());
   } catch (err) {
     setError(`Error: ${err.message}`);
   } finally {
     setLoading(false);
+  }
+};
+
+const downloadModel = async (setError) => {
+  try {
+    // Clear any previous errors
+    setError(null);
+
+    // Send request to download the model
+    const response = await fetch('http://127.0.0.1:5000/download_model', {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.statusText}`);
+    }
+
+    // Handle the file download
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'saved_model.h5';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (err) {
+    setError(`Error: ${err.message}`);
   }
 };
 
@@ -224,10 +230,33 @@ const Dashboard = () => {
     const fetchMarketData = async () => {
       try {
         const response = await getMarketData('BTC'); // Pass a default symbol for testing
-        startTransition(() => {
-          setMarketData(response.data);
-        });
+        console.log('API response:', response);
+        if (response && response.data) {
+          console.log('API response data:', response.data);
+          if (response.data.rates && response.data.rates.BTC) {
+            console.log('Valid market data received:', response.data.rates.BTC);
+            startTransition(() => {
+              setMarketData(response.data.rates.BTC);
+            });
+          } else {
+            console.error('API response data is missing expected structure:', response.data);
+            throw new Error('API response data is missing expected structure');
+          }
+        } else {
+          console.error('API response data is undefined or malformed:', response);
+          throw new Error('API response data is undefined or malformed');
+        }
       } catch (err) {
+        console.error('Error fetching market data:', {
+          message: err.message,
+          response: err.response ? {
+            status: err.response.status,
+            statusText: err.response.statusText,
+            data: err.response.data
+          } : null
+        });
+        console.log('Full error object:', err);
+        console.log('Request config:', err.config);
         startTransition(() => {
           setError(`Error: ${err.message}`);
         });
@@ -239,7 +268,7 @@ const Dashboard = () => {
     };
 
     fetchMarketData();
-    loadAndTrainModel(setError, setMarketData, setLoading);
+    loadAndPredictModel(setError, setMarketData, setLoading);
   }, []);
 
 

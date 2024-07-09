@@ -43,61 +43,33 @@ const trainModel = async (model, trainData, trainLabels) => {
   }
 
   try {
-    console.log('Before model.fit call');
-    console.log('Memory usage before training:', tf.memory());
+    console.log('Before sending data to the server for training');
+    console.log('Memory usage before sending data:', tf.memory());
 
-    const history = await tf.tidy(async () => {
-      // Remove rows with NaN values from the training data and labels
-      const mask = tf.logicalNot(tf.isNaN(trainData).any(1));
-      const cleanedTrainData = trainData.booleanMask(mask);
-      const cleanedTrainLabels = trainLabels.booleanMask(mask);
+    // Convert tensors to arrays
+    const trainDataArray = trainData.arraySync();
+    const trainLabelsArray = trainLabels.arraySync();
 
-      // Log the cleaned tensors for verification
-      console.log('Cleaned training data shape:', cleanedTrainData.shape);
-      console.log('Cleaned training labels shape:', cleanedTrainLabels.shape);
-      console.log('Cleaned training data:', cleanedTrainData.arraySync());
-      console.log('Cleaned training labels:', cleanedTrainLabels.arraySync());
-
-      // Additional logging to trace data transformation steps
-      console.log('First row of cleaned training data:', cleanedTrainData.slice([0, 0], [1, -1]).arraySync());
-      console.log('First row of cleaned training labels:', cleanedTrainLabels.slice([0, 0], [1, -1]).arraySync());
-
-      console.log('Before model.fit within tf.tidy');
-      console.log('Memory usage before model.fit within tf.tidy:', tf.memory());
-
-      const fitHistory = await model.fit(cleanedTrainData, cleanedTrainLabels, {
-        epochs: 1, // Further reduced number of epochs
-        batchSize: 1, // Further reduced batch size
-        validationSplit: 0.0, // Removed validation split to minimize memory usage
-        callbacks: {
-          onEpochBegin: (epoch, logs) => {
-            console.log(`Epoch ${epoch + 1} starting...`);
-            console.log(`Memory usage at the start of epoch ${epoch + 1}:`, tf.memory());
-          },
-          onEpochEnd: (epoch, logs) => {
-            console.log(`Epoch ${epoch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
-            console.log(`Memory usage after epoch ${epoch + 1}:`, tf.memory());
-          },
-          onBatchEnd: (batch, logs) => {
-            console.log(`Batch ${batch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
-            console.log(`Memory usage after batch ${batch + 1}:`, tf.memory());
-          },
-        },
-      });
-
-      console.log('After model.fit within tf.tidy');
-      console.log('Memory usage after model.fit within tf.tidy:', tf.memory());
-
-      // Dispose of intermediate tensors
-      cleanedTrainData.dispose();
-      cleanedTrainLabels.dispose();
-
-      return fitHistory;
+    // Send training data to the server
+    const response = await fetch('http://127.0.0.1:5000/train', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        features: trainDataArray,
+        labels: trainLabelsArray,
+      }),
     });
 
-    console.log('Model trained successfully:', history);
-    console.log('Memory usage after training:', tf.memory());
-    return history;
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log('Model trained successfully on the server:', result);
+
+    return result;
   } catch (error) {
     console.error('Error during model training:', error);
     console.log('Error stack trace during model training:', error.stack);
