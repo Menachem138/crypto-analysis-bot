@@ -46,8 +46,8 @@ const trainModel = async (model, trainData, trainLabels) => {
   const dataMask = tf.logicalNot(tf.isNaN(trainData));
   const labelsMask = tf.logicalNot(tf.isNaN(trainLabels));
   const combinedMask = tf.logicalAnd(dataMask, labelsMask);
-  const cleanedTrainData = tf.booleanMask(trainData, combinedMask);
-  const cleanedTrainLabels = tf.booleanMask(trainLabels, combinedMask);
+  let cleanedTrainData = tf.booleanMask(trainData, combinedMask);
+  let cleanedTrainLabels = tf.booleanMask(trainLabels, combinedMask);
 
   try {
     console.log('Before model.fit call');
