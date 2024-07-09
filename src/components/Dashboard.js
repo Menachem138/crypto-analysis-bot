@@ -180,6 +180,22 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     console.log("Feature tensor data:", featureTensor.arraySync());
     console.log("Label tensor data:", labelTensor.arraySync());
 
+    // Check for NaN values in tensors
+    featureTensor.arraySync().forEach((row, index) => {
+      row.forEach((value, key) => {
+        if (isNaN(value) || !isFinite(value)) {
+          console.log(`NaN or infinite value detected in feature tensor at index ${index}, key ${key}`);
+        }
+      });
+    });
+    labelTensor.arraySync().forEach((row, index) => {
+      row.forEach((value, key) => {
+        if (isNaN(value) || !isFinite(value)) {
+          console.log(`NaN or infinite value detected in label tensor at index ${index}, key ${key}`);
+        }
+      });
+    });
+
     // Train the model
     await trainModel(model, featureTensor, labelTensor);
     console.log("Model trained");
