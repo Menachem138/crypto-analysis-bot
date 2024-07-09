@@ -44,6 +44,7 @@ const trainModel = async (model, trainData, trainLabels) => {
 
   try {
     console.log('Before model.fit call');
+    console.log('Memory usage before training:', tf.memory());
 
     // Filter out rows with NaN values
     const cleanedTrainData = trainData.where(tf.logicalNot(tf.isNaN(trainData)));
@@ -56,22 +57,22 @@ const trainModel = async (model, trainData, trainLabels) => {
         validationSplit: 0.2,
         callbacks: {
           onEpochBegin: (epoch, logs) => {
-            // Commented out to reduce verbosity
-            // console.log(`Epoch ${epoch + 1} starting...`);
+            console.log(`Epoch ${epoch + 1} starting...`);
+            console.log(`Memory usage at the start of epoch ${epoch + 1}:`, tf.memory());
           },
           onEpochEnd: (epoch, logs) => {
-            // Commented out to reduce verbosity
-            // console.log(`Epoch ${epoch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
+            console.log(`Epoch ${epoch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
+            console.log(`Memory usage after epoch ${epoch + 1}:`, tf.memory());
           },
           onBatchEnd: (batch, logs) => {
-            // Commented out to reduce verbosity
-            // console.log(`Batch ${batch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
+            console.log(`Batch ${batch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
           },
         },
       });
     });
 
     console.log('Model trained successfully:', history);
+    console.log('Memory usage after training:', tf.memory());
     return history;
   } catch (error) {
     console.error('Error during model training:', error);
@@ -83,6 +84,8 @@ const trainModel = async (model, trainData, trainLabels) => {
     // Dispose of tensors to free up memory
     trainData.dispose();
     trainLabels.dispose();
+    cleanedTrainData.dispose();
+    cleanedTrainLabels.dispose();
   }
 };
 
