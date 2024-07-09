@@ -42,12 +42,9 @@ const trainModel = async (model, trainData, trainLabels) => {
     throw new Error('Training data contains infinite values');
   }
 
-  // Filter out rows with NaN values using booleanMask
-  const dataMask = tf.logicalNot(tf.isNaN(trainData));
-  const labelsMask = tf.logicalNot(tf.isNaN(trainLabels));
-  const combinedMask = tf.logicalAnd(dataMask, labelsMask);
-  let cleanedTrainData = tf.booleanMask(trainData, combinedMask);
-  let cleanedTrainLabels = tf.booleanMask(trainLabels, combinedMask);
+  // Filter out rows with NaN values using alternative method
+  const cleanedTrainData = trainData.where(tf.logicalNot(tf.isNaN(trainData)));
+  const cleanedTrainLabels = trainLabels.where(tf.logicalNot(tf.isNaN(trainLabels)));
 
   try {
     console.log('Before model.fit call');
