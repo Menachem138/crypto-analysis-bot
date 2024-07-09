@@ -9,8 +9,8 @@ const createModel = () => {
   const model = tf.sequential();
 
   // Add layers to the model
-  model.add(tf.layers.dense({ inputShape: [10], units: 16, activation: 'relu' }));
-  model.add(tf.layers.dense({ units: 8, activation: 'relu' }));
+  model.add(tf.layers.dense({ inputShape: [10], units: 8, activation: 'relu' }));
+  model.add(tf.layers.dense({ units: 4, activation: 'relu' }));
   model.add(tf.layers.dense({ units: 1 }));
 
   // Compile the model
@@ -65,8 +65,8 @@ const trainModel = async (model, trainData, trainLabels) => {
       console.log('Memory usage before model.fit within tf.tidy:', tf.memory());
 
       const fitHistory = await model.fit(cleanedTrainData, cleanedTrainLabels, {
-        epochs: 20, // Reduced number of epochs
-        batchSize: 16, // Reduced batch size
+        epochs: 5, // Further reduced number of epochs
+        batchSize: 4, // Further reduced batch size
         validationSplit: 0.2,
         callbacks: {
           onEpochBegin: (epoch, logs) => {
