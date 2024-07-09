@@ -21,6 +21,7 @@ const getMarketData = async (symbol) => {
     });
     console.log('Full request URL:', response.config.url);
     console.log('Received response from CoinGecko API:', response);
+    console.log('Response data:', response.data); // Add detailed logging of response data
     return response.data;
   } catch (error) {
     console.error('Error fetching market data:', {
