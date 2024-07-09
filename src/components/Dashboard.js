@@ -231,9 +231,9 @@ const Dashboard = () => {
       try {
         const response = await getMarketData('BTC'); // Pass a default symbol for testing
         console.log('API response:', response);
-        if (response && response.data) {
+        if (response) {
           console.log('API response data:', response.data);
-          if (response.data.rates && response.data.rates.BTC) {
+          if (response.data && response.data.rates && response.data.rates.BTC) {
             console.log('Valid market data received:', response.data.rates.BTC);
             startTransition(() => {
               setMarketData(response.data.rates.BTC);
@@ -243,8 +243,8 @@ const Dashboard = () => {
             throw new Error('API response data is missing expected structure');
           }
         } else {
-          console.error('API response data is undefined or malformed:', response);
-          throw new Error('API response data is undefined or malformed');
+          console.error('API response is undefined or malformed:', response);
+          throw new Error('API response is undefined or malformed');
         }
       } catch (err) {
         console.error('Error fetching market data:', {
