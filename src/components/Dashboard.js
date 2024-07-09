@@ -143,14 +143,23 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     console.log('Feature tensor:', featureTensor);
     console.log('Label tensor:', labelTensor);
 
+    // Log memory usage before training
+    console.log('Memory usage before training:', tf.memory());
+
     // Train the model
     await trainModel(model, featureTensor, labelTensor);
+
+    // Log memory usage after training
+    console.log('Memory usage after training:', tf.memory());
 
     // Evaluate the model
     const evaluationResults = await evaluateModel(model, featureTensor);
 
     // Generate predictions
     const predictions = model.predict(featureTensor);
+
+    // Log memory usage after predictions
+    console.log('Memory usage after predictions:', tf.memory());
 
     // Update state with predictions
     startTransition(() => {
@@ -164,6 +173,9 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     featureTensor.dispose();
     labelTensor.dispose();
     predictions.dispose(); // Dispose of predictions tensor
+
+    // Log memory usage after tensor disposal
+    console.log('Memory usage after tensor disposal:', tf.memory());
   } catch (err) {
     setError(`Error: ${err.message}`);
   } finally {
