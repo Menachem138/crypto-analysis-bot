@@ -42,13 +42,13 @@ const trainModel = async (model, trainData, trainLabels) => {
     throw new Error('Training data contains infinite values');
   }
 
+  // Filter out rows with NaN values
+  const cleanedTrainData = trainData.gather(tf.where(tf.logicalNot(tf.isNaN(trainData))));
+  const cleanedTrainLabels = trainLabels.gather(tf.where(tf.logicalNot(tf.isNaN(trainLabels))));
+
   try {
     console.log('Before model.fit call');
     console.log('Memory usage before training:', tf.memory());
-
-    // Filter out rows with NaN values
-    const cleanedTrainData = trainData.where(tf.logicalNot(tf.isNaN(trainData)));
-    const cleanedTrainLabels = trainLabels.where(tf.logicalNot(tf.isNaN(trainLabels)));
 
     const history = await tf.tidy(() => {
       return model.fit(cleanedTrainData, cleanedTrainLabels, {
