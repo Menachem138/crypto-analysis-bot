@@ -113,21 +113,34 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     // Calculate RSI with the corrected rolling calculation
     const rsiValues = calculateRSI(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
-      row.Relative_Strength_Index = isNaN(rsiValues[index]) || !isFinite(rsiValues[index]) ? 0 : rsiValues[index];
+      if (isNaN(rsiValues[index]) || !isFinite(rsiValues[index])) {
+        console.log(`NaN or infinite value detected in RSI at index ${index}`);
+        row.Relative_Strength_Index = 0;
+      } else {
+        row.Relative_Strength_Index = rsiValues[index];
+      }
     });
     console.log("RSI calculated successfully");
 
-    // Calculate Moving Average
     const movingAverageValues = calculateMovingAverage(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
-      row.Moving_Average = isNaN(movingAverageValues[index]) || !isFinite(movingAverageValues[index]) ? 0 : movingAverageValues[index];
+      if (isNaN(movingAverageValues[index]) || !isFinite(movingAverageValues[index])) {
+        console.log(`NaN or infinite value detected in Moving Average at index ${index}`);
+        row.Moving_Average = 0;
+      } else {
+        row.Moving_Average = movingAverageValues[index];
+      }
     });
     console.log("Moving Average calculated successfully");
 
-    // Calculate MACD
     const macdValues = calculateMACD(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
-      row.MACD = isNaN(macdValues[index]) || !isFinite(macdValues[index]) ? 0 : macdValues[index];
+      if (isNaN(macdValues[index]) || !isFinite(macdValues[index])) {
+        console.log(`NaN or infinite value detected in MACD at index ${index}`);
+        row.MACD = 0;
+      } else {
+        row.MACD = macdValues[index];
+      }
     });
     console.log("MACD calculated successfully");
 
