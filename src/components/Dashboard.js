@@ -1,12 +1,7 @@
 import React, { useState, useEffect, startTransition } from 'react';
 import { Box, Heading, Text, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
-import MarketChart from './MarketChart.js';
-import CopyTrading from './CopyTrading.js';
 import { getMarketData } from '../coinlayerService.js';
 import { calculateRSI, calculateMovingAverage, calculateMACD } from '../technicalAnalysis.js';
-import NewsFeed from './NewsFeed.js';
-import FinancialAdvice from './FinancialAdvice.js';
-import { Widget } from '@typeform/embed-react';
 import { createModel, trainModel, evaluateModel } from '../aiModel.js';
 import * as tf from '@tensorflow/tfjs';
 
@@ -172,9 +167,6 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
 
     // Log memory usage after training
     console.log('Memory usage after training:', tf.memory());
-
-    // Evaluate the model
-    const evaluationResults = await evaluateModel(model, featureTensor);
 
     // Generate predictions
     const predictions = model.predict(featureTensor);
