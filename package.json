@@ -37,9 +37,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-app-rewired start --config-overrides-path ./config-overrides.js",
-    "build": "react-app-rewired build --config-overrides-path ./config-overrides.js",
-    "test": "react-app-rewired test --config-overrides-path ./config-overrides.js",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -62,6 +62,6 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "react-app-rewired": "^2.2.1"
+    "react-scripts": "^2.2.1"
   }
 }
