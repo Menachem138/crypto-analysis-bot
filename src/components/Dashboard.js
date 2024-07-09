@@ -126,6 +126,13 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     console.log("RSI calculated successfully");
     console.log("RSI values:", rsiValues);
 
+    // Replace NaN values in RSI
+    cleanedDataArray.forEach((row, index) => {
+      if (isNaN(row.Relative_Strength_Index) || !isFinite(row.Relative_Strength_Index)) {
+        row.Relative_Strength_Index = 0;
+      }
+    });
+
     const movingAverageValues = calculateMovingAverage(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
       if (isNaN(movingAverageValues[index]) || !isFinite(movingAverageValues[index])) {
@@ -138,6 +145,13 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     console.log("Moving Average calculated successfully");
     console.log("Moving Average values:", movingAverageValues);
 
+    // Replace NaN values in Moving Average
+    cleanedDataArray.forEach((row, index) => {
+      if (isNaN(row.Moving_Average) || !isFinite(row.Moving_Average)) {
+        row.Moving_Average = 0;
+      }
+    });
+
     const macdValues = calculateMACD(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
       if (isNaN(macdValues[index]) || !isFinite(macdValues[index])) {
@@ -149,6 +163,13 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     });
     console.log("MACD calculated successfully");
     console.log("MACD values:", macdValues);
+
+    // Replace NaN values in MACD
+    cleanedDataArray.forEach((row, index) => {
+      if (isNaN(row.MACD) || !isFinite(row.MACD)) {
+        row.MACD = 0;
+      }
+    });
 
     // Log cleaned data before tensor conversion
     console.log("Cleaned data before tensor conversion:", cleanedDataArray);

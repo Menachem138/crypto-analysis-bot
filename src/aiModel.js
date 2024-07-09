@@ -48,22 +48,35 @@ const trainModel = async (model, trainData, trainLabels) => {
     console.log('Before model.fit call');
     console.log('Training data before model.fit:', trainData.arraySync());
     console.log('Training labels before model.fit:', trainLabels.arraySync());
-    const history = await model.fit(trainData, trainLabels, {
-      epochs: 50,
-      batchSize: 32,
-      validationSplit: 0.2,
-      callbacks: {
-        onEpochBegin: (epoch, logs) => {
-          console.log(`Epoch ${epoch + 1} starting...`);
+
+    // Additional check for NaN values immediately before model.fit
+    const cleanedTrainData = trainData.arraySync().map(row => row.map(value => isNaN(value) ? 0 : value));
+    const cleanedTrainLabels = trainLabels.arraySync().map(row => row.map(value => isNaN(value) ? 0 : value));
+    const finalTrainData = tf.tensor2d(cleanedTrainData);
+    const finalTrainLabels = tf.tensor2d(cleanedTrainLabels);
+
+    console.log('Cleaned training data:', finalTrainData.arraySync());
+    console.log('Cleaned training labels:', finalTrainLabels.arraySync());
+
+    const history = await tf.tidy(() => {
+      return model.fit(finalTrainData, finalTrainLabels, {
+        epochs: 50,
+        batchSize: 32,
+        validationSplit: 0.2,
+        callbacks: {
+          onEpochBegin: (epoch, logs) => {
+            console.log(`Epoch ${epoch + 1} starting...`);
+          },
+          onEpochEnd: (epoch, logs) => {
+            console.log(`Epoch ${epoch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
+          },
+          onBatchEnd: (batch, logs) => {
+            console.log(`Batch ${batch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
+          },
         },
-        onEpochEnd: (epoch, logs) => {
-          console.log(`Epoch ${epoch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
-        },
-        onBatchEnd: (batch, logs) => {
-          console.log(`Batch ${batch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
-        },
-      },
+      });
     });
+
     console.log('Model trained successfully:', history);
     return history;
   } catch (error) {
