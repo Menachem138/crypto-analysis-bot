@@ -113,8 +113,6 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       row.Moving_Average = movingAverageValues[index];
     });
 
-    // Commenting out TensorFlow.js related code
-    /*
     // Create the model
     const model = createModel();
 
@@ -140,7 +138,6 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
         predictions: predictions
       }));
     });
-    */
   } catch (err) {
     setError(`Error: ${err.message}`);
   } finally {
@@ -195,7 +192,8 @@ const Dashboard = () => {
     };
 
     fetchMarketData();
-    // loadAndTrainModel(setError, setMarketData, setLoading);
+    loadAndTrainModel(setError, setMarketData, setLoading);
+    // <Widget id="449162832" style={{ width: '100%', height: '500px' }} className="my-form" />
   }, [loadAndTrainModel]);
 
   useEffect(() => {
@@ -279,7 +277,6 @@ const Dashboard = () => {
           {console.log('Rendering FinancialAdvice component with props:', { marketData, loading, error })}
           <FinancialAdvice marketData={marketData} loading={loading} error={error} />
         </Box> */}
-        <Widget id="449162832" style={{ width: '100%', height: '500px' }} className="my-form" />
       </Box>
     </ErrorBoundary>
   );
