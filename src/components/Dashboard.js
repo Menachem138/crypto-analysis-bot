@@ -49,16 +49,14 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     setError(null);
 
     // Load and preprocess the historical data
-    console.log("Fetching CSV file");
     const response = await fetch('/Binance_1INCHBTC_d.csv');
     if (!response.ok) {
       throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
     }
-    console.log("CSV file fetched successfully");
 
+    // Parse and clean the CSV data
     let parsedData;
     try {
-      console.log("Parsing CSV file");
       const csvText = await response.text();
       const rows = csvText.split('\n').slice(2).filter(row => row.trim() !== '' && row.split(',').length === 10 && !isNaN(parseInt(row.split(',')[0], 10)));
       parsedData = rows.map(row => {
@@ -80,21 +78,16 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
           return null;
         }
       }).filter(row => row !== null);
-      console.log("CSV file parsed successfully");
-      console.log("Parsed data:", parsedData);
 
       // Filter out rows with NaN or infinite values
       parsedData = parsedData.filter(row => {
         return Object.keys(row).every(key => {
           if (isNaN(row[key]) || !isFinite(row[key])) {
-            console.log(`NaN or infinite value detected in parsed data at key ${key}, filtering out row`);
             return false;
           }
           return true;
         });
       });
-      console.log("Parsed data cleaned successfully");
-      console.log("Cleaned parsed data:", parsedData);
     } catch (error) {
       throw new Error(`CSV Parsing Error: ${error.message}`);
     }
@@ -106,107 +99,45 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     const cleanedDataArray = dataArray.filter(row => {
       return Object.keys(row).every(key => {
         if (isNaN(row[key]) || !isFinite(row[key])) {
-          console.log(`NaN or infinite value detected in cleaned data at key ${key}, filtering out row`);
           return false;
         }
         return true;
       });
     });
-    console.log("Data converted to arrays successfully");
-    console.log("Cleaned data array:", cleanedDataArray);
 
     // Calculate RSI with the corrected rolling calculation
     const rsiValues = calculateRSI(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
       row.Relative_Strength_Index = rsiValues[index];
     });
-    console.log("RSI calculated successfully");
-    console.log("RSI values:", rsiValues);
 
     const movingAverageValues = calculateMovingAverage(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
       row.Moving_Average = movingAverageValues[index];
     });
-    console.log("Moving Average calculated successfully");
-    console.log("Moving Average values:", movingAverageValues);
 
     const macdValues = calculateMACD(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
       row.MACD = macdValues[index];
     });
-    console.log("MACD calculated successfully");
-    console.log("MACD values:", macdValues);
-
-    // Log cleaned data before tensor conversion
-    console.log("Cleaned data before tensor conversion:", cleanedDataArray);
-
-    // Check for NaN values in cleaned data before tensor conversion
-    cleanedDataArray.forEach((row, index) => {
-      Object.keys(row).forEach(key => {
-        if (isNaN(row[key]) || !isFinite(row[key])) {
-          console.log(`NaN or infinite value detected in cleaned data at index ${index}, key ${key}`);
-        }
-      });
-    });
 
     // Create the model
     const model = createModel();
-    console.log("Model created:", model);
 
     // Convert cleanedDataArray to tensors
     const featureTensor = tf.tensor2d(cleanedDataArray.map(row => [
       row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
     ]));
     const labelTensor = tf.tensor2d(cleanedDataArray.map(row => [row.Close]));
-    console.log("Feature tensor shape:", featureTensor.shape);
-    console.log("Label tensor shape:", labelTensor.shape);
-    console.log("First row of feature tensor:", cleanedDataArray[0]);
-    console.log("First row of label tensor:", cleanedDataArray[0].Close);
-
-    // Log detailed tensor data
-    console.log("Logging feature tensor data");
-    featureTensor.data().then(data => {
-      console.log("Feature tensor data:", data);
-    });
-
-    console.log("Logging label tensor data");
-    labelTensor.data().then(data => {
-      console.log("Label tensor data:", data);
-    });
-
-    // Check for NaN values in tensors
-    console.log("Checking for NaN values in feature tensor");
-    featureTensor.data().then(data => {
-      data.forEach((value, index) => {
-        if (isNaN(value) || !isFinite(value)) {
-          console.log(`NaN or infinite value detected in feature tensor at index ${index}`);
-        }
-      });
-    });
-
-    console.log("Checking for NaN values in label tensor");
-    labelTensor.data().then(data => {
-      data.forEach((value, index) => {
-        if (isNaN(value) || !isFinite(value)) {
-          console.log(`NaN or infinite value detected in label tensor at index ${index}`);
-        }
-      });
-    });
-
-    // Log model configuration before training
-    console.log("Model configuration before training:", model);
 
     // Train the model
     await trainModel(model, featureTensor, labelTensor);
-    console.log("Model trained");
 
     // Evaluate the model
     const evaluationResults = await evaluateModel(model, featureTensor);
-    console.log("Model evaluation results:", evaluationResults);
 
     // Generate predictions
     const predictions = model.predict(featureTensor);
-    console.log("Model predictions:", predictions);
 
     // Update state with predictions
     startTransition(() => {
@@ -215,11 +146,14 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
         predictions: predictions
       }));
     });
+
+    // Dispose of tensors to free up memory
+    featureTensor.dispose();
+    labelTensor.dispose();
   } catch (err) {
     console.log("Error in loadAndTrainModel function:", err);
     setError(`Error: ${err.message}`);
   } finally {
-    console.log("loadAndTrainModel function completed");
     setLoading(false);
   }
 };
