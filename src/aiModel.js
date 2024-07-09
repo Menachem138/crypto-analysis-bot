@@ -43,9 +43,11 @@ const trainModel = async (model, trainData, trainLabels) => {
   }
 
   // Filter out rows with NaN values using booleanMask
-  const mask = tf.logicalNot(tf.isNaN(trainData));
-  const cleanedTrainData = tf.booleanMask(trainData, mask);
-  const cleanedTrainLabels = tf.booleanMask(trainLabels, mask);
+  const dataMask = tf.logicalNot(tf.isNaN(trainData));
+  const labelsMask = tf.logicalNot(tf.isNaN(trainLabels));
+  const combinedMask = tf.logicalAnd(dataMask, labelsMask);
+  const cleanedTrainData = tf.booleanMask(trainData, combinedMask);
+  const cleanedTrainLabels = tf.booleanMask(trainLabels, combinedMask);
 
   try {
     console.log('Before model.fit call');
