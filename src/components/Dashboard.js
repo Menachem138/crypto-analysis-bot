@@ -82,6 +82,16 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       parsedData = parsedData.filter(row => {
         return Object.values(row).every(value => !isNaN(value) && isFinite(value));
       });
+
+      // Log the cleaned data for verification
+      console.log('Cleaned parsed data:', parsedData);
+
+      // Additional check for NaN values before converting to tensors
+      const hasNaN = (array) => array.some(row => Object.values(row).some(value => isNaN(value)));
+      if (hasNaN(parsedData)) {
+        console.error('Parsed data contains NaN values:', parsedData);
+        throw new Error('Parsed data contains NaN values');
+      }
     } catch (error) {
       throw new Error(`CSV Parsing Error: ${error.message}`);
     }
@@ -110,6 +120,15 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       row.MACD = macdValues[index];
     });
 
+    // Additional check for NaN values before converting to tensors
+    if (hasNaN(cleanedDataArray)) {
+      console.error('Cleaned data contains NaN values:', cleanedDataArray);
+      throw new Error('Cleaned data contains NaN values');
+    }
+
+    // Log the cleaned data array for verification
+    console.log('Final cleaned data array:', cleanedDataArray);
+
     // Create the model
     const model = createModel();
 
@@ -118,6 +137,10 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
     ]));
     const labelTensor = tf.tensor2d(cleanedDataArray.map(row => [row.Close]));
+
+    // Log the tensors for verification
+    console.log('Feature tensor:', featureTensor);
+    console.log('Label tensor:', labelTensor);
 
     // Train the model
     await trainModel(model, featureTensor, labelTensor);
