@@ -43,8 +43,8 @@ const trainModel = async (model, trainData, trainLabels) => {
   }
 
   // Filter out rows with NaN values
-  const cleanedTrainData = trainData.gather(tf.where(tf.logicalNot(tf.isNaN(trainData))));
-  const cleanedTrainLabels = trainLabels.gather(tf.where(tf.logicalNot(tf.isNaN(trainLabels))));
+  const cleanedTrainData = trainData.where(tf.logicalNot(tf.isNaN(trainData)));
+  const cleanedTrainLabels = trainLabels.where(tf.logicalNot(tf.isNaN(trainLabels)));
 
   try {
     console.log('Before model.fit call');
