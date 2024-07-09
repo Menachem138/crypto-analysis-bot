@@ -200,8 +200,15 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     console.log("First row of label tensor:", cleanedDataArray[0].Close);
 
     // Log detailed tensor data
-    console.log("Feature tensor data:", featureTensor.arraySync());
-    console.log("Label tensor data:", labelTensor.arraySync());
+    console.log("Logging feature tensor data");
+    featureTensor.data().then(data => {
+      console.log("Feature tensor data:", data);
+    });
+
+    console.log("Logging label tensor data");
+    labelTensor.data().then(data => {
+      console.log("Label tensor data:", data);
+    });
 
     // Check for NaN values in tensors
     console.log("Checking for NaN values in feature tensor");
