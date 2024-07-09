@@ -57,6 +57,10 @@ const trainModel = async (model, trainData, trainLabels) => {
       console.log('Cleaned training data:', cleanedTrainData.arraySync());
       console.log('Cleaned training labels:', cleanedTrainLabels.arraySync());
 
+      // Additional logging to trace data transformation steps
+      console.log('First row of cleaned training data:', cleanedTrainData.slice([0, 0], [1, -1]).arraySync());
+      console.log('First row of cleaned training labels:', cleanedTrainLabels.slice([0, 0], [1, -1]).arraySync());
+
       return model.fit(cleanedTrainData, cleanedTrainLabels, {
         epochs: 20, // Reduced number of epochs
         batchSize: 16, // Reduced batch size
