@@ -87,6 +87,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       parsedData = parsedData.map(row => {
         Object.keys(row).forEach(key => {
           if (isNaN(row[key]) || !isFinite(row[key])) {
+            console.log(`NaN or infinite value detected in parsed data at key ${key}, replacing with 0`);
             row[key] = 0;
           }
         });
@@ -105,6 +106,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     const cleanedDataArray = dataArray.map(row => {
       Object.keys(row).forEach(key => {
         if (isNaN(row[key]) || !isFinite(row[key])) {
+          console.log(`NaN or infinite value detected in cleaned data at key ${key}, replacing with 0`);
           row[key] = 0;
         }
       });
@@ -117,7 +119,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     const rsiValues = calculateRSI(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
       if (isNaN(rsiValues[index]) || !isFinite(rsiValues[index])) {
-        console.log(`NaN or infinite value detected in RSI at index ${index}`);
+        console.log(`NaN or infinite value detected in RSI at index ${index}, replacing with 0`);
         row.Relative_Strength_Index = 0;
       } else {
         row.Relative_Strength_Index = rsiValues[index];
@@ -136,7 +138,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     const movingAverageValues = calculateMovingAverage(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
       if (isNaN(movingAverageValues[index]) || !isFinite(movingAverageValues[index])) {
-        console.log(`NaN or infinite value detected in Moving Average at index ${index}`);
+        console.log(`NaN or infinite value detected in Moving Average at index ${index}, replacing with 0`);
         row.Moving_Average = 0;
       } else {
         row.Moving_Average = movingAverageValues[index];
@@ -155,7 +157,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     const macdValues = calculateMACD(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
       if (isNaN(macdValues[index]) || !isFinite(macdValues[index])) {
-        console.log(`NaN or infinite value detected in MACD at index ${index}`);
+        console.log(`NaN or infinite value detected in MACD at index ${index}, replacing with 0`);
         row.MACD = 0;
       } else {
         row.MACD = macdValues[index];
@@ -202,17 +204,20 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     console.log("Label tensor data:", labelTensor.arraySync());
 
     // Check for NaN values in tensors
-    featureTensor.arraySync().forEach((row, index) => {
-      row.forEach((value, key) => {
+    console.log("Checking for NaN values in feature tensor");
+    featureTensor.data().then(data => {
+      data.forEach((value, index) => {
         if (isNaN(value) || !isFinite(value)) {
-          console.log(`NaN or infinite value detected in feature tensor at index ${index}, key ${key}`);
+          console.log(`NaN or infinite value detected in feature tensor at index ${index}`);
         }
       });
     });
-    labelTensor.arraySync().forEach((row, index) => {
-      row.forEach((value, key) => {
+
+    console.log("Checking for NaN values in label tensor");
+    labelTensor.data().then(data => {
+      data.forEach((value, index) => {
         if (isNaN(value) || !isFinite(value)) {
-          console.log(`NaN or infinite value detected in label tensor at index ${index}, key ${key}`);
+          console.log(`NaN or infinite value detected in label tensor at index ${index}`);
         }
       });
     });
