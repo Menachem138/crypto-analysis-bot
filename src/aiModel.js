@@ -45,9 +45,9 @@ const trainModel = async (model, trainData, trainLabels) => {
   try {
     console.log('Before model.fit call');
 
-    // Additional check for NaN values immediately before model.fit
-    const cleanedTrainData = trainData.where(tf.isNaN(trainData), tf.zerosLike(trainData));
-    const cleanedTrainLabels = trainLabels.where(tf.isNaN(trainLabels), tf.zerosLike(trainLabels));
+    // Filter out rows with NaN values
+    const cleanedTrainData = trainData.where(tf.logicalNot(tf.isNaN(trainData)));
+    const cleanedTrainLabels = trainLabels.where(tf.logicalNot(tf.isNaN(trainLabels)));
 
     const history = await tf.tidy(() => {
       return model.fit(cleanedTrainData, cleanedTrainLabels, {
@@ -56,13 +56,16 @@ const trainModel = async (model, trainData, trainLabels) => {
         validationSplit: 0.2,
         callbacks: {
           onEpochBegin: (epoch, logs) => {
-            console.log(`Epoch ${epoch + 1} starting...`);
+            // Commented out to reduce verbosity
+            // console.log(`Epoch ${epoch + 1} starting...`);
           },
           onEpochEnd: (epoch, logs) => {
-            console.log(`Epoch ${epoch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
+            // Commented out to reduce verbosity
+            // console.log(`Epoch ${epoch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
           },
           onBatchEnd: (batch, logs) => {
-            console.log(`Batch ${batch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
+            // Commented out to reduce verbosity
+            // console.log(`Batch ${batch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
           },
         },
       });
