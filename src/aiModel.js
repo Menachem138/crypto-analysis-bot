@@ -46,10 +46,9 @@ const trainModel = async (model, trainData, trainLabels) => {
     console.log('Before model.fit call');
     console.log('Memory usage before training:', tf.memory());
 
-    // Filter out rows with NaN values using boolean masking
-    const mask = tf.logicalNot(tf.isNaN(trainData));
-    const cleanedTrainData = trainData.mul(mask);
-    const cleanedTrainLabels = trainLabels.mul(mask);
+    // Filter out rows with NaN values
+    const cleanedTrainData = trainData.where(tf.logicalNot(tf.isNaN(trainData)));
+    const cleanedTrainLabels = trainLabels.where(tf.logicalNot(tf.isNaN(trainLabels)));
 
     const history = await tf.tidy(() => {
       return model.fit(cleanedTrainData, cleanedTrainLabels, {
