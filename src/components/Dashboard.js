@@ -3,7 +3,7 @@ import { Box, Heading, Text, Spinner, Alert, AlertIcon } from '@chakra-ui/react'
 import MarketChart from './MarketChart.js';
 import CopyTrading from './CopyTrading.js';
 import { getMarketData } from '../coinlayerService.js';
-import { calculateRSI, calculateMovingAverage } from '../technicalAnalysis.js';
+import { calculateRSI, calculateMovingAverage, calculateMACD } from '../technicalAnalysis.js';
 import NewsFeed from './NewsFeed.js';
 import FinancialAdvice from './FinancialAdvice.js';
 import { Widget } from '@typeform/embed-react';
@@ -124,13 +124,20 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     });
     console.log("Moving Average calculated successfully");
 
+    // Calculate MACD
+    const macdValues = calculateMACD(cleanedDataArray);
+    cleanedDataArray.forEach((row, index) => {
+      row.MACD = macdValues[index];
+    });
+    console.log("MACD calculated successfully");
+
     // Create the model
     const model = createModel();
     console.log("Model created:", model);
 
     // Convert cleanedDataArray to tensors
     const featureTensor = tf.tensor2d(cleanedDataArray.map(row => [
-      row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average
+      row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
     ]));
     const labelTensor = tf.tensor2d(cleanedDataArray.map(row => [row.Close]));
     console.log("Feature tensor:", featureTensor);
