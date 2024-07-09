@@ -37,9 +37,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "react-app-rewired start --config-overrides-path ./config-overrides.js",
+    "build": "react-app-rewired build --config-overrides-path ./config-overrides.js",
+    "test": "react-app-rewired test --config-overrides-path ./config-overrides.js",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
