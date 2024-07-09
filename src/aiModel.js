@@ -51,6 +51,9 @@ const trainModel = async (model, trainData, trainLabels) => {
     console.log('Memory usage before training:', tf.memory());
 
     const history = await tf.tidy(() => {
+      const cleanedTrainData = trainData.where(tf.logicalNot(tf.isNaN(trainData)));
+      const cleanedTrainLabels = trainLabels.where(tf.logicalNot(tf.isNaN(trainLabels)));
+
       return model.fit(cleanedTrainData, cleanedTrainLabels, {
         epochs: 20, // Reduced number of epochs
         batchSize: 16, // Reduced batch size
@@ -84,8 +87,6 @@ const trainModel = async (model, trainData, trainLabels) => {
     // Dispose of tensors to free up memory
     trainData.dispose();
     trainLabels.dispose();
-    cleanedTrainData.dispose();
-    cleanedTrainLabels.dispose();
   }
 };
 
