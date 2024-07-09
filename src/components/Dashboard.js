@@ -140,8 +140,10 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
     ]));
     const labelTensor = tf.tensor2d(cleanedDataArray.map(row => [row.Close]));
-    console.log("Feature tensor:", featureTensor);
-    console.log("Label tensor:", labelTensor);
+    console.log("Feature tensor shape:", featureTensor.shape);
+    console.log("Label tensor shape:", labelTensor.shape);
+    console.log("First row of feature tensor:", cleanedDataArray[0]);
+    console.log("First row of label tensor:", cleanedDataArray[0].Close);
 
     // Train the model
     await trainModel(model, featureTensor, labelTensor);
