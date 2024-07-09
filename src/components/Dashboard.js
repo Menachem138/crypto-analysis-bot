@@ -81,20 +81,22 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
         }
       }).filter(row => row !== null);
       console.log("CSV file parsed successfully");
+      console.log("Parsed data:", parsedData);
+
+      // Check for NaN values in parsed data and replace them with zeros
+      parsedData = parsedData.map(row => {
+        Object.keys(row).forEach(key => {
+          if (isNaN(row[key]) || !isFinite(row[key])) {
+            row[key] = 0;
+          }
+        });
+        return row;
+      });
+      console.log("Parsed data cleaned successfully");
+      console.log("Cleaned parsed data:", parsedData);
     } catch (error) {
       throw new Error(`CSV Parsing Error: ${error.message}`);
     }
-
-    // Check for NaN values in parsed data and replace them with zeros
-    parsedData = parsedData.map(row => {
-      Object.keys(row).forEach(key => {
-        if (isNaN(row[key]) || !isFinite(row[key])) {
-          row[key] = 0;
-        }
-      });
-      return row;
-    });
-    console.log("Parsed data cleaned successfully");
 
     // Convert the data to arrays
     const dataArray = parsedData;
@@ -109,6 +111,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       return row;
     });
     console.log("Data converted to arrays successfully");
+    console.log("Cleaned data array:", cleanedDataArray);
 
     // Calculate RSI with the corrected rolling calculation
     const rsiValues = calculateRSI(cleanedDataArray);
@@ -121,6 +124,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       }
     });
     console.log("RSI calculated successfully");
+    console.log("RSI values:", rsiValues);
 
     const movingAverageValues = calculateMovingAverage(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
@@ -132,6 +136,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       }
     });
     console.log("Moving Average calculated successfully");
+    console.log("Moving Average values:", movingAverageValues);
 
     const macdValues = calculateMACD(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
@@ -143,9 +148,19 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       }
     });
     console.log("MACD calculated successfully");
+    console.log("MACD values:", macdValues);
 
     // Log cleaned data before tensor conversion
     console.log("Cleaned data before tensor conversion:", cleanedDataArray);
+
+    // Check for NaN values in cleaned data before tensor conversion
+    cleanedDataArray.forEach((row, index) => {
+      Object.keys(row).forEach(key => {
+        if (isNaN(row[key]) || !isFinite(row[key])) {
+          console.log(`NaN or infinite value detected in cleaned data at index ${index}, key ${key}`);
+        }
+      });
+    });
 
     // Create the model
     const model = createModel();
@@ -160,6 +175,10 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     console.log("Label tensor shape:", labelTensor.shape);
     console.log("First row of feature tensor:", cleanedDataArray[0]);
     console.log("First row of label tensor:", cleanedDataArray[0].Close);
+
+    // Log detailed tensor data
+    console.log("Feature tensor data:", featureTensor.arraySync());
+    console.log("Label tensor data:", labelTensor.arraySync());
 
     // Train the model
     await trainModel(model, featureTensor, labelTensor);
