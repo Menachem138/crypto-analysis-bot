@@ -61,7 +61,10 @@ const trainModel = async (model, trainData, trainLabels) => {
       console.log('First row of cleaned training data:', cleanedTrainData.slice([0, 0], [1, -1]).arraySync());
       console.log('First row of cleaned training labels:', cleanedTrainLabels.slice([0, 0], [1, -1]).arraySync());
 
-      return model.fit(cleanedTrainData, cleanedTrainLabels, {
+      console.log('Before model.fit within tf.tidy');
+      console.log('Memory usage before model.fit within tf.tidy:', tf.memory());
+
+      const fitHistory = await model.fit(cleanedTrainData, cleanedTrainLabels, {
         epochs: 20, // Reduced number of epochs
         batchSize: 16, // Reduced batch size
         validationSplit: 0.2,
@@ -76,9 +79,15 @@ const trainModel = async (model, trainData, trainLabels) => {
           },
           onBatchEnd: (batch, logs) => {
             console.log(`Batch ${batch + 1} completed. Loss: ${logs.loss}, MSE: ${logs.mse}`);
+            console.log(`Memory usage after batch ${batch + 1}:`, tf.memory());
           },
         },
       });
+
+      console.log('After model.fit within tf.tidy');
+      console.log('Memory usage after model.fit within tf.tidy:', tf.memory());
+
+      return fitHistory;
     });
 
     console.log('Model trained successfully:', history);
