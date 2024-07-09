@@ -171,6 +171,12 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
     console.log('Feature tensor:', featureTensor);
     console.log('Label tensor:', labelTensor);
 
+    // Additional check for NaN values in tensors
+    if (hasNaN(featureTensor) || hasNaN(labelTensor)) {
+      console.error('Tensors contain NaN values:', { featureTensor: featureTensor.arraySync(), labelTensor: labelTensor.arraySync() });
+      throw new Error('Tensors contain NaN values');
+    }
+
     // Log memory usage before training
     console.log('Memory usage before training:', tf.memory());
 
