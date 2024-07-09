@@ -68,7 +68,7 @@ const trainModel = async (model, trainData, trainLabels) => {
       const fitHistory = await model.fit(cleanedTrainData, cleanedTrainLabels, {
         epochs: 1, // Further reduced number of epochs
         batchSize: 1, // Further reduced batch size
-        validationSplit: 0.1, // Reduced validation split to minimize memory usage
+        validationSplit: 0.05, // Reduced validation split to minimize memory usage
         callbacks: {
           onEpochBegin: (epoch, logs) => {
             console.log(`Epoch ${epoch + 1} starting...`);
