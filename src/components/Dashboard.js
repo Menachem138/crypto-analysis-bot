@@ -22,6 +22,8 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error("ErrorBoundary caught an error", error, errorInfo);
+    console.log("Error details:", error);
+    console.log("Error info:", errorInfo);
   }
 
   render() {
@@ -42,17 +44,21 @@ class ErrorBoundary extends React.Component {
 
 const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
   try {
+    console.log("Starting loadAndTrainModel function");
     // Clear any previous errors
     setError(null);
 
     // Load and preprocess the historical data
+    console.log("Fetching CSV file");
     const response = await fetch('/Binance_1INCHBTC_d.csv');
     if (!response.ok) {
       throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
     }
+    console.log("CSV file fetched successfully");
 
     let parsedData;
     try {
+      console.log("Parsing CSV file");
       const csvText = await response.text();
       const rows = csvText.split('\n').slice(2).filter(row => row.trim() !== '' && row.split(',').length === 10 && !isNaN(parseInt(row.split(',')[0], 10)));
       parsedData = rows.map(row => {
@@ -74,6 +80,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
           return null;
         }
       }).filter(row => row !== null);
+      console.log("CSV file parsed successfully");
     } catch (error) {
       throw new Error(`CSV Parsing Error: ${error.message}`);
     }
@@ -87,6 +94,7 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       });
       return row;
     });
+    console.log("Parsed data cleaned successfully");
 
     // Convert the data to arrays
     const dataArray = parsedData;
@@ -100,36 +108,45 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       });
       return row;
     });
+    console.log("Data converted to arrays successfully");
 
     // Calculate RSI with the corrected rolling calculation
     const rsiValues = calculateRSI(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
       row.Relative_Strength_Index = rsiValues[index];
     });
+    console.log("RSI calculated successfully");
 
     // Calculate Moving Average
     const movingAverageValues = calculateMovingAverage(cleanedDataArray);
     cleanedDataArray.forEach((row, index) => {
       row.Moving_Average = movingAverageValues[index];
     });
+    console.log("Moving Average calculated successfully");
 
     // Create the model
     const model = createModel();
+    console.log("Model created:", model);
 
     // Convert cleanedDataArray to tensors
     const featureTensor = tf.tensor2d(cleanedDataArray.map(row => [
       row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average
     ]));
     const labelTensor = tf.tensor2d(cleanedDataArray.map(row => [row.Close]));
+    console.log("Feature tensor:", featureTensor);
+    console.log("Label tensor:", labelTensor);
 
     // Train the model
     await trainModel(model, featureTensor, labelTensor);
+    console.log("Model trained");
 
     // Evaluate the model
     const evaluationResults = await evaluateModel(model, featureTensor);
+    console.log("Model evaluation results:", evaluationResults);
 
     // Generate predictions
     const predictions = model.predict(featureTensor);
+    console.log("Model predictions:", predictions);
 
     // Update state with predictions
     startTransition(() => {
@@ -139,8 +156,10 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       }));
     });
   } catch (err) {
+    console.log("Error in loadAndTrainModel function:", err);
     setError(`Error: ${err.message}`);
   } finally {
+    console.log("loadAndTrainModel function completed");
     setLoading(false);
   }
 };
