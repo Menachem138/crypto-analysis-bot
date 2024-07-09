@@ -42,6 +42,8 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+const hasNaN = (array) => array.some(row => Object.values(row).some(value => isNaN(value)));
+
 const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
   try {
     // Clear any previous errors
@@ -87,7 +89,6 @@ const loadAndTrainModel = async (setError, setMarketData, setLoading) => {
       console.log('Cleaned parsed data:', parsedData);
 
       // Additional check for NaN values before converting to tensors
-      const hasNaN = (array) => array.some(row => Object.values(row).some(value => isNaN(value)));
       if (hasNaN(parsedData)) {
         console.error('Parsed data contains NaN values:', parsedData);
         throw new Error('Parsed data contains NaN values');
@@ -195,7 +196,7 @@ const Dashboard = () => {
 
     fetchMarketData();
     loadAndTrainModel(setError, setMarketData, setLoading);
-  }, [loadAndTrainModel]);
+  }, []);
 
 
   if (loading) {
