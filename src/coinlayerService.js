@@ -22,6 +22,7 @@ const getMarketData = async (symbol) => {
     });
     console.log('Full request URL:', response.config.url);
     console.log('Received response from Coinlayer API:', response);
+    console.log('Response data structure:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching market data:', {
