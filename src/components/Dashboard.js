@@ -197,6 +197,17 @@ const Dashboard = () => {
             console.log('BTC market data:', response.rates.BTC);
             startTransition(() => {
               if (isMountedRef.current) {
+                console.log('Setting marketData:', {
+                  price: response.rates.BTC,
+                  volume: response.volume || 'N/A',
+                  marketCap: response.marketCap || 'N/A',
+                  change24h: response.change24h || 'N/A',
+                  change7d: response.change7d || 'N/A',
+                  change30d: response.change30d || 'N/A',
+                  change1y: response.change1y || 'N/A',
+                  ath: response.ath || 'N/A',
+                  atl: response.atl || 'N/A'
+                });
                 setMarketData({
                   price: response.rates.BTC,
                   volume: response.volume || 'N/A',
@@ -214,6 +225,7 @@ const Dashboard = () => {
             console.warn('BTC market data is missing in the response:', response.rates);
             startTransition(() => {
               if (isMountedRef.current) {
+                console.log('Setting marketData to N/A');
                 setMarketData({
                   price: 'N/A',
                   volume: 'N/A',
@@ -236,6 +248,7 @@ const Dashboard = () => {
         if (err.name !== 'AbortError') {
           console.error('Error fetching market data:', err.message);
           if (isMountedRef.current) {
+            console.log('Setting marketData to error state');
             setMarketData({
               price: 'N/A',
               volume: 'N/A',
