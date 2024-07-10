@@ -40,6 +40,7 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         const processedData = await processResponse.json();
         console.log('Processed data:', processedData);
         if (hasNaN(processedData)) {
+          console.error('Processed data contains NaN values:', processedData);
           throw new Error('Processed data contains NaN values');
         }
 
@@ -48,6 +49,7 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         ]);
         console.log('Features data:', features);
         if (hasNaN(features)) {
+          console.error('Features data contains NaN values:', features);
           throw new Error('Features data contains NaN values');
         }
 
@@ -112,15 +114,18 @@ const Dashboard = () => {
         console.log('API response:', response);
         if (response && response.data && response.data.rates) {
           if (response.data.rates.BTC) {
+            console.log('BTC market data:', response.data.rates.BTC);
             startTransition(() => {
               if (isMountedRef.current) {
                 setMarketData(response.data.rates.BTC);
               }
             });
           } else {
+            console.error('BTC market data is missing in the response:', response.data.rates);
             throw new Error('BTC market data is missing in the response');
           }
         } else {
+          console.error('API response data is missing expected structure:', response);
           throw new Error('API response data is missing expected structure');
         }
       } catch (err) {
