@@ -202,6 +202,7 @@ const Dashboard = () => {
 
     const fetchMarketData = async () => {
       try {
+        console.log('Starting fetchMarketData');
         const response = await getMarketData('BTC', { signal }); // Pass a default symbol for testing
         console.log('API response:', response);
         if (response && response.rates) {
@@ -261,6 +262,8 @@ const Dashboard = () => {
               error: err.message
             });
           }
+        } else {
+          console.log('Fetch request was aborted');
         }
       } finally {
         console.log('Market data fetch completed');
@@ -269,12 +272,14 @@ const Dashboard = () => {
 
     // Only call these functions when the component mounts for the first time
     if (!marketData) {
+      console.log('Calling fetchMarketData and loadAndPredictModel');
       fetchMarketData();
       loadAndPredictModel(setMarketData, signal, isMountedRef.current);
     }
 
     // Cleanup function to cancel ongoing operations when the component unmounts
     return () => {
+      console.log('Component unmounting, aborting fetch requests');
       isMountedRef.current = false; // Set isMountedRef to false to cancel ongoing operations
       controller.abort(); // Cancel ongoing fetch requests
     };
