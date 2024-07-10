@@ -108,8 +108,13 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
         row.MACD = macdValues[index];
       });
 
-      console.log('Data with technical indicators:', cleanedDataArray);
-      return cleanedDataArray;
+      // Additional check for NaN values after calculating technical indicators
+      const finalCleanedData = cleanedDataArray.filter(row => {
+        return Object.values(row).every(value => !isNaN(value) && isFinite(value));
+      });
+
+      console.log('Data with technical indicators:', finalCleanedData);
+      return finalCleanedData;
     };
 
     // Main function to fetch, parse, clean, and preprocess data
