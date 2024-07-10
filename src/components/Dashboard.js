@@ -45,18 +45,33 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         const processedData = await processResponse.json();
         console.log('Response from /process_data:', processedData);
 
-        // Check for NaN values in the processed data and replace them using interpolation
+        // Check for NaN values in the processed data and replace them using the mean of the column
         if (hasNaN(processedData)) {
           console.error('Processed data contains NaN values:', processedData);
           processedData.forEach(row => {
             Object.keys(row).forEach(key => {
               if (isNaN(row[key])) {
-                // Implement interpolation or other imputation methods here
-                row[key] = interpolateValue(processedData, key);
+                // Replace NaN values with the mean of the non-NaN values in the same column
+                const columnValues = processedData.map(row => row[key]).filter(value => !isNaN(value));
+                const meanValue = columnValues.reduce((sum, value) => sum + value, 0) / columnValues.length;
+                row[key] = isNaN(meanValue) ? 0 : meanValue;
               }
             });
           });
           console.log('Processed data after replacing NaN values:', processedData);
+        }
+
+        // Additional check to ensure no NaN values remain in the processed data
+        if (hasNaN(processedData)) {
+          console.error('Processed data still contains NaN values after replacing with mean:', processedData);
+          processedData.forEach(row => {
+            Object.keys(row).forEach(key => {
+              if (isNaN(row[key])) {
+                row[key] = 0; // Replace remaining NaN values with 0
+              }
+            });
+          });
+          console.log('Processed data after replacing remaining NaN values with 0:', processedData);
         }
 
         // Log the state of the data before creating features
