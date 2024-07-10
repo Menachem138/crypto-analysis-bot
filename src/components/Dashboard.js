@@ -278,7 +278,7 @@ const Dashboard = () => {
       isMountedRef.current = false; // Set isMountedRef to false to cancel ongoing operations
       controller.abort(); // Cancel ongoing fetch requests
     };
-  }, [marketData]);
+  }, []);
 
   // Updated JSX in Dashboard component
   return (
