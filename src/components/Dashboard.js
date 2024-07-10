@@ -242,99 +242,104 @@ const downloadModel = async (setError) => {
   }
 };
 
-// useEffect hook to fetch market data and load the model
-useEffect(() => {
-  const fetchMarketData = async () => {
-    try {
-      const response = await getMarketData('BTC'); // Pass a default symbol for testing
-      console.log('API response:', response);
-      if (response && response.data && response.data.rates) {
-        console.log('Valid market data received:', response.data.rates);
-        if (response.data.rates.BTC) {
-          console.log('BTC market data:', response.data.rates.BTC);
-          startTransition(() => {
-            setMarketData(response.data.rates.BTC);
-          });
+const Dashboard = () => {
+  const [marketData, setMarketData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // useEffect hook to fetch market data and load the model
+  useEffect(() => {
+    const fetchMarketData = async () => {
+      try {
+        const response = await getMarketData('BTC'); // Pass a default symbol for testing
+        console.log('API response:', response);
+        if (response && response.data && response.data.rates) {
+          console.log('Valid market data received:', response.data.rates);
+          if (response.data.rates.BTC) {
+            console.log('BTC market data:', response.data.rates.BTC);
+            startTransition(() => {
+              setMarketData(response.data.rates.BTC);
+            });
+          } else {
+            console.error('BTC market data is missing in the response:', response.data.rates);
+            console.log('Full response data:', response.data);
+            throw new Error('BTC market data is missing in the response');
+          }
         } else {
-          console.error('BTC market data is missing in the response:', response.data.rates);
+          console.error('API response data is missing expected structure:', response.data);
           console.log('Full response data:', response.data);
-          throw new Error('BTC market data is missing in the response');
+          throw new Error('API response data is missing expected structure');
         }
-      } else {
-        console.error('API response data is missing expected structure:', response.data);
-        console.log('Full response data:', response.data);
-        throw new Error('API response data is missing expected structure');
+      } catch (err) {
+        console.error('Error fetching market data:', {
+          message: err.message,
+          response: err.response ? {
+            status: err.response.status,
+            statusText: err.response.statusText,
+            data: err.response.data
+          } : null
+        });
+        console.log('Full error object:', err);
+        console.log('Request config:', err.config);
+        startTransition(() => {
+          setError(`Error: ${err.message}`);
+        });
+      } finally {
+        startTransition(() => {
+          setLoading(false);
+        });
       }
-    } catch (err) {
-      console.error('Error fetching market data:', {
-        message: err.message,
-        response: err.response ? {
-          status: err.response.status,
-          statusText: err.response.statusText,
-          data: err.response.data
-        } : null
-      });
-      console.log('Full error object:', err);
-      console.log('Request config:', err.config);
-      startTransition(() => {
-        setError(`Error: ${err.message}`);
-      });
-    } finally {
-      startTransition(() => {
-        setLoading(false);
-      });
+    };
+
+    // Only call these functions when the component mounts for the first time
+    if (!marketData) {
+      fetchMarketData();
+      loadAndPredictModel(setError, setMarketData, setLoading);
     }
-  };
+  }, [marketData]);
 
-  // Only call these functions when the component mounts for the first time
-  if (!marketData) {
-    fetchMarketData();
-    loadAndPredictModel(setError, setMarketData, setLoading);
+  if (loading) {
+    return (
+      <Box textAlign="center" py={10} px={6}>
+        <Spinner size="xl" />
+        <Text mt={4}>Loading market data...</Text>
+      </Box>
+    );
   }
-}, [marketData]);
 
-if (loading) {
+  if (error) {
+    return (
+      <Box textAlign="center" py={10} px={6}>
+        <Alert status="error">
+          <AlertIcon />
+          {error}
+        </Alert>
+      </Box>
+    );
+  }
+
   return (
-    <Box textAlign="center" py={10} px={6}>
-      <Spinner size="xl" />
-      <Text mt={4}>Loading market data...</Text>
-    </Box>
+    <ErrorBoundary>
+      <Box textAlign="center" py={10} px={6}>
+        <Heading as="h1" size="xl" mb={6}>
+          Cryptocurrency Market Data
+        </Heading>
+        {marketData && (
+          <Box>
+            {marketData.market_cap && marketData.market_cap.usd !== undefined && (
+              <Text>Market Cap: {marketData.market_cap.usd}</Text>
+            )}
+            {marketData.total_volume && marketData.total_volume.usd !== undefined && (
+              <Text>24h Volume: {marketData.total_volume.usd}</Text>
+            )}
+            {marketData.market_cap_percentage && marketData.market_cap_percentage.btc !== undefined && (
+              <Text>Bitcoin Dominance: {marketData.market_cap_percentage.btc}%</Text>
+            )}
+          </Box>
+        )}
+      </Box>
+    </ErrorBoundary>
   );
-}
-
-if (error) {
-  return (
-    <Box textAlign="center" py={10} px={6}>
-      <Alert status="error">
-        <AlertIcon />
-        {error}
-      </Alert>
-    </Box>
-  );
-}
-
-return (
-  <ErrorBoundary>
-    <Box textAlign="center" py={10} px={6}>
-      <Heading as="h1" size="xl" mb={6}>
-        Cryptocurrency Market Data
-      </Heading>
-      {marketData && (
-        <Box>
-          {marketData.market_cap && marketData.market_cap.usd !== undefined && (
-            <Text>Market Cap: {marketData.market_cap.usd}</Text>
-          )}
-          {marketData.total_volume && marketData.total_volume.usd !== undefined && (
-            <Text>24h Volume: {marketData.total_volume.usd}</Text>
-          )}
-          {marketData.market_cap_percentage && marketData.market_cap_percentage.btc !== undefined && (
-            <Text>Bitcoin Dominance: {marketData.market_cap_percentage.btc}%</Text>
-          )}
-        </Box>
-      )}
-    </Box>
-  </ErrorBoundary>
-);
 };
 
 export default Dashboard;
