@@ -256,32 +256,6 @@ const Dashboard = () => {
       }
     };
 
-    const loadAndPredictModel = async () => {
-      console.log('Loading and predicting model');
-      // Add your model loading and prediction logic here
-      try {
-        const response = await fetch('http://127.0.0.1:5000/predict', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ features: marketData.features }),
-          signal,
-        });
-        if (!response.ok) {
-          throw new Error(`Server error: ${response.statusText}`);
-        }
-        const result = await response.json();
-        if (isMountedRef.current) {
-          setMarketData(prevData => ({
-            ...prevData,
-            predictions: result.predictions
-          }));
-        }
-      } catch (error) {
-        console.error('Error loading and predicting model:', error.message);
-      }
-    };
 
     // Only call these functions when the component mounts for the first time
     if (!marketData) {
@@ -297,7 +271,7 @@ const Dashboard = () => {
       controller.abort(); // Abort any ongoing fetch requests
       console.log('Fetch requests aborted');
     };
-  }, []);
+  }, [marketData]);
 
   // Updated JSX in Dashboard component
   return (
