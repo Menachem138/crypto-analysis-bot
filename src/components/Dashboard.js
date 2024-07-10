@@ -179,6 +179,7 @@ const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef) => {
 
 // Define the Dashboard component
 const Dashboard = () => {
+  console.log('Dashboard component rendering');
   const [marketData, setMarketData] = useState(null);
   const isMountedRef = useRef(true);
 
