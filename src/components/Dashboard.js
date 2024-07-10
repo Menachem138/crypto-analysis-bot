@@ -117,11 +117,14 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
       try {
         const csvText = await fetchCSVData();
         let parsedData = parseCSVData(csvText);
+        console.log('Data after parsing:', parsedData);
         parsedData = cleanParsedData(parsedData);
+        console.log('Data after cleaning:', parsedData);
 
         // Check if the data is already available and skip unnecessary processing
         if (parsedData.length > 0) {
           const cleanedDataArray = await calculateTechnicalIndicators(parsedData);
+          console.log('Data after calculating technical indicators:', cleanedDataArray);
 
           // Send data to the server for predictions
           const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
