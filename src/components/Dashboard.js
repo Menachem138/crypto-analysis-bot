@@ -219,6 +219,17 @@ const Dashboard = () => {
                   ath: response.ath || 'N/A',
                   atl: response.atl || 'N/A'
                 });
+                console.log('marketData state updated:', {
+                  price: response.rates.BTC,
+                  volume: response.volume || 'N/A',
+                  marketCap: response.marketCap || 'N/A',
+                  change24h: response.change24h || 'N/A',
+                  change7d: response.change7d || 'N/A',
+                  change30d: response.change30d || 'N/A',
+                  change1y: response.change1y || 'N/A',
+                  ath: response.ath || 'N/A',
+                  atl: response.atl || 'N/A'
+                });
               }
             });
           } else {
@@ -237,6 +248,7 @@ const Dashboard = () => {
                   ath: 'N/A',
                   atl: 'N/A'
                 });
+                console.log('marketData state updated to N/A');
               }
             });
           }
@@ -250,6 +262,18 @@ const Dashboard = () => {
           if (isMountedRef.current) {
             console.log('Setting marketData to error state');
             setMarketData({
+              price: 'N/A',
+              volume: 'N/A',
+              marketCap: 'N/A',
+              change24h: 'N/A',
+              change7d: 'N/A',
+              change30d: 'N/A',
+              change1y: 'N/A',
+              ath: 'N/A',
+              atl: 'N/A',
+              error: err.message
+            });
+            console.log('marketData state updated to error state:', {
               price: 'N/A',
               volume: 'N/A',
               marketCap: 'N/A',
