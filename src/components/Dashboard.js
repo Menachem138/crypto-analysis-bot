@@ -7,24 +7,37 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
   let features = []; // Define features variable in the outer scope
 
   try {
-    // Function to fetch CSV data
+    // Updated fetchCSVData function
     const fetchCSVData = async () => {
-      const response = await fetch('/Binance_1INCHBTC_d.csv', { signal });
-      if (!response.ok) {
-        throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
+      try {
+        const response = await fetch('/Binance_1INCHBTC_d.csv', { signal });
+        if (!response.ok) {
+          throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
+        }
+        const csvText = await response.text();
+        console.log('Fetched CSV data:', csvText);
+        if (csvText.includes('NaN')) {
+          console.error('Fetched CSV data contains NaN values:', csvText);
+        }
+        return csvText;
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          console.log('Fetch request was aborted');
+          return null; // Return null if the fetch request was aborted
+        } else {
+          throw error;
+        }
       }
-      const csvText = await response.text();
-      console.log('Fetched CSV data:', csvText);
-      if (csvText.includes('NaN')) {
-        console.error('Fetched CSV data contains NaN values:', csvText);
-      }
-      return csvText;
     };
 
     // Main function to fetch, parse, clean, and preprocess data
     const fetchDataAndPreprocess = async () => {
       try {
         const csvText = await fetchCSVData();
+        if (!csvText) {
+          console.error('CSV fetch was aborted or failed');
+          return;
+        }
         console.log('CSV Text:', csvText);
 
         const processResponse = await fetch('http://127.0.0.1:5000/process_data', {
@@ -200,8 +213,22 @@ const Dashboard = () => {
               }
             });
           } else {
-            console.error('BTC market data is missing in the response:', response.rates);
-            throw new Error('BTC market data is missing in the response');
+            console.warn('BTC market data is missing in the response:', response.rates);
+            startTransition(() => {
+              if (isMountedRef.current) {
+                setMarketData({
+                  price: 'N/A',
+                  volume: 'N/A',
+                  marketCap: 'N/A',
+                  change24h: 'N/A',
+                  change7d: 'N/A',
+                  change30d: 'N/A',
+                  change1y: 'N/A',
+                  ath: 'N/A',
+                  atl: 'N/A'
+                });
+              }
+            });
           }
         } else {
           console.error('API response data is missing expected structure:', response);
@@ -229,21 +256,22 @@ const Dashboard = () => {
     };
   }, [marketData]);
 
+  // Updated JSX in Dashboard component
   return (
     <div>
       <h1>Crypto Analysis Dashboard</h1>
       {marketData ? (
         <div>
           <h2>Market Data</h2>
-          <p>BTC Price: {marketData.price}</p>
-          <p>BTC Volume: {marketData.volume}</p>
-          <p>BTC Market Cap: {marketData.marketCap}</p>
-          <p>BTC 24h Change: {marketData.change24h}%</p>
-          <p>BTC 7d Change: {marketData.change7d}%</p>
-          <p>BTC 30d Change: {marketData.change30d}%</p>
-          <p>BTC 1y Change: {marketData.change1y}%</p>
-          <p>BTC All-Time High: {marketData.ath}</p>
-          <p>BTC All-Time Low: {marketData.atl}</p>
+          <p>BTC Price: {marketData.price || 'N/A'}</p>
+          <p>BTC Volume: {marketData.volume || 'N/A'}</p>
+          <p>BTC Market Cap: {marketData.marketCap || 'N/A'}</p>
+          <p>BTC 24h Change: {marketData.change24h !== undefined ? `${marketData.change24h}%` : 'N/A'}</p>
+          <p>BTC 7d Change: {marketData.change7d !== undefined ? `${marketData.change7d}%` : 'N/A'}</p>
+          <p>BTC 30d Change: {marketData.change30d !== undefined ? `${marketData.change30d}%` : 'N/A'}</p>
+          <p>BTC 1y Change: {marketData.change1y !== undefined ? `${marketData.change1y}%` : 'N/A'}</p>
+          <p>BTC All-Time High: {marketData.ath || 'N/A'}</p>
+          <p>BTC All-Time Low: {marketData.atl || 'N/A'}</p>
           {/* Add more market data details here */}
         </div>
       ) : (
