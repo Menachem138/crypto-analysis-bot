@@ -1,11 +1,9 @@
 module.exports = {
-  transform: {},
+  transform: {
+    "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
+  },
   moduleNameMapper: {
     "\\.(css|less)$": "identity-obj-proxy"
   },
-  globals: {
-    "babel-jest": {
-      useESModules: true
-    }
-  }
+  globals: {}
 };
