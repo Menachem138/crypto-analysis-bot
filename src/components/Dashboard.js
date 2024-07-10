@@ -231,7 +231,17 @@ const Dashboard = () => {
 
   return (
     <div>
-      {/* Add your component JSX here */}
+      <h1>Crypto Analysis Dashboard</h1>
+      {marketData ? (
+        <div>
+          <h2>Market Data</h2>
+          <p>BTC Price: {marketData}</p>
+          {/* Add more market data details here */}
+        </div>
+      ) : (
+        <p>Loading market data...</p>
+      )}
+      {/* Add more components and content here */}
     </div>
   );
 };
