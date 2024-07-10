@@ -242,6 +242,7 @@ const Dashboard = () => {
       } finally {
         startTransition(() => {
           setLoading(false);
+          console.log('Loading state set to false in fetchMarketData finally block');
         });
       }
     };
