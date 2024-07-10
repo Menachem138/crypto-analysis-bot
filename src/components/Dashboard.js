@@ -292,11 +292,10 @@ const Dashboard = () => {
 
     // Cleanup function to cancel ongoing operations when the component unmounts
     return () => {
-      console.log('Component unmounting, aborting fetch requests');
+      console.log('Component unmounting');
       isMountedRef.current = false; // Set isMountedRef to false to cancel ongoing operations
-      controller.abort(); // Cancel ongoing fetch requests
     };
-  }, [marketData]);
+  }, []);
 
   // Updated JSX in Dashboard component
   return (
