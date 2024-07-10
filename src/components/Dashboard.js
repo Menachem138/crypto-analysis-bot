@@ -43,7 +43,15 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         console.log('Response from /process_data:', processedData);
         if (hasNaN(processedData)) {
           console.error('Processed data contains NaN values:', processedData);
-          throw new Error('Processed data contains NaN values');
+          // Replace NaN values with 0
+          processedData.forEach(row => {
+            Object.keys(row).forEach(key => {
+              if (isNaN(row[key])) {
+                row[key] = 0;
+              }
+            });
+          });
+          console.log('Processed data after replacing NaN values:', processedData);
         }
 
         const features = processedData.map(row => [
