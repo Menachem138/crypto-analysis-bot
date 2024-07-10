@@ -37,6 +37,7 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         }
 
         const processedData = await processResponse.json();
+        console.log('Processed data:', processedData);
         if (hasNaN(processedData)) {
           throw new Error('Processed data contains NaN values');
         }
@@ -44,6 +45,7 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         const features = processedData.map(row => [
           row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
         ]);
+        console.log('Features data:', features);
         if (hasNaN(features)) {
           throw new Error('Features data contains NaN values');
         }
