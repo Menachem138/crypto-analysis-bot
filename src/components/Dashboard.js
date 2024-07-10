@@ -46,20 +46,17 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         console.log('Response from /process_data:', processedData);
 
         // Check for NaN values in the processed data and replace them using the mean of the column
-        if (hasNaN(processedData)) {
-          console.error('Processed data contains NaN values:', processedData);
-          processedData.forEach(row => {
-            Object.keys(row).forEach(key => {
-              if (isNaN(row[key])) {
-                // Replace NaN values with the mean of the non-NaN values in the same column
-                const columnValues = processedData.map(row => row[key]).filter(value => !isNaN(value));
-                const meanValue = columnValues.reduce((sum, value) => sum + value, 0) / columnValues.length;
-                row[key] = isNaN(meanValue) ? 0 : meanValue;
-              }
-            });
+        processedData.forEach(row => {
+          Object.keys(row).forEach(key => {
+            if (isNaN(row[key])) {
+              // Replace NaN values with the mean of the non-NaN values in the same column
+              const columnValues = processedData.map(row => row[key]).filter(value => !isNaN(value));
+              const meanValue = columnValues.length > 0 ? columnValues.reduce((sum, value) => sum + value, 0) / columnValues.length : null;
+              row[key] = meanValue !== null ? meanValue : 0; // Use 0 if meanValue is null
+            }
           });
-          console.log('Processed data after replacing NaN values:', processedData);
-        }
+        });
+        console.log('Processed data after replacing NaN values:', processedData);
 
         // Additional check to ensure no NaN values remain in the processed data
         if (hasNaN(processedData)) {
@@ -74,6 +71,12 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
           console.log('Processed data after replacing remaining NaN values with 0:', processedData);
         }
 
+        // Final check to ensure no NaN values remain in the features and labels arrays
+        if (hasNaN(processedData)) {
+          console.error('Processed data still contains NaN values after all replacements:', processedData);
+          throw new Error('Processed data still contains NaN values after all replacements');
+        }
+
         // Log the state of the data before creating features
         console.log('Data before creating features:', processedData);
 
@@ -83,18 +86,27 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         ]);
         console.log('Features data:', features);
 
+        // Create the labels array from the 'Close' prices
+        const labels = processedData.map(row => row.Close);
+        console.log('Labels data:', labels);
+
         // Check for NaN values in the features array and replace them with 0
-        if (hasNaN(features)) {
-          console.error('Features data contains NaN values:', features);
-          features.forEach(row => {
-            row.forEach((value, index) => {
-              if (isNaN(value)) {
-                row[index] = 0;
-              }
-            });
+        features.forEach(row => {
+          row.forEach((value, index) => {
+            if (isNaN(value)) {
+              row[index] = 0;
+            }
           });
-          console.log('Features data after replacing NaN values:', features);
-        }
+        });
+        console.log('Features data after replacing NaN values:', features);
+
+        // Check for NaN values in the labels array and replace them with 0
+        labels.forEach((value, index) => {
+          if (isNaN(value)) {
+            labels[index] = 0;
+          }
+        });
+        console.log('Labels data after replacing NaN values:', labels);
 
         // Log the state of the data before sending it to the /predict endpoint
         console.log('Data before sending to /predict:', { features });
@@ -122,6 +134,24 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
             predictions: result.predictions
           }));
         }
+
+        // Log the state of the data before sending it to the /train endpoint
+        console.log('Data before sending to /train:', { features, labels });
+        const trainResponse = await fetch('http://127.0.0.1:5000/train', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ features, labels }), // Include both features and labels in the payload
+          signal,
+        });
+        if (!trainResponse.ok) {
+          console.error('Error response from /train:', trainResponse);
+          throw new Error(`Server error: ${trainResponse.statusText}`);
+        }
+        const trainResult = await trainResponse.json();
+        console.log('Model training process completed:', trainResult);
+
       } catch (error) {
         console.error(`CSV Parsing Error: ${error.message}`);
         if (isMounted) {
@@ -135,22 +165,6 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
 
     // Call the fetchDataAndPreprocess function after the component has mounted
     await fetchDataAndPreprocess();
-    console.log('Starting model training process...');
-    console.log('Data before sending to /train:', { features });
-    const trainResponse = await fetch('http://127.0.0.1:5000/train', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ features }), // Assuming features is the data to be sent for training
-      signal,
-    });
-    if (!trainResponse.ok) {
-      console.error('Error response from /train:', trainResponse);
-      throw new Error(`Server error: ${trainResponse.statusText}`);
-    }
-    const trainResult = await trainResponse.json();
-    console.log('Model training process completed:', trainResult);
 
   } catch (err) {
     console.error(`Error: ${err.message}`);
