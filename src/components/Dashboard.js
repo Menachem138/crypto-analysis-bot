@@ -235,7 +235,15 @@ const Dashboard = () => {
       {marketData ? (
         <div>
           <h2>Market Data</h2>
-          <p>BTC Price: {marketData}</p>
+          <p>BTC Price: {marketData.price}</p>
+          <p>BTC Volume: {marketData.volume}</p>
+          <p>BTC Market Cap: {marketData.marketCap}</p>
+          <p>BTC 24h Change: {marketData.change24h}%</p>
+          <p>BTC 7d Change: {marketData.change7d}%</p>
+          <p>BTC 30d Change: {marketData.change30d}%</p>
+          <p>BTC 1y Change: {marketData.change1y}%</p>
+          <p>BTC All-Time High: {marketData.ath}</p>
+          <p>BTC All-Time Low: {marketData.atl}</p>
           {/* Add more market data details here */}
         </div>
       ) : (
