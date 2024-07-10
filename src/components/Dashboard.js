@@ -48,9 +48,9 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         // Check for NaN values in the processed data and replace them using the mean of the column
         processedData.forEach(row => {
           Object.keys(row).forEach(key => {
-            if (isNaN(row[key])) {
-              // Replace NaN values with the mean of the non-NaN values in the same column
-              const columnValues = processedData.map(row => row[key]).filter(value => !isNaN(value));
+            if (isNaN(row[key]) || row[key] === null || row[key] === undefined) {
+              // Replace NaN, null, or undefined values with the mean of the non-NaN values in the same column
+              const columnValues = processedData.map(row => row[key]).filter(value => !isNaN(value) && value !== null && value !== undefined);
               const meanValue = columnValues.length > 0 ? columnValues.reduce((sum, value) => sum + value, 0) / columnValues.length : null;
               row[key] = meanValue !== null ? meanValue : 0; // Use 0 if meanValue is null
             }
@@ -63,8 +63,8 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
           console.error('Processed data still contains NaN values after replacing with mean:', processedData);
           processedData.forEach(row => {
             Object.keys(row).forEach(key => {
-              if (isNaN(row[key])) {
-                row[key] = 0; // Replace remaining NaN values with 0
+              if (isNaN(row[key]) || row[key] === null || row[key] === undefined) {
+                row[key] = 0; // Replace remaining NaN, null, or undefined values with 0
               }
             });
           });
