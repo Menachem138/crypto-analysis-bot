@@ -281,7 +281,7 @@ const Dashboard = () => {
     return () => {
       console.log('Component unmounting, aborting fetch requests');
       isMountedRef.current = false; // Set isMountedRef to false to cancel ongoing operations
-      controller.abort(); // Abort any ongoing fetch requests
+      controller.abort(); // Abort any ongoing fetch requests to prevent memory leaks
       console.log('Fetch requests aborted');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
