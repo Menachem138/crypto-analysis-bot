@@ -3,7 +3,7 @@ module.exports = {
     "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
   },
   transformIgnorePatterns: [
-    "/node_modules/(?!(chartjs-adapter-date-fns)/)"
+    "/node_modules/(?!(axios|chartjs-adapter-date-fns)/)"
   ],
   moduleNameMapper: {
     "\\.(css|less)$": "identity-obj-proxy"
