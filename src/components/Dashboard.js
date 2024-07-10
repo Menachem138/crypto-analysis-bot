@@ -209,7 +209,17 @@ const Dashboard = () => {
             console.log('BTC market data:', response.rates.BTC);
             startTransition(() => {
               if (isMountedRef.current) {
-                setMarketData(response.rates.BTC);
+                setMarketData({
+                  price: response.rates.BTC,
+                  volume: response.volume || 'N/A',
+                  marketCap: response.marketCap || 'N/A',
+                  change24h: response.change24h || 'N/A',
+                  change7d: response.change7d || 'N/A',
+                  change30d: response.change30d || 'N/A',
+                  change1y: response.change1y || 'N/A',
+                  ath: response.ath || 'N/A',
+                  atl: response.atl || 'N/A'
+                });
               }
             });
           } else {
@@ -268,7 +278,7 @@ const Dashboard = () => {
       isMountedRef.current = false; // Set isMountedRef to false to cancel ongoing operations
       controller.abort(); // Cancel ongoing fetch requests
     };
-  }, []);
+  }, [marketData]);
 
   // Updated JSX in Dashboard component
   return (
