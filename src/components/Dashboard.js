@@ -257,10 +257,12 @@ useEffect(() => {
           });
         } else {
           console.error('BTC market data is missing in the response:', response.data.rates);
+          console.log('Full response data:', response.data);
           throw new Error('BTC market data is missing in the response');
         }
       } else {
         console.error('API response data is missing expected structure:', response.data);
+        console.log('Full response data:', response.data);
         throw new Error('API response data is missing expected structure');
       }
     } catch (err) {
