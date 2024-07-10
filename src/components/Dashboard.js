@@ -24,6 +24,7 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
       try {
         const csvText = await fetchCSVData();
         console.log('CSV Text:', csvText);
+
         const processResponse = await fetch('http://127.0.0.1:5000/process_data', {
           method: 'POST',
           headers: {
@@ -54,13 +55,24 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
           console.log('Processed data after replacing NaN values:', processedData);
         }
 
+        // Log the state of the data before creating features
+        console.log('Data before creating features:', processedData);
+
         const features = processedData.map(row => [
           row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
         ]);
         console.log('Features data:', features);
         if (hasNaN(features)) {
           console.error('Features data contains NaN values:', features);
-          throw new Error('Features data contains NaN values');
+          // Replace NaN values with 0
+          features.forEach(row => {
+            row.forEach((value, index) => {
+              if (isNaN(value)) {
+                row[index] = 0;
+              }
+            });
+          });
+          console.log('Features data after replacing NaN values:', features);
         }
 
         // Log the state of the data before sending it to the /predict endpoint
