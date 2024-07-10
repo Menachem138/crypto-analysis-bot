@@ -114,6 +114,21 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
 
     // Call the fetchDataAndPreprocess function after the component has mounted
     await fetchDataAndPreprocess();
+    console.log('Starting model training process...');
+    const trainResponse = await fetch('http://127.0.0.1:5000/train', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ features }), // Assuming features is the data to be sent for training
+      signal,
+    });
+    if (!trainResponse.ok) {
+      console.error('Error response from /train:', trainResponse);
+      throw new Error(`Server error: ${trainResponse.statusText}`);
+    }
+    const trainResult = await trainResponse.json();
+    console.log('Model training process completed:', trainResult);
 
   } catch (err) {
     console.error(`Error: ${err.message}`);

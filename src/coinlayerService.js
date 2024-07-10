@@ -29,6 +29,7 @@ const getMarketData = async (symbol) => {
       console.log('Valid market data received:', response.data.rates);
     } else {
       console.error('API response data is missing expected structure:', response.data);
+      throw new Error('API response data is missing expected structure');
     }
 
     return response.data;
