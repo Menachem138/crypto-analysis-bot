@@ -32,13 +32,15 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
           body: JSON.stringify({ csvText }),
           signal,
         });
+        console.log('Request to /process_data:', { csvText });
 
         if (!processResponse.ok) {
+          console.error('Error response from /process_data:', processResponse);
           throw new Error(`Server error: ${processResponse.statusText}`);
         }
 
         const processedData = await processResponse.json();
-        console.log('Processed data:', processedData);
+        console.log('Response from /process_data:', processedData);
         if (hasNaN(processedData)) {
           console.error('Processed data contains NaN values:', processedData);
           throw new Error('Processed data contains NaN values');
@@ -61,13 +63,15 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
           body: JSON.stringify({ features }),
           signal,
         });
+        console.log('Request to /predict:', { features });
 
         if (!predictResponse.ok) {
+          console.error('Error response from /predict:', predictResponse);
           throw new Error(`Server error: ${predictResponse.statusText}`);
         }
 
         const result = await predictResponse.json();
-        console.log('Prediction result:', result);
+        console.log('Response from /predict:', result);
         if (isMounted) {
           setMarketData(prevData => ({
             ...prevData,
