@@ -42,170 +42,107 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
     // Clear any previous errors
     setError(null);
 
-    // Defer data fetching and preprocessing to a separate function
-    const fetchDataAndPreprocess = async () => {
-      // Load and preprocess the historical data
+    // Function to fetch CSV data
+    const fetchCSVData = async () => {
       const response = await fetch('/Binance_1INCHBTC_d.csv');
       if (!response.ok) {
         throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
       }
+      return response.text();
+    };
 
-      // Parse and clean the CSV data
-      let parsedData;
-      let cleanedDataArray;
+    // Function to parse CSV data
+    const parseCSVData = (csvText) => {
+      const rows = csvText.split('\n').slice(2).filter(row => row.trim() !== '' && row.split(',').length === 10 && !isNaN(parseInt(row.split(',')[0], 10)));
+      return rows.map(row => {
+        const values = row.split(',');
+        if (values.length === 10) {
+          return {
+            Unix: parseInt(values[0], 10),
+            Date: values[1],
+            Symbol: values[2],
+            Open: parseFloat(values[3]),
+            High: parseFloat(values[4]),
+            Low: parseFloat(values[5]),
+            Close: parseFloat(values[6]),
+            'Volume 1INCH': parseFloat(values[7]),
+            'Volume BTC': parseFloat(values[8]),
+            tradecount: parseInt(values[9], 10)
+          };
+        } else {
+          return null;
+        }
+      }).filter(row => row !== null);
+    };
+
+    // Function to clean parsed data
+    const cleanParsedData = (parsedData) => {
+      return parsedData.filter(row => {
+        return Object.values(row).every(value => !isNaN(value) && isFinite(value));
+      }).filter(row => {
+        return !hasNaN([row]);
+      });
+    };
+
+    // Function to calculate technical indicators
+    const calculateTechnicalIndicators = async (cleanedDataArray) => {
+      const calculateRSI = (await import('../technicalAnalysis.js')).calculateRSI;
+      const calculateMovingAverage = (await import('../technicalAnalysis.js')).calculateMovingAverage;
+      const calculateMACD = (await import('../technicalAnalysis.js')).calculateMACD;
+
+      const rsiValues = calculateRSI(cleanedDataArray);
+      cleanedDataArray.forEach((row, index) => {
+        row.Relative_Strength_Index = rsiValues[index];
+      });
+
+      const movingAverageValues = calculateMovingAverage(cleanedDataArray);
+      cleanedDataArray.forEach((row, index) => {
+        row.Moving_Average = movingAverageValues[index];
+      });
+
+      const macdValues = calculateMACD(cleanedDataArray);
+      cleanedDataArray.forEach((row, index) => {
+        row.MACD = macdValues[index];
+      });
+
+      return cleanedDataArray;
+    };
+
+    // Main function to fetch, parse, clean, and preprocess data
+    const fetchDataAndPreprocess = async () => {
       try {
-        const csvText = await response.text();
-        const rows = csvText.split('\n').slice(2).filter(row => row.trim() !== '' && row.split(',').length === 10 && !isNaN(parseInt(row.split(',')[0], 10)));
-        parsedData = rows.map(row => {
-          const values = row.split(',');
-          if (values.length === 10) {
-            return {
-              Unix: parseInt(values[0], 10),
-              Date: values[1],
-              Symbol: values[2],
-              Open: parseFloat(values[3]),
-              High: parseFloat(values[4]),
-              Low: parseFloat(values[5]),
-              Close: parseFloat(values[6]),
-              'Volume 1INCH': parseFloat(values[7]),
-              'Volume BTC': parseFloat(values[8]),
-              tradecount: parseInt(values[9], 10)
-            };
-          } else {
-            return null;
-          }
-        }).filter(row => row !== null);
+        const csvText = await fetchCSVData();
+        let parsedData = parseCSVData(csvText);
+        parsedData = cleanParsedData(parsedData);
+        const cleanedDataArray = await calculateTechnicalIndicators(parsedData);
 
-        console.log('Parsed data:', parsedData);
-
-        parsedData = parsedData.filter(row => {
-          return Object.values(row).every(value => !isNaN(value) && isFinite(value));
+        // Send data to the server for predictions
+        const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            features: cleanedDataArray.map(row => [
+              row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
+            ]),
+          }),
         });
 
-        // Additional step to remove any rows with NaN values
-        parsedData = parsedData.filter(row => {
-          return !hasNaN([row]);
-        });
-
-        // Log the cleaned data for verification
-        console.log('Cleaned parsed data after initial filtering:', parsedData);
-
-        // Additional check for NaN values before converting to tensors
-        if (hasNaN(parsedData)) {
-          console.error('Parsed data contains NaN values after initial filtering:', parsedData);
-          throw new Error('Parsed data contains NaN values after initial filtering');
+        if (!predictResponse.ok) {
+          throw new Error(`Server error: ${predictResponse.statusText}`);
         }
 
-        // Convert the data to arrays
-        const dataArray = parsedData;
-
-        // Extract features and labels
-        cleanedDataArray = dataArray.filter(row => {
-          return Object.values(row).every(value => !isNaN(value) && isFinite(value));
+        const result = await predictResponse.json();
+        startTransition(() => {
+          setMarketData(prevData => ({
+            ...prevData,
+            predictions: result.predictions
+          }));
         });
-
-        // Log the cleaned data array for verification
-        console.log('Cleaned data array after feature extraction:', cleanedDataArray);
-
-        // Calculate RSI with the corrected rolling calculation
-        console.log('Data before RSI calculation:', cleanedDataArray);
-        const rsiValues = calculateRSI(cleanedDataArray);
-        cleanedDataArray.forEach((row, index) => {
-          row.Relative_Strength_Index = rsiValues[index];
-        });
-
-        // Log the data after RSI calculation
-        console.log('Data after RSI calculation:', cleanedDataArray);
-
-        // Additional check for NaN values after RSI calculation
-        if (hasNaN(cleanedDataArray)) {
-          console.error('Data contains NaN values after RSI calculation:', cleanedDataArray);
-          throw new Error('Data contains NaN values after RSI calculation');
-        }
-
-        console.log('Data before Moving Average calculation:', cleanedDataArray);
-        const movingAverageValues = calculateMovingAverage(cleanedDataArray);
-        cleanedDataArray.forEach((row, index) => {
-          row.Moving_Average = movingAverageValues[index];
-        });
-
-        // Log the data after Moving Average calculation
-        console.log('Data after Moving Average calculation:', cleanedDataArray);
-
-        // Additional check for NaN values after Moving Average calculation
-        if (hasNaN(cleanedDataArray)) {
-          console.error('Data contains NaN values after Moving Average calculation:', cleanedDataArray);
-          throw new Error('Data contains NaN values after Moving Average calculation');
-        }
-
-        console.log('Data before MACD calculation:', cleanedDataArray);
-        const macdValues = calculateMACD(cleanedDataArray);
-        cleanedDataArray.forEach((row, index) => {
-          row.MACD = macdValues[index];
-        });
-
-        // Log the data after MACD calculation
-        console.log('Data after MACD calculation:', cleanedDataArray);
-
-        // Additional check for NaN values after MACD calculation
-        if (hasNaN(cleanedDataArray)) {
-          console.error('Cleaned data contains NaN values after technical analysis calculations:', cleanedDataArray);
-          throw new Error('Cleaned data contains NaN values after technical analysis calculations');
-        }
-
-        // Log the final cleaned data array for verification
-        console.log('Final cleaned data array:', cleanedDataArray);
-
-        // Additional check for NaN values before sending to the server
-        if (hasNaN(cleanedDataArray)) {
-          console.error('Final cleaned data contains NaN values:', cleanedDataArray);
-          throw new Error('Final cleaned data contains NaN values');
-        }
-
-        // Log the data being sent to the server for predictions
-        console.log('Data being sent to the server for predictions:', cleanedDataArray);
-
-        // Log the first few rows of the data being sent to the server for predictions
-        console.log('First few rows of data being sent to the server for predictions:', cleanedDataArray.slice(0, 5));
-
-        // Additional logging to track NaN values in the data
-        cleanedDataArray.forEach((row, index) => {
-          if (hasNaN([row])) {
-            console.error(`Row ${index} contains NaN values:`, row);
-          }
-        });
-
       } catch (error) {
         throw new Error(`CSV Parsing Error: ${error.message}`);
       }
-
-      // Send data to the server for predictions
-      const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          features: cleanedDataArray.map(row => [
-            row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
-          ]),
-        }),
-      });
-
-      if (!predictResponse.ok) {
-        throw new Error(`Server error: ${predictResponse.statusText}`);
-      }
-
-      const result = await predictResponse.json();
-      console.log('Predictions received from the server:', result);
-
-      // Update state with predictions
-      startTransition(() => {
-        setMarketData(prevData => ({
-          ...prevData,
-          predictions: result.predictions
-        }));
-      });
     };
 
     // Call the fetchDataAndPreprocess function after the component has mounted
