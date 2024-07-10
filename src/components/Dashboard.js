@@ -256,7 +256,6 @@ const Dashboard = () => {
       }
     };
 
-
     // Only call these functions when the component mounts for the first time
     if (!marketData) {
       console.log('Calling fetchMarketData and fetchDataAndPreprocess');
@@ -271,7 +270,7 @@ const Dashboard = () => {
       controller.abort(); // Abort any ongoing fetch requests
       console.log('Fetch requests aborted');
     };
-  }, [marketData]);
+  }, [marketData, fetchDataAndPreprocess, getMarketData]);
 
   // Updated JSX in Dashboard component
   return (
