@@ -1,8 +1,6 @@
-import React, { useState, useEffect, startTransition } from 'react';
+import React, { useState, useEffect, startTransition, lazy, Suspense } from 'react';
 import { Box, Heading, Text, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
 import { getMarketData } from '../coinlayerService.js';
-import { calculateRSI, calculateMovingAverage, calculateMACD } from '../technicalAnalysis.js';
-import { createModel, trainModel } from '../aiModel.js';
 import * as tf from '@tensorflow/tfjs';
 
 class ErrorBoundary extends React.Component {
