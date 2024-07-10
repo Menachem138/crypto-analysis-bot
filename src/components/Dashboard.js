@@ -1,4 +1,4 @@
-import React, { useState, useEffect, startTransition } from 'react';
+import React, { useState, useEffect, startTransition, useRef } from 'react';
 import { getMarketData } from '../coinlayerService.js';
 
 const hasNaN = (array) => array.some(row => Object.values(row).some(value => isNaN(value)));
@@ -19,10 +19,12 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
     // Main function to fetch, parse, clean, and preprocess data
     const fetchDataAndPreprocess = async () => {
       try {
+        console.log('Starting fetchDataAndPreprocess');
         const csvText = await fetchCSVData();
         console.log('Data after fetching:', csvText);
 
         // Send raw CSV data to the server for processing
+        console.log('Sending raw CSV data to the server for processing');
         const processResponse = await fetch('http://127.0.0.1:5000/process_data', {
           method: 'POST',
           headers: {
@@ -41,6 +43,12 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
 
         // Check for NaN values in the processed data
         if (hasNaN(processedData)) {
+          if (isMounted) {
+            setMarketData(prevData => ({
+              ...prevData,
+              error: 'Processed data contains NaN values'
+            }));
+          }
           throw new Error('Processed data contains NaN values');
         }
 
@@ -48,11 +56,19 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         const features = processedData.map(row => [
           row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
         ]);
+        console.log('Features data:', features);
         if (hasNaN(features)) {
+          if (isMounted) {
+            setMarketData(prevData => ({
+              ...prevData,
+              error: 'Features data contains NaN values'
+            }));
+          }
           throw new Error('Features data contains NaN values');
         }
 
         // Send processed data to the server for predictions
+        console.log('Sending processed data to the server for predictions');
         const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
           method: 'POST',
           headers: {
@@ -67,6 +83,7 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         }
 
         const result = await predictResponse.json();
+        console.log('Predictions received from server:', result);
         if (isMounted) {
           setMarketData(prevData => ({
             ...prevData,
@@ -74,6 +91,13 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
           }));
         }
       } catch (error) {
+        console.error(`CSV Parsing Error: ${error.message}`);
+        if (isMounted) {
+          setMarketData(prevData => ({
+            ...prevData,
+            error: error.message
+          }));
+        }
         throw new Error(`CSV Parsing Error: ${error.message}`);
       }
     };
@@ -83,18 +107,23 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
 
   } catch (err) {
     console.error(`Error: ${err.message}`);
+    if (isMounted) {
+      setMarketData(prevData => ({
+        ...prevData,
+        error: err.message
+      }));
+    }
   }
 };
 
+// Define the Dashboard component
 const Dashboard = () => {
   const [marketData, setMarketData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
-    let isMounted = true; // Track if the component is mounted
 
     const fetchMarketData = async () => {
       try {
@@ -107,7 +136,7 @@ const Dashboard = () => {
             console.log('BTC market data:', response.data.rates.BTC);
             console.log('Setting marketData state with:', response.data.rates.BTC);
             startTransition(() => {
-              if (isMounted) {
+              if (isMountedRef.current) {
                 console.log('Before setting marketData:', response.data.rates.BTC);
                 setMarketData(response.data.rates.BTC);
                 console.log('After setting marketData:', response.data.rates.BTC);
@@ -141,13 +170,14 @@ const Dashboard = () => {
 
     // Only call these functions when the component mounts for the first time
     if (!marketData) {
+      console.log('Component mounted, fetching market data and loading model');
       fetchMarketData();
-      loadAndPredictModel(setMarketData, signal, isMounted);
+      loadAndPredictModel(setMarketData, signal, isMountedRef.current);
     }
 
     // Cleanup function to cancel ongoing operations when the component unmounts
     return () => {
-      isMounted = false; // Set isMounted to false to cancel ongoing operations
+      isMountedRef.current = false; // Set isMountedRef to false to cancel ongoing operations
       controller.abort(); // Cancel ongoing fetch requests
     };
   }, [marketData]);
