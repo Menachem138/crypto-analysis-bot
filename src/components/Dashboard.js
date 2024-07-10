@@ -55,6 +55,7 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
 
     // Function to parse CSV data
     const parseCSVData = (csvText) => {
+      console.log('Raw CSV data:', csvText);
       const rows = csvText.split('\n').slice(2).filter(row => row.trim() !== '' && row.split(',').length === 10 && !isNaN(parseInt(row.split(',')[0], 10)));
       const parsedData = rows.map(row => {
         const values = row.split(',');
@@ -81,6 +82,7 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
 
     // Function to clean parsed data
     const cleanParsedData = (parsedData) => {
+      console.log('Data before cleaning:', parsedData);
       const cleanedData = parsedData.filter(row => {
         return Object.values(row).every(value => !isNaN(value) && isFinite(value));
       });
@@ -90,21 +92,19 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
 
     // Function to calculate technical indicators
     const calculateTechnicalIndicators = async (cleanedDataArray) => {
-      const { calculateRSI } = await import('../technicalAnalysis.js');
+      console.log('Data before calculating technical indicators:', cleanedDataArray);
       const rsiValues = calculateRSI(cleanedDataArray);
       cleanedDataArray.forEach((row, index) => {
         row.Relative_Strength_Index = rsiValues[index];
       });
       console.log('Data after calculating RSI:', cleanedDataArray);
 
-      const { calculateMovingAverage } = await import('../technicalAnalysis.js');
       const movingAverageValues = calculateMovingAverage(cleanedDataArray);
       cleanedDataArray.forEach((row, index) => {
         row.Moving_Average = movingAverageValues[index];
       });
       console.log('Data after calculating Moving Average:', cleanedDataArray);
 
-      const { calculateMACD } = await import('../technicalAnalysis.js');
       const macdValues = calculateMACD(cleanedDataArray);
       cleanedDataArray.forEach((row, index) => {
         row.MACD = macdValues[index];
