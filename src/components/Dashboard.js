@@ -270,7 +270,7 @@ const Dashboard = () => {
       controller.abort(); // Abort any ongoing fetch requests
       console.log('Fetch requests aborted');
     };
-  }, []);
+  }, []); // The empty dependency array ensures this useEffect runs only once on mount and unmount
 
   // Updated JSX in Dashboard component
   return (
