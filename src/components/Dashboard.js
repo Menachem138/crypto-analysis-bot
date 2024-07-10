@@ -95,18 +95,21 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
       cleanedDataArray.forEach((row, index) => {
         row.Relative_Strength_Index = rsiValues[index];
       });
+      console.log('Data after calculating RSI:', cleanedDataArray);
 
       const { calculateMovingAverage } = await import('../technicalAnalysis.js');
       const movingAverageValues = calculateMovingAverage(cleanedDataArray);
       cleanedDataArray.forEach((row, index) => {
         row.Moving_Average = movingAverageValues[index];
       });
+      console.log('Data after calculating Moving Average:', cleanedDataArray);
 
       const { calculateMACD } = await import('../technicalAnalysis.js');
       const macdValues = calculateMACD(cleanedDataArray);
       cleanedDataArray.forEach((row, index) => {
         row.MACD = macdValues[index];
       });
+      console.log('Data after calculating MACD:', cleanedDataArray);
 
       // Additional check for NaN values after calculating technical indicators
       const finalCleanedData = cleanedDataArray.filter(row => {
