@@ -71,7 +71,7 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
           console.log('Processed data after replacing remaining NaN values with 0:', processedData);
         }
 
-        // Final check to ensure no NaN values remain in the features and labels arrays
+        // Final check to ensure no NaN values remain in the processed data
         if (hasNaN(processedData)) {
           console.error('Processed data still contains NaN values after all replacements:', processedData);
           throw new Error('Processed data still contains NaN values after all replacements');
