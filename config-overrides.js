@@ -1,5 +1,5 @@
 const path = require('path');
-const { override } = require('customize-cra');
+const { override, addBabelPreset, addBabelPlugin } = require('customize-cra');
 
 module.exports = override(
   (config) => {
@@ -13,5 +13,9 @@ module.exports = override(
       "vm": require.resolve("vm-browserify")
     };
     return config;
-  }
+  },
+  addBabelPreset('@babel/preset-env'),
+  addBabelPlugin('@babel/plugin-proposal-class-properties'),
+  addBabelPlugin('@babel/plugin-proposal-private-methods'),
+  addBabelPlugin('@babel/plugin-proposal-private-property-in-object')
 );
