@@ -53,112 +53,52 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
       return csvText;
     };
 
-    // Function to parse CSV data
-    const parseCSVData = (csvText) => {
-      console.log('Raw CSV data:', csvText);
-      const rows = csvText.split('\n').slice(2).filter(row => row.trim() !== '' && row.split(',').length === 10 && !isNaN(parseInt(row.split(',')[0], 10)));
-      const parsedData = rows.map(row => {
-        const values = row.split(',');
-        if (values.length === 10) {
-          return {
-            Unix: parseInt(values[0], 10),
-            Date: values[1],
-            Symbol: values[2],
-            Open: parseFloat(values[3]),
-            High: parseFloat(values[4]),
-            Low: parseFloat(values[5]),
-            Close: parseFloat(values[6]),
-            'Volume 1INCH': parseFloat(values[7]),
-            'Volume BTC': parseFloat(values[8]),
-            tradecount: parseInt(values[9], 10)
-          };
-        } else {
-          return null;
-        }
-      }).filter(row => row !== null && !hasNaN([row]));
-      console.log('Parsed CSV data:', parsedData);
-      return parsedData;
-    };
-
-    // Function to clean parsed data
-    const cleanParsedData = (parsedData) => {
-      console.log('Data before cleaning:', parsedData);
-      const cleanedData = parsedData.filter(row => {
-        return Object.values(row).every(value => !isNaN(value) && isFinite(value));
-      });
-      console.log('Cleaned parsed data:', cleanedData);
-      return cleanedData;
-    };
-
-    // Function to calculate technical indicators
-    const calculateTechnicalIndicators = async (cleanedDataArray) => {
-      console.log('Data before calculating technical indicators:', cleanedDataArray);
-      const rsiValues = calculateRSI(cleanedDataArray);
-      cleanedDataArray.forEach((row, index) => {
-        row.Relative_Strength_Index = rsiValues[index];
-      });
-      console.log('Data after calculating RSI:', cleanedDataArray);
-
-      const movingAverageValues = calculateMovingAverage(cleanedDataArray);
-      cleanedDataArray.forEach((row, index) => {
-        row.Moving_Average = movingAverageValues[index];
-      });
-      console.log('Data after calculating Moving Average:', cleanedDataArray);
-
-      const macdValues = calculateMACD(cleanedDataArray);
-      cleanedDataArray.forEach((row, index) => {
-        row.MACD = macdValues[index];
-      });
-      console.log('Data after calculating MACD:', cleanedDataArray);
-
-      // Additional check for NaN values after calculating technical indicators
-      const finalCleanedData = cleanedDataArray.filter(row => {
-        return Object.values(row).every(value => !isNaN(value) && isFinite(value));
-      });
-
-      console.log('Data with technical indicators:', finalCleanedData);
-      return finalCleanedData;
-    };
-
     // Main function to fetch, parse, clean, and preprocess data
     const fetchDataAndPreprocess = async () => {
       try {
         const csvText = await fetchCSVData();
-        let parsedData = parseCSVData(csvText);
-        console.log('Data after parsing:', parsedData);
-        parsedData = cleanParsedData(parsedData);
-        console.log('Data after cleaning:', parsedData);
+        console.log('Data after fetching:', csvText);
 
-        // Check if the data is already available and skip unnecessary processing
-        if (parsedData.length > 0) {
-          const cleanedDataArray = await calculateTechnicalIndicators(parsedData);
-          console.log('Data after calculating technical indicators:', cleanedDataArray);
+        // Send raw CSV data to the server for processing
+        const processResponse = await fetch('http://127.0.0.1:5000/process_data', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ csvText }),
+        });
 
-          // Send data to the server for predictions
-          const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              features: cleanedDataArray.map(row => [
-                row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
-              ]),
-            }),
-          });
-
-          if (!predictResponse.ok) {
-            throw new Error(`Server error: ${predictResponse.statusText}`);
-          }
-
-          const result = await predictResponse.json();
-          startTransition(() => {
-            setMarketData(prevData => ({
-              ...prevData,
-              predictions: result.predictions
-            }));
-          });
+        if (!processResponse.ok) {
+          throw new Error(`Server error: ${processResponse.statusText}`);
         }
+
+        const processedData = await processResponse.json();
+        console.log('Processed data from server:', processedData);
+
+        // Send processed data to the server for predictions
+        const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            features: processedData.map(row => [
+              row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
+            ]),
+          }),
+        });
+
+        if (!predictResponse.ok) {
+          throw new Error(`Server error: ${predictResponse.statusText}`);
+        }
+
+        const result = await predictResponse.json();
+        startTransition(() => {
+          setMarketData(prevData => ({
+            ...prevData,
+            predictions: result.predictions
+          }));
+        });
       } catch (error) {
         throw new Error(`CSV Parsing Error: ${error.message}`);
       }
