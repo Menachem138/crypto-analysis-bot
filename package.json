@@ -40,7 +40,7 @@
   "scripts": {
     "start": "react-app-rewired start --config-overrides-path ./config-overrides.js",
     "build": "react-app-rewired build --config-overrides-path ./config-overrides.js",
-    "test": "react-app-rewired test --experimental-vm-modules",
+    "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
