@@ -52,8 +52,8 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
             if (isNaN(row[key]) || row[key] === null || row[key] === undefined) {
               // Replace NaN, null, or undefined values with the mean of the non-NaN values in the same column
               const columnValues = processedData.map(row => row[key]).filter(value => !isNaN(value) && value !== null && value !== undefined);
-              const meanValue = columnValues.length > 0 ? columnValues.reduce((sum, value) => sum + value, 0) / columnValues.length : null;
-              row[key] = meanValue !== null ? meanValue : 0; // Use 0 if meanValue is null
+              const meanValue = columnValues.length > 0 ? columnValues.reduce((sum, value) => sum + value, 0) / columnValues.length : 0;
+              row[key] = columnValues.length > 0 ? meanValue : 0; // Set default value to 0 if column consists entirely of NaN values
             }
           });
         });
@@ -191,16 +191,16 @@ const Dashboard = () => {
       try {
         const response = await getMarketData('BTC', { signal }); // Pass a default symbol for testing
         console.log('API response:', response);
-        if (response && response.data && response.data.rates) {
-          if (response.data.rates.BTC) {
-            console.log('BTC market data:', response.data.rates.BTC);
+        if (response && response.rates) {
+          if (response.rates.BTC) {
+            console.log('BTC market data:', response.rates.BTC);
             startTransition(() => {
               if (isMountedRef.current) {
-                setMarketData(response.data.rates.BTC);
+                setMarketData(response.rates.BTC);
               }
             });
           } else {
-            console.error('BTC market data is missing in the response:', response.data.rates);
+            console.error('BTC market data is missing in the response:', response.rates);
             throw new Error('BTC market data is missing in the response');
           }
         } else {
