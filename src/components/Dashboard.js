@@ -237,6 +237,20 @@ const Dashboard = () => {
       } catch (err) {
         if (err.name !== 'AbortError') {
           console.error('Error fetching market data:', err.message);
+          if (isMountedRef.current) {
+            setMarketData({
+              price: 'N/A',
+              volume: 'N/A',
+              marketCap: 'N/A',
+              change24h: 'N/A',
+              change7d: 'N/A',
+              change30d: 'N/A',
+              change1y: 'N/A',
+              ath: 'N/A',
+              atl: 'N/A',
+              error: err.message
+            });
+          }
         }
       } finally {
         console.log('Market data fetch completed');
