@@ -4,6 +4,8 @@ import { getMarketData } from '../coinlayerService.js';
 const hasNaN = (array) => array.some(row => Object.values(row).some(value => isNaN(value)));
 
 const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
+  let features = []; // Define features variable in the outer scope
+
   try {
     // Function to fetch CSV data
     const fetchCSVData = async () => {
@@ -42,13 +44,15 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
 
         const processedData = await processResponse.json();
         console.log('Response from /process_data:', processedData);
+
+        // Check for NaN values in the processed data and replace them using interpolation
         if (hasNaN(processedData)) {
           console.error('Processed data contains NaN values:', processedData);
-          // Replace NaN values with 0
           processedData.forEach(row => {
             Object.keys(row).forEach(key => {
               if (isNaN(row[key])) {
-                row[key] = 0;
+                // Implement interpolation or other imputation methods here
+                row[key] = interpolateValue(processedData, key);
               }
             });
           });
@@ -58,13 +62,15 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         // Log the state of the data before creating features
         console.log('Data before creating features:', processedData);
 
-        const features = processedData.map(row => [
+        // Create the features array from the processed data
+        features = processedData.map(row => [
           row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
         ]);
         console.log('Features data:', features);
+
+        // Check for NaN values in the features array and replace them with 0
         if (hasNaN(features)) {
           console.error('Features data contains NaN values:', features);
-          // Replace NaN values with 0
           features.forEach(row => {
             row.forEach((value, index) => {
               if (isNaN(value)) {
@@ -115,6 +121,7 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
     // Call the fetchDataAndPreprocess function after the component has mounted
     await fetchDataAndPreprocess();
     console.log('Starting model training process...');
+    console.log('Data before sending to /train:', { features });
     const trainResponse = await fetch('http://127.0.0.1:5000/train', {
       method: 'POST',
       headers: {
