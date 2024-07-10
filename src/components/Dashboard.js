@@ -23,6 +23,7 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
     const fetchDataAndPreprocess = async () => {
       try {
         const csvText = await fetchCSVData();
+        console.log('CSV Text:', csvText);
         const processResponse = await fetch('http://127.0.0.1:5000/process_data', {
           method: 'POST',
           headers: {
@@ -64,6 +65,7 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         }
 
         const result = await predictResponse.json();
+        console.log('Prediction result:', result);
         if (isMounted) {
           setMarketData(prevData => ({
             ...prevData,
@@ -125,6 +127,8 @@ const Dashboard = () => {
         if (err.name !== 'AbortError') {
           console.error('Error fetching market data:', err.message);
         }
+      } finally {
+        console.log('Market data fetch completed');
       }
     };
 
