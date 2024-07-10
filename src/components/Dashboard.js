@@ -183,6 +183,7 @@ const Dashboard = () => {
   const isMountedRef = useRef(true);
 
   useEffect(() => {
+    console.log('useEffect hook running');
     const controller = new AbortController();
     const signal = controller.signal;
 
