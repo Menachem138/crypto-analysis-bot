@@ -270,7 +270,7 @@ const Dashboard = () => {
       controller.abort(); // Abort any ongoing fetch requests
       console.log('Fetch requests aborted');
     };
-  }, [marketData, fetchDataAndPreprocess, getMarketData]);
+  }, [marketData]);
 
   // Updated JSX in Dashboard component
   return (
