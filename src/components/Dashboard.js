@@ -1,47 +1,10 @@
 import React, { useState, useEffect, startTransition } from 'react';
-import { Box, Heading, Text } from '@chakra-ui/react';
 import { getMarketData } from '../coinlayerService.js';
-import { calculateRSI, calculateMovingAverage, calculateMACD } from '../technicalAnalysis.js';
-
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error("ErrorBoundary caught an error", error, errorInfo);
-    console.log("Error details:", error);
-    console.log("Error info:", errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <Box textAlign="center" py={10} px={6}>
-          <Heading as="h1" size="xl" mb={6}>
-            Something went wrong.
-          </Heading>
-          <Text>Please try again later.</Text>
-        </Box>
-      );
-    }
-
-    return this.props.children;
-  }
-}
 
 const hasNaN = (array) => array.some(row => Object.values(row).some(value => isNaN(value)));
 
-const loadAndPredictModel = async (setError, setMarketData, setLoading, signal, isMounted) => {
+const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
   try {
-    // Clear any previous errors
-    setError(null);
-
     // Function to fetch CSV data
     const fetchCSVData = async () => {
       const response = await fetch('/Binance_1INCHBTC_d.csv', { signal });
@@ -119,15 +82,13 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading, signal, 
     await fetchDataAndPreprocess();
 
   } catch (err) {
-    setError(`Error: ${err.message}`);
-  } finally {
-    setLoading(false);
+    console.error(`Error: ${err.message}`);
   }
 };
 
 const Dashboard = () => {
   const [marketData, setMarketData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -174,14 +135,6 @@ const Dashboard = () => {
           });
           console.log('Full error object:', err);
           console.log('Request config:', err.config);
-          if (isMounted) {
-            setError(`Error: ${err.message}`);
-          }
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-          console.log('Loading state set to false in fetchMarketData finally block');
         }
       }
     };
@@ -189,15 +142,13 @@ const Dashboard = () => {
     // Only call these functions when the component mounts for the first time
     if (!marketData) {
       fetchMarketData();
-      loadAndPredictModel(setError, setMarketData, setLoading, signal, isMounted);
+      loadAndPredictModel(setMarketData, signal, isMounted);
     }
 
     // Cleanup function to cancel ongoing operations when the component unmounts
     return () => {
       isMounted = false; // Set isMounted to false to cancel ongoing operations
       controller.abort(); // Cancel ongoing fetch requests
-      setLoading(false);
-      setError(null);
     };
   }, [marketData]);
 
