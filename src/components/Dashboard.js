@@ -74,7 +74,7 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
         } else {
           return null;
         }
-      }).filter(row => row !== null);
+      }).filter(row => row !== null && !hasNaN([row]));
       console.log('Parsed CSV data:', parsedData);
       return parsedData;
     };
@@ -83,8 +83,6 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
     const cleanParsedData = (parsedData) => {
       const cleanedData = parsedData.filter(row => {
         return Object.values(row).every(value => !isNaN(value) && isFinite(value));
-      }).filter(row => {
-        return !hasNaN([row]);
       });
       console.log('Cleaned parsed data:', cleanedData);
       return cleanedData;
@@ -120,32 +118,36 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
         const csvText = await fetchCSVData();
         let parsedData = parseCSVData(csvText);
         parsedData = cleanParsedData(parsedData);
-        const cleanedDataArray = await calculateTechnicalIndicators(parsedData);
 
-        // Send data to the server for predictions
-        const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            features: cleanedDataArray.map(row => [
-              row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
-            ]),
-          }),
-        });
+        // Check if the data is already available and skip unnecessary processing
+        if (parsedData.length > 0) {
+          const cleanedDataArray = await calculateTechnicalIndicators(parsedData);
 
-        if (!predictResponse.ok) {
-          throw new Error(`Server error: ${predictResponse.statusText}`);
+          // Send data to the server for predictions
+          const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              features: cleanedDataArray.map(row => [
+                row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
+              ]),
+            }),
+          });
+
+          if (!predictResponse.ok) {
+            throw new Error(`Server error: ${predictResponse.statusText}`);
+          }
+
+          const result = await predictResponse.json();
+          startTransition(() => {
+            setMarketData(prevData => ({
+              ...prevData,
+              predictions: result.predictions
+            }));
+          });
         }
-
-        const result = await predictResponse.json();
-        startTransition(() => {
-          setMarketData(prevData => ({
-            ...prevData,
-            predictions: result.predictions
-          }));
-        });
       } catch (error) {
         throw new Error(`CSV Parsing Error: ${error.message}`);
       }
