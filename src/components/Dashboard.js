@@ -48,13 +48,15 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
       if (!response.ok) {
         throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
       }
-      return response.text();
+      const csvText = await response.text();
+      console.log('Fetched CSV data:', csvText);
+      return csvText;
     };
 
     // Function to parse CSV data
     const parseCSVData = (csvText) => {
       const rows = csvText.split('\n').slice(2).filter(row => row.trim() !== '' && row.split(',').length === 10 && !isNaN(parseInt(row.split(',')[0], 10)));
-      return rows.map(row => {
+      const parsedData = rows.map(row => {
         const values = row.split(',');
         if (values.length === 10) {
           return {
@@ -73,15 +75,19 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
           return null;
         }
       }).filter(row => row !== null);
+      console.log('Parsed CSV data:', parsedData);
+      return parsedData;
     };
 
     // Function to clean parsed data
     const cleanParsedData = (parsedData) => {
-      return parsedData.filter(row => {
+      const cleanedData = parsedData.filter(row => {
         return Object.values(row).every(value => !isNaN(value) && isFinite(value));
       }).filter(row => {
         return !hasNaN([row]);
       });
+      console.log('Cleaned parsed data:', cleanedData);
+      return cleanedData;
     };
 
     // Function to calculate technical indicators
@@ -105,6 +111,7 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
         row.MACD = macdValues[index];
       });
 
+      console.log('Data with technical indicators:', cleanedDataArray);
       return cleanedDataArray;
     };
 

@@ -15,17 +15,17 @@ const calculateMovingAverage = (data, period = 14) => {
       sum += data[j].Close;
     }
 
-    movingAverage.push(sum / period);
+    const avg = sum / period;
+    if (isNaN(avg) || !isFinite(avg)) {
+      console.error('Invalid Moving Average value:', avg);
+      throw new Error('Invalid Moving Average value');
+    }
+
+    movingAverage.push(avg);
   }
 
   // Log the moving average for verification
   console.log('Moving Average:', movingAverage);
-
-  // Check for NaN values in the moving average
-  if (movingAverage.some(value => isNaN(value))) {
-    console.error('Moving Average contains NaN values:', movingAverage);
-    throw new Error('Moving Average contains NaN values');
-  }
 
   return movingAverage;
 };
@@ -54,18 +54,21 @@ const calculateRSI = (data, period = 14) => {
 
     const avgGain = gain / period;
     const avgLoss = loss / period;
-    const rs = avgGain / (avgLoss + 1e-8); // Add small constant to prevent division by zero
-    rsi.push(100 - (100 / (1 + rs)));
+    if (avgLoss === 0) {
+      rsi.push(100); // If avgLoss is zero, RSI is 100
+    } else {
+      const rs = avgGain / avgLoss;
+      const rsiValue = 100 - (100 / (1 + rs));
+      if (isNaN(rsiValue) || !isFinite(rsiValue)) {
+        console.error('Invalid RSI value:', rsiValue);
+        throw new Error('Invalid RSI value');
+      }
+      rsi.push(rsiValue);
+    }
   }
 
   // Log the RSI for verification
   console.log('RSI:', rsi);
-
-  // Check for NaN values in the RSI
-  if (rsi.some(value => isNaN(value))) {
-    console.error('RSI contains NaN values:', rsi);
-    throw new Error('RSI contains NaN values');
-  }
 
   return rsi;
 };
@@ -79,9 +82,9 @@ const calculateMACD = (data, shortPeriod = 12, longPeriod = 26, signalPeriod = 9
   console.log('MACD:', macdResult.macd);
 
   // Check for NaN values in the MACD
-  if (macdResult.macd.some(value => isNaN(value))) {
-    console.error('MACD contains NaN values:', macdResult.macd);
-    throw new Error('MACD contains NaN values');
+  if (macdResult.macd.some(value => isNaN(value) || !isFinite(value))) {
+    console.error('MACD contains invalid values:', macdResult.macd);
+    throw new Error('MACD contains invalid values');
   }
 
   return macdResult.macd; // Return only the MACD array
