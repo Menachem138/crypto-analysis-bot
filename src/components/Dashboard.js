@@ -248,11 +248,17 @@ useEffect(() => {
     try {
       const response = await getMarketData('BTC'); // Pass a default symbol for testing
       console.log('API response:', response);
-      if (response && response.data && response.data.rates && response.data.rates.BTC) {
-        console.log('Valid market data received:', response.data.rates.BTC);
-        startTransition(() => {
-          setMarketData(response.data.rates.BTC);
-        });
+      if (response && response.data && response.data.rates) {
+        console.log('Valid market data received:', response.data.rates);
+        if (response.data.rates.BTC) {
+          console.log('BTC market data:', response.data.rates.BTC);
+          startTransition(() => {
+            setMarketData(response.data.rates.BTC);
+          });
+        } else {
+          console.error('BTC market data is missing in the response:', response.data.rates);
+          throw new Error('BTC market data is missing in the response');
+        }
       } else {
         console.error('API response data is missing expected structure:', response.data);
         throw new Error('API response data is missing expected structure');
