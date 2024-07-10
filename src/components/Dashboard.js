@@ -92,20 +92,19 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
 
     // Function to calculate technical indicators
     const calculateTechnicalIndicators = async (cleanedDataArray) => {
-      const calculateRSI = (await import('../technicalAnalysis.js')).calculateRSI;
-      const calculateMovingAverage = (await import('../technicalAnalysis.js')).calculateMovingAverage;
-      const calculateMACD = (await import('../technicalAnalysis.js')).calculateMACD;
-
+      const { calculateRSI } = await import('../technicalAnalysis.js');
       const rsiValues = calculateRSI(cleanedDataArray);
       cleanedDataArray.forEach((row, index) => {
         row.Relative_Strength_Index = rsiValues[index];
       });
 
+      const { calculateMovingAverage } = await import('../technicalAnalysis.js');
       const movingAverageValues = calculateMovingAverage(cleanedDataArray);
       cleanedDataArray.forEach((row, index) => {
         row.Moving_Average = movingAverageValues[index];
       });
 
+      const { calculateMACD } = await import('../technicalAnalysis.js');
       const macdValues = calculateMACD(cleanedDataArray);
       cleanedDataArray.forEach((row, index) => {
         row.MACD = macdValues[index];
