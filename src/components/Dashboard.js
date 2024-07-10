@@ -194,98 +194,64 @@ const Dashboard = () => {
         const response = await getMarketData('BTC', { signal }); // Pass a default symbol for testing
         console.log('API response:', response);
         if (response && response.rates) {
-          if (response.rates.BTC) {
-            console.log('BTC market data:', response.rates.BTC);
-            startTransition(() => {
-              if (isMountedRef.current) {
-                console.log('Setting marketData:', {
-                  price: response.rates.BTC,
-                  volume: response.volume || 'N/A',
-                  marketCap: response.marketCap || 'N/A',
-                  change24h: response.change24h || 'N/A',
-                  change7d: response.change7d || 'N/A',
-                  change30d: response.change30d || 'N/A',
-                  change1y: response.change1y || 'N/A',
-                  ath: response.ath || 'N/A',
-                  atl: response.atl || 'N/A'
-                });
-                setMarketData({
-                  price: response.rates.BTC,
-                  volume: response.volume || 'N/A',
-                  marketCap: response.marketCap || 'N/A',
-                  change24h: response.change24h || 'N/A',
-                  change7d: response.change7d || 'N/A',
-                  change30d: response.change30d || 'N/A',
-                  change1y: response.change1y || 'N/A',
-                  ath: response.ath || 'N/A',
-                  atl: response.atl || 'N/A'
-                });
-                console.log('marketData state updated:', {
-                  price: response.rates.BTC,
-                  volume: response.volume || 'N/A',
-                  marketCap: response.marketCap || 'N/A',
-                  change24h: response.change24h || 'N/A',
-                  change7d: response.change7d || 'N/A',
-                  change30d: response.change30d || 'N/A',
-                  change1y: response.change1y || 'N/A',
-                  ath: response.ath || 'N/A',
-                  atl: response.atl || 'N/A'
-                });
-              }
-            });
-          } else {
-            console.warn('BTC market data is missing in the response:', response.rates);
-            startTransition(() => {
-              if (isMountedRef.current) {
-                console.log('Setting marketData to N/A');
-                setMarketData({
-                  price: 'N/A',
-                  volume: 'N/A',
-                  marketCap: 'N/A',
-                  change24h: 'N/A',
-                  change7d: 'N/A',
-                  change30d: 'N/A',
-                  change1y: 'N/A',
-                  ath: 'N/A',
-                  atl: 'N/A'
-                });
-                console.log('marketData state updated to N/A');
-              }
-            });
-          }
+          const newMarketData = {
+            price: response.rates.BTC || 'N/A',
+            volume: response.volume || 'N/A',
+            marketCap: response.marketCap || 'N/A',
+            change24h: response.change24h || 'N/A',
+            change7d: response.change7d || 'N/A',
+            change30d: response.change30d || 'N/A',
+            change1y: response.change1y || 'N/A',
+            ath: response.ath || 'N/A',
+            atl: response.atl || 'N/A'
+          };
+          startTransition(() => {
+            if (isMountedRef.current) {
+              console.log('Setting marketData:', newMarketData);
+              setMarketData(newMarketData);
+              console.log('marketData state updated:', newMarketData);
+            }
+          });
         } else {
-          console.error('API response data is missing expected structure:', response);
-          throw new Error('API response data is missing expected structure');
+          console.warn('BTC market data is missing in the response:', response.rates);
+          const newMarketData = {
+            price: 'N/A',
+            volume: 'N/A',
+            marketCap: 'N/A',
+            change24h: 'N/A',
+            change7d: 'N/A',
+            change30d: 'N/A',
+            change1y: 'N/A',
+            ath: 'N/A',
+            atl: 'N/A'
+          };
+          startTransition(() => {
+            if (isMountedRef.current) {
+              console.log('Setting marketData to N/A');
+              setMarketData(newMarketData);
+              console.log('marketData state updated to N/A');
+            }
+          });
         }
       } catch (err) {
         if (err.name !== 'AbortError') {
           console.error('Error fetching market data:', err.message);
+          const newMarketData = {
+            price: 'N/A',
+            volume: 'N/A',
+            marketCap: 'N/A',
+            change24h: 'N/A',
+            change7d: 'N/A',
+            change30d: 'N/A',
+            change1y: 'N/A',
+            ath: 'N/A',
+            atl: 'N/A',
+            error: err.message
+          };
           if (isMountedRef.current) {
             console.log('Setting marketData to error state');
-            setMarketData({
-              price: 'N/A',
-              volume: 'N/A',
-              marketCap: 'N/A',
-              change24h: 'N/A',
-              change7d: 'N/A',
-              change30d: 'N/A',
-              change1y: 'N/A',
-              ath: 'N/A',
-              atl: 'N/A',
-              error: err.message
-            });
-            console.log('marketData state updated to error state:', {
-              price: 'N/A',
-              volume: 'N/A',
-              marketCap: 'N/A',
-              change24h: 'N/A',
-              change7d: 'N/A',
-              change30d: 'N/A',
-              change1y: 'N/A',
-              ath: 'N/A',
-              atl: 'N/A',
-              error: err.message
-            });
+            setMarketData(newMarketData);
+            console.log('marketData state updated to error state:', newMarketData);
           }
         } else {
           console.log('Fetch request was aborted');
