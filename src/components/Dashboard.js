@@ -46,6 +46,7 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         console.log('Response from /process_data:', processedData);
 
         // Check for NaN values in the processed data and replace them using the mean of the column
+        console.log('Processed data before replacing NaN values:', processedData);
         processedData.forEach(row => {
           Object.keys(row).forEach(key => {
             if (isNaN(row[key]) || row[key] === null || row[key] === undefined) {
