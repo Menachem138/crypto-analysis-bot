@@ -212,8 +212,9 @@ const Dashboard = () => {
             console.log('BTC market data:', response.data.rates.BTC);
             console.log('Setting marketData state with:', response.data.rates.BTC);
             startTransition(() => {
+              console.log('Before setting marketData:', response.data.rates.BTC);
               setMarketData(response.data.rates.BTC);
-              console.log('marketData state after setting:', response.data.rates.BTC);
+              console.log('After setting marketData:', response.data.rates.BTC);
             });
           } else {
             console.error('BTC market data is missing in the response:', response.data.rates);
