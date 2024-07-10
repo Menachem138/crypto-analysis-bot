@@ -55,6 +55,9 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
           throw new Error('Features data contains NaN values');
         }
 
+        // Log the state of the data before sending it to the /predict endpoint
+        console.log('Data before sending to /predict:', { features });
+
         const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
           method: 'POST',
           headers: {
