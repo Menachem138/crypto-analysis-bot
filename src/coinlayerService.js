@@ -23,6 +23,14 @@ const getMarketData = async (symbol) => {
     console.log('Full request URL:', response.config.url);
     console.log('Received response from Coinlayer API:', response);
     console.log('Response data structure:', response.data);
+
+    // Additional logging to capture the structure of the API response
+    if (response.data && response.data.rates) {
+      console.log('Valid market data received:', response.data.rates);
+    } else {
+      console.error('API response data is missing expected structure:', response.data);
+    }
+
     return response.data;
   } catch (error) {
     console.error('Error fetching market data:', {
