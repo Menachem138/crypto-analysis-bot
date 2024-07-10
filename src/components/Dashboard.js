@@ -1,5 +1,5 @@
 import React, { useState, useEffect, startTransition } from 'react';
-import { Box, Heading, Text, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
+import { Box, Heading, Text } from '@chakra-ui/react';
 import { getMarketData } from '../coinlayerService.js';
 import { calculateRSI, calculateMovingAverage, calculateMACD } from '../technicalAnalysis.js';
 
@@ -37,14 +37,14 @@ class ErrorBoundary extends React.Component {
 
 const hasNaN = (array) => array.some(row => Object.values(row).some(value => isNaN(value)));
 
-const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
+const loadAndPredictModel = async (setError, setMarketData, setLoading, signal, isMounted) => {
   try {
     // Clear any previous errors
     setError(null);
 
     // Function to fetch CSV data
     const fetchCSVData = async () => {
-      const response = await fetch('/Binance_1INCHBTC_d.csv');
+      const response = await fetch('/Binance_1INCHBTC_d.csv', { signal });
       if (!response.ok) {
         throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
       }
@@ -66,6 +66,7 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ csvText }),
+          signal,
         });
 
         if (!processResponse.ok) {
@@ -75,17 +76,27 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
         const processedData = await processResponse.json();
         console.log('Processed data from server:', processedData);
 
+        // Check for NaN values in the processed data
+        if (hasNaN(processedData)) {
+          throw new Error('Processed data contains NaN values');
+        }
+
+        // Check for NaN values before sending data to the /predict endpoint
+        const features = processedData.map(row => [
+          row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
+        ]);
+        if (hasNaN(features)) {
+          throw new Error('Features data contains NaN values');
+        }
+
         // Send processed data to the server for predictions
         const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            features: processedData.map(row => [
-              row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
-            ]),
-          }),
+          body: JSON.stringify({ features }),
+          signal,
         });
 
         if (!predictResponse.ok) {
@@ -93,19 +104,19 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
         }
 
         const result = await predictResponse.json();
-        startTransition(() => {
+        if (isMounted) {
           setMarketData(prevData => ({
             ...prevData,
             predictions: result.predictions
           }));
-        });
+        }
       } catch (error) {
         throw new Error(`CSV Parsing Error: ${error.message}`);
       }
     };
 
     // Call the fetchDataAndPreprocess function after the component has mounted
-    fetchDataAndPreprocess();
+    await fetchDataAndPreprocess();
 
   } catch (err) {
     setError(`Error: ${err.message}`);
@@ -114,44 +125,19 @@ const loadAndPredictModel = async (setError, setMarketData, setLoading) => {
   }
 };
 
-const downloadModel = async (setError) => {
-  try {
-    // Clear any previous errors
-    setError(null);
-
-    // Send request to download the model
-    const response = await fetch('http://127.0.0.1:5000/download_model', {
-      method: 'GET',
-    });
-
-    if (!response.ok) {
-      throw new Error(`Server error: ${response.statusText}`);
-    }
-
-    // Handle the file download
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'saved_model.h5';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  } catch (err) {
-    setError(`Error: ${err.message}`);
-  }
-};
-
 const Dashboard = () => {
   const [marketData, setMarketData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // useEffect hook to fetch market data and load the model
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    let isMounted = true; // Track if the component is mounted
+
     const fetchMarketData = async () => {
       try {
-        const response = await getMarketData('BTC'); // Pass a default symbol for testing
+        const response = await getMarketData('BTC', { signal }); // Pass a default symbol for testing
         console.log('API response:', response);
         console.log('Full API response object:', response);
         if (response && response.data && response.data.rates) {
@@ -160,9 +146,11 @@ const Dashboard = () => {
             console.log('BTC market data:', response.data.rates.BTC);
             console.log('Setting marketData state with:', response.data.rates.BTC);
             startTransition(() => {
-              console.log('Before setting marketData:', response.data.rates.BTC);
-              setMarketData(response.data.rates.BTC);
-              console.log('After setting marketData:', response.data.rates.BTC);
+              if (isMounted) {
+                console.log('Before setting marketData:', response.data.rates.BTC);
+                setMarketData(response.data.rates.BTC);
+                console.log('After setting marketData:', response.data.rates.BTC);
+              }
             });
           } else {
             console.error('BTC market data is missing in the response:', response.data.rates);
@@ -175,75 +163,48 @@ const Dashboard = () => {
           throw new Error('API response data is missing expected structure');
         }
       } catch (err) {
-        console.error('Error fetching market data:', {
-          message: err.message,
-          response: err.response ? {
-            status: err.response.status,
-            statusText: err.response.statusText,
-            data: err.response.data
-          } : null
-        });
-        console.log('Full error object:', err);
-        console.log('Request config:', err.config);
-        startTransition(() => {
-          setError(`Error: ${err.message}`);
-        });
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching market data:', {
+            message: err.message,
+            response: err.response ? {
+              status: err.response.status,
+              statusText: err.response.statusText,
+              data: err.response.data
+            } : null
+          });
+          console.log('Full error object:', err);
+          console.log('Request config:', err.config);
+          if (isMounted) {
+            setError(`Error: ${err.message}`);
+          }
+        }
       } finally {
-        startTransition(() => {
+        if (isMounted) {
           setLoading(false);
           console.log('Loading state set to false in fetchMarketData finally block');
-        });
+        }
       }
     };
 
     // Only call these functions when the component mounts for the first time
     if (!marketData) {
       fetchMarketData();
-      loadAndPredictModel(setError, setMarketData, setLoading);
+      loadAndPredictModel(setError, setMarketData, setLoading, signal, isMounted);
     }
+
+    // Cleanup function to cancel ongoing operations when the component unmounts
+    return () => {
+      isMounted = false; // Set isMounted to false to cancel ongoing operations
+      controller.abort(); // Cancel ongoing fetch requests
+      setLoading(false);
+      setError(null);
+    };
   }, [marketData]);
 
-  if (loading) {
-    return (
-      <Box textAlign="center" py={10} px={6}>
-        <Spinner size="xl" />
-        <Text mt={4}>Loading market data...</Text>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box textAlign="center" py={10} px={6}>
-        <Alert status="error">
-          <AlertIcon />
-          {error}
-        </Alert>
-      </Box>
-    );
-  }
-
   return (
-    <ErrorBoundary>
-      <Box textAlign="center" py={10} px={6}>
-        <Heading as="h1" size="xl" mb={6}>
-          Cryptocurrency Market Data
-        </Heading>
-        {marketData && (
-          <Box>
-            {marketData.market_cap && marketData.market_cap.usd !== undefined && (
-              <Text>Market Cap: {marketData.market_cap.usd}</Text>
-            )}
-            {marketData.total_volume && marketData.total_volume.usd !== undefined && (
-              <Text>24h Volume: {marketData.total_volume.usd}</Text>
-            )}
-            {marketData.market_cap_percentage && marketData.market_cap_percentage.btc !== undefined && (
-              <Text>Bitcoin Dominance: {marketData.market_cap_percentage.btc}%</Text>
-            )}
-          </Box>
-        )}
-      </Box>
-    </ErrorBoundary>
+    <div>
+      {/* Add your component JSX here */}
+    </div>
   );
 };
 
