@@ -253,6 +253,7 @@ const Dashboard = () => {
       try {
         const response = await getMarketData('BTC'); // Pass a default symbol for testing
         console.log('API response:', response);
+        console.log('Full API response object:', response);
         if (response && response.data && response.data.rates) {
           console.log('Valid market data received:', response.data.rates);
           if (response.data.rates.BTC) {
