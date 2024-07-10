@@ -3,189 +3,175 @@ import { getMarketData } from '../coinlayerService.js';
 
 const hasNaN = (array) => array.some(row => Object.values(row).some(value => isNaN(value)));
 
-const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
-  let features = []; // Define features variable in the outer scope
-
+// Updated fetchCSVData function
+const fetchCSVData = async (signal) => {
   try {
-    // Updated fetchCSVData function
-    const fetchCSVData = async () => {
-      try {
-        const response = await fetch('/Binance_1INCHBTC_d.csv', { signal });
-        if (!response.ok) {
-          throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
+    const response = await fetch('/Binance_1INCHBTC_d.csv', { signal });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
+    }
+    const csvText = await response.text();
+    console.log('Fetched CSV data:', csvText);
+    if (csvText.includes('NaN')) {
+      console.error('Fetched CSV data contains NaN values:', csvText);
+    }
+    return csvText;
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      console.log('Fetch request was aborted');
+      return null; // Return null if the fetch request was aborted
+    } else {
+      throw error;
+    }
+  }
+};
+
+// Main function to fetch, parse, clean, and preprocess data
+const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef) => {
+  try {
+    const csvText = await fetchCSVData(signal);
+    if (!csvText) {
+      console.error('CSV fetch was aborted or failed');
+      return;
+    }
+    console.log('CSV Text:', csvText);
+
+    // Ensure proper handling of newline characters
+    const formattedCSVText = csvText.replace(/\\n/g, '\n');
+    console.log('Formatted CSV Text:', formattedCSVText);
+
+    const processResponse = await fetch('http://127.0.0.1:5000/process_data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ csvText: formattedCSVText }),
+      signal,
+    });
+    console.log('Request to /process_data:', { csvText: formattedCSVText });
+
+    if (!processResponse.ok) {
+      console.error('Error response from /process_data:', processResponse);
+      throw new Error(`Server error: ${processResponse.statusText}`);
+    }
+
+    const processedData = await processResponse.json();
+    console.log('Response from /process_data:', processedData);
+
+    // Check for NaN values in the processed data and replace them using the mean of the column
+    console.log('Processed data before replacing NaN values:', processedData);
+    processedData.forEach(row => {
+      Object.keys(row).forEach(key => {
+        if (isNaN(row[key]) || row[key] === null || row[key] === undefined) {
+          // Replace NaN, null, or undefined values with the mean of the non-NaN values in the same column
+          const columnValues = processedData.map(row => row[key]).filter(value => !isNaN(value) && value !== null && value !== undefined);
+          const meanValue = columnValues.length > 0 ? columnValues.reduce((sum, value) => sum + value, 0) / columnValues.length : 0;
+          row[key] = columnValues.length > 0 ? meanValue : 0; // Set default value to 0 if column consists entirely of NaN values
         }
-        const csvText = await response.text();
-        console.log('Fetched CSV data:', csvText);
-        if (csvText.includes('NaN')) {
-          console.error('Fetched CSV data contains NaN values:', csvText);
-        }
-        return csvText;
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          console.log('Fetch request was aborted');
-          return null; // Return null if the fetch request was aborted
-        } else {
-          throw error;
-        }
-      }
-    };
+      });
+    });
+    console.log('Processed data after replacing NaN values:', processedData);
 
-    // Main function to fetch, parse, clean, and preprocess data
-    const fetchDataAndPreprocess = async () => {
-      try {
-        const csvText = await fetchCSVData();
-        if (!csvText) {
-          console.error('CSV fetch was aborted or failed');
-          return;
-        }
-        console.log('CSV Text:', csvText);
-
-        const processResponse = await fetch('http://127.0.0.1:5000/process_data', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ csvText }),
-          signal,
-        });
-        console.log('Request to /process_data:', { csvText });
-
-        if (!processResponse.ok) {
-          console.error('Error response from /process_data:', processResponse);
-          throw new Error(`Server error: ${processResponse.statusText}`);
-        }
-
-        const processedData = await processResponse.json();
-        console.log('Response from /process_data:', processedData);
-
-        // Check for NaN values in the processed data and replace them using the mean of the column
-        console.log('Processed data before replacing NaN values:', processedData);
-        processedData.forEach(row => {
-          Object.keys(row).forEach(key => {
-            if (isNaN(row[key]) || row[key] === null || row[key] === undefined) {
-              // Replace NaN, null, or undefined values with the mean of the non-NaN values in the same column
-              const columnValues = processedData.map(row => row[key]).filter(value => !isNaN(value) && value !== null && value !== undefined);
-              const meanValue = columnValues.length > 0 ? columnValues.reduce((sum, value) => sum + value, 0) / columnValues.length : 0;
-              row[key] = columnValues.length > 0 ? meanValue : 0; // Set default value to 0 if column consists entirely of NaN values
-            }
-          });
-        });
-        console.log('Processed data after replacing NaN values:', processedData);
-
-        // Additional check to ensure no NaN values remain in the processed data
-        if (hasNaN(processedData)) {
-          console.error('Processed data still contains NaN values after replacing with mean:', processedData);
-          processedData.forEach(row => {
-            Object.keys(row).forEach(key => {
-              if (isNaN(row[key]) || row[key] === null || row[key] === undefined) {
-                row[key] = 0; // Replace remaining NaN, null, or undefined values with 0
-              }
-            });
-          });
-          console.log('Processed data after replacing remaining NaN values with 0:', processedData);
-        }
-
-        // Final check to ensure no NaN values remain in the processed data
-        if (hasNaN(processedData)) {
-          console.error('Processed data still contains NaN values after all replacements:', processedData);
-          throw new Error('Processed data still contains NaN values after all replacements');
-        }
-
-        // Log the state of the data before creating features
-        console.log('Data before creating features:', processedData);
-
-        // Create the features array from the processed data
-        features = processedData.map(row => [
-          row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
-        ]);
-        console.log('Features data:', features);
-
-        // Create the labels array from the 'Close' prices
-        const labels = processedData.map(row => row.Close);
-        console.log('Labels data:', labels);
-
-        // Check for NaN values in the features array and replace them with 0
-        features.forEach(row => {
-          row.forEach((value, index) => {
-            if (isNaN(value)) {
-              row[index] = 0;
-            }
-          });
-        });
-        console.log('Features data after replacing NaN values:', features);
-
-        // Check for NaN values in the labels array and replace them with 0
-        labels.forEach((value, index) => {
-          if (isNaN(value)) {
-            labels[index] = 0;
+    // Additional check to ensure no NaN values remain in the processed data
+    if (hasNaN(processedData)) {
+      console.error('Processed data still contains NaN values after replacing with mean:', processedData);
+      processedData.forEach(row => {
+        Object.keys(row).forEach(key => {
+          if (isNaN(row[key]) || row[key] === null || row[key] === undefined) {
+            row[key] = 0; // Replace remaining NaN, null, or undefined values with 0
           }
         });
-        console.log('Labels data after replacing NaN values:', labels);
+      });
+      console.log('Processed data after replacing remaining NaN values with 0:', processedData);
+    }
 
-        // Log the state of the data before sending it to the /predict endpoint
-        console.log('Data before sending to /predict:', { features });
+    // Final check to ensure no NaN values remain in the processed data
+    if (hasNaN(processedData)) {
+      console.error('Processed data still contains NaN values after all replacements:', processedData);
+      throw new Error('Processed data still contains NaN values after all replacements');
+    }
 
-        const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ features }),
-          signal,
-        });
-        console.log('Request to /predict:', { features });
+    // Log the state of the data before creating features
+    console.log('Data before creating features:', processedData);
 
-        if (!predictResponse.ok) {
-          console.error('Error response from /predict:', predictResponse);
-          throw new Error(`Server error: ${predictResponse.statusText}`);
+    // Create the features array from the processed data
+    const features = processedData.map(row => [
+      row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
+    ]);
+    console.log('Features data:', features);
+
+    // Create the labels array from the 'Close' prices
+    const labels = processedData.map(row => row.Close);
+    console.log('Labels data:', labels);
+
+    // Check for NaN values in the features array and replace them with 0
+    features.forEach(row => {
+      row.forEach((value, index) => {
+        if (isNaN(value)) {
+          row[index] = 0;
         }
+      });
+    });
+    console.log('Features data after replacing NaN values:', features);
 
-        const result = await predictResponse.json();
-        console.log('Response from /predict:', result);
-        if (isMounted) {
-          setMarketData(prevData => ({
-            ...prevData,
-            predictions: result.predictions
-          }));
-        }
-
-        // Log the state of the data before sending it to the /train endpoint
-        console.log('Data before sending to /train:', { features, labels });
-        const trainResponse = await fetch('http://127.0.0.1:5000/train', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ features, labels }), // Include both features and labels in the payload
-          signal,
-        });
-        if (!trainResponse.ok) {
-          console.error('Error response from /train:', trainResponse);
-          throw new Error(`Server error: ${trainResponse.statusText}`);
-        }
-        const trainResult = await trainResponse.json();
-        console.log('Model training process completed:', trainResult);
-
-      } catch (error) {
-        console.error(`CSV Parsing Error: ${error.message}`);
-        if (isMounted) {
-          setMarketData(prevData => ({
-            ...prevData,
-            error: error.message
-          }));
-        }
+    // Check for NaN values in the labels array and replace them with 0
+    labels.forEach((value, index) => {
+      if (isNaN(value)) {
+        labels[index] = 0;
       }
-    };
+    });
+    console.log('Labels data after replacing NaN values:', labels);
 
-    // Call the fetchDataAndPreprocess function after the component has mounted
-    await fetchDataAndPreprocess();
+    // Log the state of the data before sending it to the /predict endpoint
+    console.log('Data before sending to /predict:', { features });
 
-  } catch (err) {
-    console.error(`Error: ${err.message}`);
-    if (isMounted) {
+    const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ features }),
+      signal,
+    });
+    console.log('Request to /predict:', { features });
+
+    if (!predictResponse.ok) {
+      console.error('Error response from /predict:', predictResponse);
+      throw new Error(`Server error: ${predictResponse.statusText}`);
+    }
+
+    const result = await predictResponse.json();
+    console.log('Response from /predict:', result);
+    if (isMountedRef.current) {
       setMarketData(prevData => ({
         ...prevData,
-        error: err.message
+        predictions: result.predictions
+      }));
+    }
+
+    // Log the state of the data before sending it to the /train endpoint
+    console.log('Data before sending to /train:', { features, labels });
+    const trainResponse = await fetch('http://127.0.0.1:5000/train', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ features, labels }), // Include both features and labels in the payload
+      signal,
+    });
+    if (!trainResponse.ok) {
+      console.error('Error response from /train:', trainResponse);
+      throw new Error(`Server error: ${trainResponse.statusText}`);
+    }
+    const trainResult = await trainResponse.json();
+    console.log('Model training process completed:', trainResult);
+
+  } catch (error) {
+    console.error(`CSV Parsing Error: ${error.message}`);
+    if (isMountedRef.current) {
+      setMarketData(prevData => ({
+        ...prevData,
+        error: error.message
       }));
     }
   }
@@ -270,11 +256,38 @@ const Dashboard = () => {
       }
     };
 
+    const loadAndPredictModel = async () => {
+      console.log('Loading and predicting model');
+      // Add your model loading and prediction logic here
+      try {
+        const response = await fetch('http://127.0.0.1:5000/predict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ features: marketData.features }),
+          signal,
+        });
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.statusText}`);
+        }
+        const result = await response.json();
+        if (isMountedRef.current) {
+          setMarketData(prevData => ({
+            ...prevData,
+            predictions: result.predictions
+          }));
+        }
+      } catch (error) {
+        console.error('Error loading and predicting model:', error.message);
+      }
+    };
+
     // Only call these functions when the component mounts for the first time
     if (!marketData) {
-      console.log('Calling fetchMarketData and loadAndPredictModel');
+      console.log('Calling fetchMarketData and fetchDataAndPreprocess');
       fetchMarketData();
-      loadAndPredictModel(setMarketData, signal, isMountedRef.current);
+      fetchDataAndPreprocess(signal, setMarketData, isMountedRef);
     }
 
     // Cleanup function to cancel ongoing operations when the component unmounts
@@ -283,7 +296,7 @@ const Dashboard = () => {
       isMountedRef.current = false; // Set isMountedRef to false to cancel ongoing operations
       controller.abort(); // Cancel ongoing fetch requests
     };
-  }, []);
+  }, [marketData]);
 
   // Updated JSX in Dashboard component
   return (
