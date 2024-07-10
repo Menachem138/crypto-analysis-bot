@@ -13,6 +13,9 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
       }
       const csvText = await response.text();
       console.log('Fetched CSV data:', csvText);
+      if (csvText.includes('NaN')) {
+        console.error('Fetched CSV data contains NaN values:', csvText);
+      }
       return csvText;
     };
 
@@ -24,7 +27,7 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         console.log('Data after fetching:', csvText);
 
         // Send raw CSV data to the server for processing
-        console.log('Sending raw CSV data to the server for processing');
+        console.log('Sending raw CSV data to the server for processing:', csvText);
         const processResponse = await fetch('http://127.0.0.1:5000/process_data', {
           method: 'POST',
           headers: {
@@ -40,6 +43,9 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
 
         const processedData = await processResponse.json();
         console.log('Processed data from server:', processedData);
+        if (hasNaN(processedData)) {
+          console.error('Processed data contains NaN values:', processedData);
+        }
 
         // Check for NaN values in the processed data
         if (hasNaN(processedData)) {
@@ -58,6 +64,9 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         ]);
         console.log('Features data:', features);
         if (hasNaN(features)) {
+          console.error('Features data contains NaN values:', features);
+        }
+        if (hasNaN(features)) {
           if (isMounted) {
             setMarketData(prevData => ({
               ...prevData,
@@ -68,7 +77,7 @@ const loadAndPredictModel = async (setMarketData, signal, isMounted) => {
         }
 
         // Send processed data to the server for predictions
-        console.log('Sending processed data to the server for predictions');
+        console.log('Sending processed data to the server for predictions:', features);
         const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
           method: 'POST',
           headers: {
