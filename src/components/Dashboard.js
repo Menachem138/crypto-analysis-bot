@@ -25,6 +25,78 @@ const fetchCSVData = async (signal) => {
   }
 };
 
+const processCSVData = async (csvText, signal) => {
+  try {
+    const processResponse = await fetch('http://127.0.0.1:5000/process_data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ csvText }),
+      signal,
+    });
+    if (!processResponse.ok) {
+      throw new Error(`Server error: ${processResponse.statusText}`);
+    }
+    const processedData = await processResponse.json();
+    return processedData;
+  } catch (error) {
+    console.error('Error processing CSV data:', error);
+    return null;
+  }
+};
+
+const extractFeatures = (processedData) => {
+  return processedData.map(row => [
+    row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
+  ]);
+};
+
+const extractLabels = (processedData) => {
+  return processedData.map(row => row.Close);
+};
+
+const makePredictions = async (features, signal) => {
+  try {
+    const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ features }),
+      signal,
+    });
+    if (!predictResponse.ok) {
+      throw new Error(`Server error: ${predictResponse.statusText}`);
+    }
+    const result = await predictResponse.json();
+    return result.predictions;
+  } catch (error) {
+    console.error('Error making predictions:', error);
+    return [];
+  }
+};
+
+const trainModel = async (features, labels, signal) => {
+  try {
+    const trainResponse = await fetch('http://127.0.0.1:5000/train', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ features, labels }),
+      signal,
+    });
+    if (!trainResponse.ok) {
+      throw new Error(`Server error: ${trainResponse.statusText}`);
+    }
+    const trainResult = await trainResponse.json();
+    console.log('Model training process completed:', trainResult);
+  } catch (error) {
+    console.error('Error training model:', error);
+  }
+};
+
 const fetchDataAndPreprocess = async (signal, dispatch, isMountedRef, marketData) => {
   if (!isMountedRef.current) {
     console.log('Component is unmounted, skipping fetchDataAndPreprocess');
@@ -101,6 +173,7 @@ const Dashboard = () => {
   const isMountedRef = useRef(true);
 
   const shallowCompare = (obj1, obj2) => {
+    if (!obj1 || !obj2) return false;
     const keys1 = Object.keys(obj1);
     const keys2 = Object.keys(obj2);
 
@@ -214,7 +287,6 @@ const Dashboard = () => {
       console.log('Fetch requests aborted');
       console.log('Component unmounted');
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Ensure the hook runs only once on mount
 
   // Updated JSX in Dashboard component
