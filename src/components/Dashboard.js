@@ -131,6 +131,11 @@ const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef) => {
     const result = await predictResponse.json();
     console.log('Response from /predict:', result);
     if (isMountedRef.current) {
+      console.log('Previous marketData state:', marketData);
+      console.log('Next marketData state with predictions:', {
+        ...marketData,
+        predictions: result.predictions
+      });
       console.log('Component is still mounted, updating marketData with predictions');
       setMarketData(prevData => ({
         ...prevData,
@@ -196,6 +201,8 @@ const Dashboard = () => {
             atl: response.atl || 'N/A'
           };
           if (isMountedRef.current && JSON.stringify(marketData) !== JSON.stringify(newMarketData)) {
+            console.log('Previous marketData state:', marketData);
+            console.log('Next marketData state:', newMarketData);
             console.log('Setting marketData:', newMarketData);
             setMarketData(newMarketData);
             console.log('marketData state updated:', newMarketData);
