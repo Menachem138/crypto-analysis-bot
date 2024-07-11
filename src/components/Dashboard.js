@@ -1,4 +1,4 @@
-import React, { useState, useEffect, startTransition, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getMarketData } from '../coinlayerService.js';
 
 const hasNaN = (array) => array.some(row => Object.values(row).some(value => isNaN(value)));
