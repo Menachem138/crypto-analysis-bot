@@ -230,6 +230,7 @@ const Dashboard = () => {
                 console.warn('API response is empty or invalid:', response);
                 if (isMountedRef.current) {
                     console.log('Skipping marketData update due to empty or invalid response');
+                    dispatch({ type: 'SET_ERROR', payload: 'Invalid API response' });
                 }
             }
         } catch (err) {
@@ -237,6 +238,7 @@ const Dashboard = () => {
                 console.error('Error fetching market data:', err.message);
                 if (isMountedRef.current) {
                     console.log('Skipping marketData update due to fetch error');
+                    dispatch({ type: 'SET_ERROR', payload: err.message });
                 }
             } else {
                 console.log('Fetch request was aborted');
@@ -250,8 +252,15 @@ const Dashboard = () => {
 
     const fetchAndProcessData = async () => {
         console.log('Calling fetchMarketData and fetchDataAndPreprocess');
-        await fetchMarketData();
-        await fetchDataAndPreprocess(signal, dispatch, isMountedRef, state.marketData);
+        try {
+            await fetchMarketData();
+            await fetchDataAndPreprocess(signal, dispatch, isMountedRef, state.marketData);
+        } catch (error) {
+            console.error('Error in fetchAndProcessData:', error);
+            if (isMountedRef.current) {
+                dispatch({ type: 'SET_ERROR', payload: error.message });
+            }
+        }
     };
 
     fetchAndProcessData();
