@@ -3,7 +3,7 @@ import axios from 'axios';
 console.log('Environment variable REACT_APP_COINLAYER_API_KEY:', process.env.REACT_APP_COINLAYER_API_KEY);
 
 const instance = axios.create({
-  baseURL: 'http://api.coinlayer.com', // Use HTTP instead of HTTPS
+  baseURL: 'https://api.coinlayer.com', // Use HTTPS instead of HTTP
   headers: {
     'access_key': '11fea5cda29c95e1ec2945a380495a01' // Hardcode the API key for debugging purposes
   }
