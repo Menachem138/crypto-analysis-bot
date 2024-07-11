@@ -218,13 +218,11 @@ const Dashboard = () => {
             ath: response.ath || 'N/A',
             atl: response.atl || 'N/A'
           };
-          startTransition(() => {
-            if (isMountedRef.current && !deepEqual(marketData, newMarketData)) {
-              console.log('Setting marketData:', newMarketData);
-              setMarketData(newMarketData);
-              console.log('marketData state updated:', newMarketData);
-            }
-          });
+          if (isMountedRef.current && !deepEqual(marketData, newMarketData)) {
+            console.log('Setting marketData:', newMarketData);
+            setMarketData(newMarketData);
+            console.log('marketData state updated:', newMarketData);
+          }
         } else {
           console.warn('BTC market data is missing in the response:', response.rates);
           const newMarketData = {
@@ -238,13 +236,11 @@ const Dashboard = () => {
             ath: 'N/A',
             atl: 'N/A'
           };
-          startTransition(() => {
-            if (isMountedRef.current && !deepEqual(marketData, newMarketData)) {
-              console.log('Setting marketData to N/A');
-              setMarketData(newMarketData);
-              console.log('marketData state updated to N/A');
-            }
-          });
+          if (isMountedRef.current && !deepEqual(marketData, newMarketData)) {
+            console.log('Setting marketData to N/A');
+            setMarketData(newMarketData);
+            console.log('marketData state updated to N/A');
+          }
         }
       } catch (err) {
         if (err.name !== 'AbortError') {
