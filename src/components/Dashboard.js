@@ -3,20 +3,6 @@ import { getMarketData } from '../coinlayerService.js';
 
 const hasNaN = (array) => array.some(row => Object.values(row).some(value => isNaN(value)));
 
-// Define deepEqual function for deep comparison of objects
-const deepEqual = (obj1, obj2) => {
-  if (obj1 === obj2) return true;
-  if (typeof obj1 !== 'object' || typeof obj2 !== 'object' || obj1 === null || obj2 === null) return false;
-  const keys1 = Object.keys(obj1);
-  const keys2 = Object.keys(obj2);
-  if (keys1.length !== keys2.length) return false;
-  for (let key of keys1) {
-    if (!keys2.includes(key) || !deepEqual(obj1[key], obj2[key])) return false;
-  }
-  return true;
-};
-
-// Updated fetchCSVData function
 const fetchCSVData = async (signal) => {
   try {
     const response = await fetch('/Binance_1INCHBTC_d.csv', { signal });
@@ -39,7 +25,8 @@ const fetchCSVData = async (signal) => {
   }
 };
 
-// Main function to fetch, parse, clean, and preprocess data
+// Remove deepEqual function
+// Simplify fetchDataAndPreprocess function
 const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef) => {
   if (!isMountedRef.current) {
     console.log('Component is unmounted, skipping fetchDataAndPreprocess');
@@ -47,10 +34,6 @@ const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef) => {
   }
   try {
     console.log('fetchDataAndPreprocess started');
-    if (!isMountedRef.current) {
-      console.log('Component is unmounted, skipping fetchDataAndPreprocess');
-      return;
-    }
     const csvText = await fetchCSVData(signal);
     if (!csvText) {
       console.error('CSV fetch was aborted or failed');
@@ -58,7 +41,6 @@ const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef) => {
     }
     console.log('CSV Text:', csvText);
 
-    // Ensure proper handling of newline characters
     const formattedCSVText = csvText.replace(/\\n/g, '\n');
     console.log('Formatted CSV Text:', formattedCSVText);
 
@@ -80,53 +62,40 @@ const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef) => {
     const processedData = await processResponse.json();
     console.log('Response from /process_data:', processedData);
 
-    // Check for NaN values in the processed data and replace them using the mean of the column
-    console.log('Processed data before replacing NaN values:', processedData);
     processedData.forEach(row => {
       Object.keys(row).forEach(key => {
         if (isNaN(row[key]) || row[key] === null || row[key] === undefined) {
-          // Replace NaN, null, or undefined values with the mean of the non-NaN values in the same column
           const columnValues = processedData.map(row => row[key]).filter(value => !isNaN(value) && value !== null && value !== undefined);
           const meanValue = columnValues.length > 0 ? columnValues.reduce((sum, value) => sum + value, 0) / columnValues.length : 0;
-          row[key] = columnValues.length > 0 ? meanValue : 0; // Set default value to 0 if column consists entirely of NaN values
+          row[key] = columnValues.length > 0 ? meanValue : 0;
         }
       });
     });
     console.log('Processed data after replacing NaN values:', processedData);
 
-    // Additional check to ensure no NaN values remain in the processed data
     if (hasNaN(processedData)) {
-      console.error('Processed data still contains NaN values after replacing with mean:', processedData);
       processedData.forEach(row => {
         Object.keys(row).forEach(key => {
           if (isNaN(row[key]) || row[key] === null || row[key] === undefined) {
-            row[key] = 0; // Replace remaining NaN, null, or undefined values with 0
+            row[key] = 0;
           }
         });
       });
       console.log('Processed data after replacing remaining NaN values with 0:', processedData);
     }
 
-    // Final check to ensure no NaN values remain in the processed data
     if (hasNaN(processedData)) {
-      console.error('Processed data still contains NaN values after all replacements:', processedData);
       throw new Error('Processed data still contains NaN values after all replacements');
     }
 
-    // Log the state of the data before creating features
-    console.log('Data before creating features:', processedData);
-
-    // Create the features array from the processed data
     const features = processedData.map(row => [
       row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
     ]);
     console.log('Features data:', features);
 
-    // Create the labels array from the 'Close' prices
     const labels = processedData.map(row => row.Close);
     console.log('Labels data:', labels);
 
-    // Check for NaN values in the features array and replace them with 0
     features.forEach(row => {
       row.forEach((value, index) => {
         if (isNaN(value)) {
@@ -136,15 +105,12 @@ const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef) => {
     });
     console.log('Features data after replacing NaN values:', features);
 
-    // Check for NaN values in the labels array and replace them with 0
     labels.forEach((value, index) => {
       if (isNaN(value)) {
         labels[index] = 0;
       }
     });
-    console.log('Labels data after replacing NaN values:', labels);
 
-    // Log the state of the data before sending it to the /predict endpoint
     console.log('Data before sending to /predict:', { features });
 
     const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
@@ -174,14 +140,13 @@ const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef) => {
       console.log('Component is unmounted, skipping marketData update');
     }
 
-    // Log the state of the data before sending it to the /train endpoint
     console.log('Data before sending to /train:', { features, labels });
     const trainResponse = await fetch('http://127.0.0.1:5000/train', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ features, labels }), // Include both features and labels in the payload
+      body: JSON.stringify({ features, labels }),
       signal,
     });
     if (!trainResponse.ok) {
@@ -216,7 +181,7 @@ const Dashboard = () => {
     const fetchMarketData = async () => {
       try {
         console.log('Starting fetchMarketData');
-        const response = await getMarketData('BTC', { signal }); // Pass a default symbol for testing
+        const response = await getMarketData('BTC', { signal });
         console.log('API response:', response);
         if (response && response.rates) {
           const newMarketData = {
@@ -230,7 +195,7 @@ const Dashboard = () => {
             ath: response.ath || 'N/A',
             atl: response.atl || 'N/A'
           };
-          if (isMountedRef.current && !deepEqual(marketData, newMarketData)) {
+          if (isMountedRef.current && JSON.stringify(marketData) !== JSON.stringify(newMarketData)) {
             console.log('Setting marketData:', newMarketData);
             setMarketData(newMarketData);
             console.log('marketData state updated:', newMarketData);
@@ -248,7 +213,7 @@ const Dashboard = () => {
             ath: 'N/A',
             atl: 'N/A'
           };
-          if (isMountedRef.current && !deepEqual(marketData, newMarketData)) {
+          if (isMountedRef.current && JSON.stringify(marketData) !== JSON.stringify(newMarketData)) {
             console.log('Setting marketData to N/A');
             setMarketData(newMarketData);
             console.log('marketData state updated to N/A');
@@ -269,7 +234,7 @@ const Dashboard = () => {
             atl: 'N/A',
             error: err.message
           };
-          if (isMountedRef.current && !deepEqual(marketData, newMarketData)) {
+          if (isMountedRef.current && JSON.stringify(marketData) !== JSON.stringify(newMarketData)) {
             console.log('Setting marketData to error state');
             setMarketData(newMarketData);
             console.log('marketData state updated to error state:', newMarketData);
@@ -282,11 +247,15 @@ const Dashboard = () => {
       }
     };
 
+    const fetchAndProcessData = async () => {
+      console.log('Calling fetchMarketData and fetchDataAndPreprocess');
+      await fetchMarketData();
+      await fetchDataAndPreprocess(signal, setMarketData, isMountedRef);
+    };
+
     // Only call these functions when the component mounts for the first time
     if (!marketData) {
-      console.log('Calling fetchMarketData and fetchDataAndPreprocess');
-      fetchMarketData();
-      fetchDataAndPreprocess(signal, setMarketData, isMountedRef);
+      fetchAndProcessData();
     }
 
     // Cleanup function to cancel ongoing operations when the component unmounts
