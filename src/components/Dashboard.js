@@ -292,7 +292,7 @@ const Dashboard = () => {
       console.log('Fetch requests aborted');
       console.log('Component unmounted');
     };
-  }, []); // Ensure the hook runs only once on mount
+  }, [state.marketData]); // Ensure the hook runs only once on mount
 
   // Updated JSX in Dashboard component
   return (
