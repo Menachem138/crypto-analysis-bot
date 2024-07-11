@@ -3,6 +3,19 @@ import { getMarketData } from '../coinlayerService.js';
 
 const hasNaN = (array) => array.some(row => Object.values(row).some(value => isNaN(value)));
 
+// Define deepEqual function for deep comparison of objects
+const deepEqual = (obj1, obj2) => {
+  if (obj1 === obj2) return true;
+  if (typeof obj1 !== 'object' || typeof obj2 !== 'object' || obj1 === null || obj2 === null) return false;
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+  if (keys1.length !== keys2.length) return false;
+  for (let key of keys1) {
+    if (!keys2.includes(key) || !deepEqual(obj1[key], obj2[key])) return false;
+  }
+  return true;
+};
+
 // Updated fetchCSVData function
 const fetchCSVData = async (signal) => {
   try {
@@ -206,7 +219,7 @@ const Dashboard = () => {
             atl: response.atl || 'N/A'
           };
           startTransition(() => {
-            if (isMountedRef.current) {
+            if (isMountedRef.current && !deepEqual(marketData, newMarketData)) {
               console.log('Setting marketData:', newMarketData);
               setMarketData(newMarketData);
               console.log('marketData state updated:', newMarketData);
@@ -226,7 +239,7 @@ const Dashboard = () => {
             atl: 'N/A'
           };
           startTransition(() => {
-            if (isMountedRef.current) {
+            if (isMountedRef.current && !deepEqual(marketData, newMarketData)) {
               console.log('Setting marketData to N/A');
               setMarketData(newMarketData);
               console.log('marketData state updated to N/A');
@@ -248,7 +261,7 @@ const Dashboard = () => {
             atl: 'N/A',
             error: err.message
           };
-          if (isMountedRef.current) {
+          if (isMountedRef.current && !deepEqual(marketData, newMarketData)) {
             console.log('Setting marketData to error state');
             setMarketData(newMarketData);
             console.log('marketData state updated to error state:', newMarketData);
@@ -281,7 +294,7 @@ const Dashboard = () => {
       console.log('Component unmounted');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Ensure the hook runs only once on mount
+  }, [marketData]); // Ensure the hook runs only once on mount
 
   // Updated JSX in Dashboard component
   return (
