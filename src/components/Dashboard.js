@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useRef, useReducer } from 'react';
+import React, { useEffect, useRef, useReducer } from 'react';
 import { getMarketData } from '../coinlayerService.js';
-
-const hasNaN = (array) => array.some(row => Object.values(row).some(value => isNaN(value)));
 
 const fetchCSVData = async (signal) => {
   try {
@@ -212,8 +210,8 @@ const Dashboard = () => {
             ath: response.ath || 'N/A',
             atl: response.atl || 'N/A'
           };
-          if (isMountedRef.current && !shallowCompare(marketData, newMarketData)) {
-            console.log('Previous marketData state:', marketData);
+          if (isMountedRef.current && !shallowCompare(state.marketData, newMarketData)) {
+            console.log('Previous marketData state:', state.marketData);
             console.log('Next marketData state:', newMarketData);
             console.log('Setting marketData:', newMarketData);
             dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
@@ -235,7 +233,7 @@ const Dashboard = () => {
             atl: 'N/A',
             error: 'API response data is missing expected structure or contains an error'
           };
-          if (isMountedRef.current && !shallowCompare(marketData, newMarketData)) {
+          if (isMountedRef.current && !shallowCompare(state.marketData, newMarketData)) {
             console.log('Setting marketData to error state');
             dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
             console.log('marketData state updated to error state:', newMarketData);
@@ -258,7 +256,7 @@ const Dashboard = () => {
             atl: 'N/A',
             error: err.message
           };
-          if (isMountedRef.current && !shallowCompare(marketData, newMarketData)) {
+          if (isMountedRef.current && !shallowCompare(state.marketData, newMarketData)) {
             console.log('Setting marketData to error state');
             dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
             console.log('marketData state updated to error state:', newMarketData);
@@ -276,16 +274,16 @@ const Dashboard = () => {
     const fetchAndProcessData = async () => {
       console.log('Calling fetchMarketData and fetchDataAndPreprocess');
       await fetchMarketData();
-      await fetchDataAndPreprocess(signal, dispatch, isMountedRef, marketData);
+      await fetchDataAndPreprocess(signal, dispatch, isMountedRef, state.marketData);
     };
 
     fetchAndProcessData();
 
     // Cleanup function to cancel ongoing operations when the component unmounts
     return () => {
-      console.log('Component unmounting, current marketData state:', marketData);
+      console.log('Component unmounting, current marketData state:', state.marketData);
       console.log('State updates before unmounting:', {
-        marketData,
+        marketData: state.marketData,
         isMountedRef: isMountedRef.current
       });
       isMountedRef.current = false; // Set isMountedRef to false to cancel ongoing operations
