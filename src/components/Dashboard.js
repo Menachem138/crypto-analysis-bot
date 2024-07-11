@@ -27,7 +27,7 @@ const fetchCSVData = async (signal) => {
 
 // Remove deepEqual function
 // Simplify fetchDataAndPreprocess function
-const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef) => {
+const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef, marketData) => {
   if (!isMountedRef.current) {
     console.log('Component is unmounted, skipping fetchDataAndPreprocess');
     return;
@@ -257,7 +257,7 @@ const Dashboard = () => {
     const fetchAndProcessData = async () => {
       console.log('Calling fetchMarketData and fetchDataAndPreprocess');
       await fetchMarketData();
-      await fetchDataAndPreprocess(signal, setMarketData, isMountedRef);
+      await fetchDataAndPreprocess(signal, setMarketData, isMountedRef, marketData);
     };
 
     // Only call these functions when the component mounts for the first time
