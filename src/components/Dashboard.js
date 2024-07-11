@@ -198,6 +198,7 @@ const Dashboard = () => {
     console.log('Component mounted');
     const controller = new AbortController();
     const signal = controller.signal;
+    console.log('AbortController created, signal:', signal);
 
     const fetchMarketData = async () => {
       try {
