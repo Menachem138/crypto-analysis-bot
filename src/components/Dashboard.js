@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useReducer } from 'react';
-import { getMarketData } from '../coinlayerService.js';
+import { getMarketData } from '../coingeckoService.js';
 
 const fetchCSVData = async (signal) => {
   try {
@@ -198,17 +198,17 @@ const Dashboard = () => {
         console.log('Starting fetchMarketData');
         const response = await getMarketData('BTC', { signal });
         console.log('API response:', response);
-        if (response && response.success && response.rates && response.rates.BTC) {
+        if (response && response.market_data && response.market_data.current_price) {
           const newMarketData = {
-            price: response.rates.BTC,
-            volume: response.volume || 'N/A',
-            marketCap: response.marketCap || 'N/A',
-            change24h: response.change24h || 'N/A',
-            change7d: response.change7d || 'N/A',
-            change30d: response.change30d || 'N/A',
-            change1y: response.change1y || 'N/A',
-            ath: response.ath || 'N/A',
-            atl: response.atl || 'N/A'
+            price: response.market_data.current_price.usd,
+            volume: response.market_data.total_volume.usd || 'N/A',
+            marketCap: response.market_data.market_cap.usd || 'N/A',
+            change24h: response.market_data.price_change_percentage_24h || 'N/A',
+            change7d: response.market_data.price_change_percentage_7d || 'N/A',
+            change30d: response.market_data.price_change_percentage_30d || 'N/A',
+            change1y: response.market_data.price_change_percentage_1y || 'N/A',
+            ath: response.market_data.ath.usd || 'N/A',
+            atl: response.market_data.atl.usd || 'N/A'
           };
           if (isMountedRef.current && !shallowCompare(state.marketData, newMarketData)) {
             console.log('Previous marketData state:', state.marketData);
