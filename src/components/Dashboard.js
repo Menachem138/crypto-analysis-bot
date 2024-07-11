@@ -5,7 +5,7 @@ const hasNaN = (array) => array.some(row => Object.values(row).some(value => isN
 
 const fetchCSVData = async (signal) => {
   try {
-    const response = await fetch('/Binance_1INCHBTC_d.csv', { signal });
+    const response = await fetch('http://127.0.0.1:5000/Binance_1INCHBTC_d.csv', { signal });
     if (!response.ok) {
       throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
     }
@@ -25,8 +25,6 @@ const fetchCSVData = async (signal) => {
   }
 };
 
-// Remove deepEqual function
-// Simplify fetchDataAndPreprocess function
 const fetchDataAndPreprocess = async (signal, dispatch, isMountedRef, marketData) => {
   if (!isMountedRef.current) {
     console.log('Component is unmounted, skipping fetchDataAndPreprocess');
@@ -247,12 +245,13 @@ const Dashboard = () => {
             change30d: 'N/A',
             change1y: 'N/A',
             ath: 'N/A',
-            atl: 'N/A'
+            atl: 'N/A',
+            error: 'API response data is missing expected structure or contains an error'
           };
           if (isMountedRef.current && !shallowCompare(marketData, newMarketData)) {
-            console.log('Setting marketData to N/A');
+            console.log('Setting marketData to error state');
             dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
-            console.log('marketData state updated to N/A');
+            console.log('marketData state updated to error state:', newMarketData);
           }
         }
       } catch (err) {
