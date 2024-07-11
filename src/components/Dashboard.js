@@ -218,6 +218,8 @@ const Dashboard = () => {
             console.log('Setting marketData:', newMarketData);
             dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
             console.log('marketData state updated:', newMarketData);
+          } else {
+            console.log('No change in marketData state detected by shallowCompare');
           }
         } else {
           console.warn('API response data is missing expected structure or contains an error:', response);
@@ -237,6 +239,8 @@ const Dashboard = () => {
             console.log('Setting marketData to error state');
             dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
             console.log('marketData state updated to error state:', newMarketData);
+          } else {
+            console.log('No change in marketData state detected by shallowCompare');
           }
         }
       } catch (err) {
@@ -258,6 +262,8 @@ const Dashboard = () => {
             console.log('Setting marketData to error state');
             dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
             console.log('marketData state updated to error state:', newMarketData);
+          } else {
+            console.log('No change in marketData state detected by shallowCompare');
           }
         } else {
           console.log('Fetch request was aborted');
