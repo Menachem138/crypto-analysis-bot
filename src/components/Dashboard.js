@@ -271,9 +271,14 @@ const Dashboard = () => {
     // Cleanup function to cancel ongoing operations when the component unmounts
     return () => {
       console.log('Component unmounting, current marketData state:', marketData);
+      console.log('State updates before unmounting:', {
+        marketData,
+        isMountedRef: isMountedRef.current
+      });
       isMountedRef.current = false; // Set isMountedRef to false to cancel ongoing operations
       controller.abort(); // Abort any ongoing fetch requests to prevent memory leaks
       console.log('Fetch requests aborted');
+      console.log('Component unmounted');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // The dependency array is now empty to ensure the hook runs only once on mount
