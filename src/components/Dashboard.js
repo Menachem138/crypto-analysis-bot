@@ -217,7 +217,7 @@ const Dashboard = () => {
         console.log('Starting fetchMarketData');
         const response = await getMarketData('BTC', { signal });
         console.log('API response:', response);
-        if (response && response.rates && response.rates.BTC) {
+        if (response && response.success && response.rates && response.rates.BTC) {
           const newMarketData = {
             price: response.rates.BTC,
             volume: response.volume || 'N/A',
@@ -237,7 +237,7 @@ const Dashboard = () => {
             console.log('marketData state updated:', newMarketData);
           }
         } else {
-          console.warn('BTC market data is missing in the response:', response);
+          console.warn('API response data is missing expected structure or contains an error:', response);
           const newMarketData = {
             price: 'N/A',
             volume: 'N/A',
