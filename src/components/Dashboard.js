@@ -225,64 +225,17 @@ const Dashboard = () => {
           } else {
             console.log('No change in marketData state detected by shallowCompare');
           }
-        } else if (response.length === 0) {
-          console.warn('API response is empty:', response);
-          const newMarketData = {
-            price: 'N/A',
-            volume: 'N/A',
-            marketCap: 'N/A',
-            change24h: 'N/A',
-            change7d: 'N/A',
-            change30d: 'N/A',
-            change1y: 'N/A',
-            ath: 'N/A',
-            atl: 'N/A',
-            error: 'API response is empty'
-          };
-          if (isMountedRef.current) {
-            console.log('Setting marketData to default state for empty response');
-            dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
-            console.log('marketData state updated to default state for empty response:', newMarketData);
-          }
         } else {
-          console.warn('API response data is missing expected structure or contains an error:', response);
-          const newMarketData = {
-            price: 'N/A',
-            volume: 'N/A',
-            marketCap: 'N/A',
-            change24h: 'N/A',
-            change7d: 'N/A',
-            change30d: 'N/A',
-            change1y: 'N/A',
-            ath: 'N/A',
-            atl: 'N/A',
-            error: 'API response data is missing expected structure or contains an error'
-          };
+          console.warn('API response is empty or invalid:', response);
           if (isMountedRef.current) {
-            console.log('Setting marketData to error state');
-            dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
-            console.log('marketData state updated to error state:', newMarketData);
+            console.log('Skipping marketData update due to empty or invalid response');
           }
         }
       } catch (err) {
         if (err.name !== 'AbortError') {
           console.error('Error fetching market data:', err.message);
-          const newMarketData = {
-            price: 'N/A',
-            volume: 'N/A',
-            marketCap: 'N/A',
-            change24h: 'N/A',
-            change7d: 'N/A',
-            change30d: 'N/A',
-            change1y: 'N/A',
-            ath: 'N/A',
-            atl: 'N/A',
-            error: err.message
-          };
           if (isMountedRef.current) {
-            console.log('Setting marketData to error state');
-            dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
-            console.log('marketData state updated to error state:', newMarketData);
+            console.log('Skipping marketData update due to fetch error');
           }
         } else {
           console.log('Fetch request was aborted');
