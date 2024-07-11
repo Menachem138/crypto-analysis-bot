@@ -41,7 +41,16 @@ const fetchCSVData = async (signal) => {
 
 // Main function to fetch, parse, clean, and preprocess data
 const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef) => {
+  if (!isMountedRef.current) {
+    console.log('Component is unmounted, skipping fetchDataAndPreprocess');
+    return;
+  }
   try {
+    console.log('fetchDataAndPreprocess started');
+    if (!isMountedRef.current) {
+      console.log('Component is unmounted, skipping fetchDataAndPreprocess');
+      return;
+    }
     const csvText = await fetchCSVData(signal);
     if (!csvText) {
       console.error('CSV fetch was aborted or failed');
@@ -156,10 +165,13 @@ const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef) => {
     const result = await predictResponse.json();
     console.log('Response from /predict:', result);
     if (isMountedRef.current) {
+      console.log('Component is still mounted, updating marketData with predictions');
       setMarketData(prevData => ({
         ...prevData,
         predictions: result.predictions
       }));
+    } else {
+      console.log('Component is unmounted, skipping marketData update');
     }
 
     // Log the state of the data before sending it to the /train endpoint
