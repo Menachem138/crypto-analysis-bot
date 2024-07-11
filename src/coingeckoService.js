@@ -3,10 +3,7 @@ import axios from 'axios';
 console.log('Environment variable REACT_APP_COINGECKO_API_KEY:', process.env.REACT_APP_COINGECKO_API_KEY);
 
 const instance = axios.create({
-  baseURL: 'https://api.coingecko.com/api/v3',
-  headers: {
-    'Authorization': `Bearer ${process.env.REACT_APP_COINGECKO_API_KEY}` // Use environment variable for API key
-  }
+  baseURL: 'https://api.coingecko.com/api/v3'
 });
 
 const getMarketData = async (symbol) => {
