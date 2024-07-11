@@ -100,6 +100,11 @@ const makePredictions = async (features, signal) => {
 };
 
 const trainModel = async (features, labels, signal) => {
+  if (features.length === 0 || labels.length === 0) {
+    console.error('Error: Features and labels must be non-empty arrays');
+    return;
+  }
+
   try {
     const trainResponse = await fetch('http://127.0.0.1:5000/train', {
       method: 'POST',
@@ -194,7 +199,6 @@ const Dashboard = () => {
   const { marketData } = state;
   const isMountedRef = useRef(true);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     console.log('Component mounted');
     const controller = new AbortController();
@@ -291,7 +295,7 @@ const Dashboard = () => {
       console.log('Fetch requests aborted');
       console.log('Component unmounted');
     };
-  }, []);
+  }, [state.marketData, fetchMarketData, fetchAndProcessData, dispatch, isMountedRef]);
 
   // Updated JSX in Dashboard component
   return (
