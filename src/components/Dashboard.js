@@ -194,6 +194,7 @@ const Dashboard = () => {
   const { marketData } = state;
   const isMountedRef = useRef(true);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     console.log('Component mounted');
     const controller = new AbortController();
