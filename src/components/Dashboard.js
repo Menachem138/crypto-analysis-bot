@@ -215,7 +215,7 @@ const Dashboard = () => {
             ath: response[0].ath || 'N/A',
             atl: response[0].atl || 'N/A'
           };
-          if (isMountedRef.current && !shallowCompare(state.marketData, newMarketData)) {
+          if (isMountedRef.current && (!shallowCompare(state.marketData, newMarketData) || response.length === 0)) {
             console.log('Previous marketData state:', state.marketData);
             console.log('Next marketData state:', newMarketData);
             console.log('Setting marketData:', newMarketData);
