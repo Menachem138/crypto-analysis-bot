@@ -42,120 +42,32 @@ const fetchDataAndPreprocess = async (signal, dispatch, isMountedRef, marketData
     const formattedCSVText = csvText.replace(/\\n/g, '\n');
     console.log('Formatted CSV Text:', formattedCSVText);
 
-    const processResponse = await fetch('http://127.0.0.1:5000/process_data', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ csvText: formattedCSVText }),
-      signal,
-    });
-    console.log('Request to /process_data:', { csvText: formattedCSVText });
-
-    if (!processResponse.ok) {
-      console.error('Error response from /process_data:', processResponse);
-      throw new Error(`Server error: ${processResponse.statusText}`);
+    const processedData = await processCSVData(formattedCSVText, signal);
+    if (!processedData) {
+      console.error('CSV processing failed');
+      return;
     }
+    console.log('Processed data:', processedData);
 
-    const processedData = await processResponse.json();
-    console.log('Response from /process_data:', processedData);
-
-    processedData.forEach(row => {
-      Object.keys(row).forEach(key => {
-        if (isNaN(row[key]) || row[key] === null || row[key] === undefined) {
-          const columnValues = processedData.map(row => row[key]).filter(value => !isNaN(value) && value !== null && value !== undefined);
-          const meanValue = columnValues.length > 0 ? columnValues.reduce((sum, value) => sum + value, 0) / columnValues.length : 0;
-          row[key] = columnValues.length > 0 ? meanValue : 0;
-        }
-      });
-    });
-    console.log('Processed data after replacing NaN values:', processedData);
-
-    if (hasNaN(processedData)) {
-      processedData.forEach(row => {
-        Object.keys(row).forEach(key => {
-          if (isNaN(row[key]) || row[key] === null || row[key] === undefined) {
-            row[key] = 0;
-          }
-        });
-      });
-      console.log('Processed data after replacing remaining NaN values with 0:', processedData);
-    }
-
-    if (hasNaN(processedData)) {
-      throw new Error('Processed data still contains NaN values after all replacements');
-    }
-
-    const features = processedData.map(row => [
-      row.Open, row.High, row.Low, row.Close, row['Volume 1INCH'], row['Volume BTC'], row.tradecount, row.Relative_Strength_Index, row.Moving_Average, row.MACD
-    ]);
+    const features = extractFeatures(processedData);
+    const labels = extractLabels(processedData);
     console.log('Features data:', features);
-
-    const labels = processedData.map(row => row.Close);
     console.log('Labels data:', labels);
 
-    features.forEach(row => {
-      row.forEach((value, index) => {
-        if (isNaN(value)) {
-          row[index] = 0;
-        }
-      });
-    });
-    console.log('Features data after replacing NaN values:', features);
-
-    labels.forEach((value, index) => {
-      if (isNaN(value)) {
-        labels[index] = 0;
-      }
-    });
-
-    console.log('Data before sending to /predict:', { features });
-
-    const predictResponse = await fetch('http://127.0.0.1:5000/predict', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ features }),
-      signal,
-    });
-    console.log('Request to /predict:', { features });
-
-    if (!predictResponse.ok) {
-      console.error('Error response from /predict:', predictResponse);
-      throw new Error(`Server error: ${predictResponse.statusText}`);
-    }
-
-    const result = await predictResponse.json();
-    console.log('Response from /predict:', result);
+    const predictions = await makePredictions(features, signal);
     if (isMountedRef.current) {
       console.log('Previous marketData state:', marketData);
       console.log('Next marketData state with predictions:', {
         ...marketData,
-        predictions: result.predictions
+        predictions
       });
       console.log('Component is still mounted, updating marketData with predictions');
-      dispatch({ type: 'SET_MARKET_DATA', payload: { ...marketData, predictions: result.predictions } });
+      dispatch({ type: 'SET_MARKET_DATA', payload: { ...marketData, predictions } });
     } else {
       console.log('Component is unmounted, skipping marketData update');
     }
 
-    console.log('Data before sending to /train:', { features, labels });
-    const trainResponse = await fetch('http://127.0.0.1:5000/train', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ features, labels }),
-      signal,
-    });
-    if (!trainResponse.ok) {
-      console.error('Error response from /train:', trainResponse);
-      throw new Error(`Server error: ${trainResponse.statusText}`);
-    }
-    const trainResult = await trainResponse.json();
-    console.log('Model training process completed:', trainResult);
-
+    await trainModel(features, labels, signal);
   } catch (error) {
     console.error(`CSV Parsing Error: ${error.message}`);
     if (isMountedRef.current) {
