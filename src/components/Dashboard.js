@@ -242,7 +242,9 @@ const Dashboard = () => {
                 console.log('Fetch request was aborted');
             }
         } finally {
-            console.log('Market data fetch completed');
+            if (isMountedRef.current) {
+                console.log('Market data fetch completed');
+            }
         }
     };
 
