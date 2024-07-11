@@ -204,17 +204,6 @@ const Dashboard = () => {
         const response = await getMarketData('BTC', { signal });
         console.log('API response:', response);
 
-        // Log the response headers and body as text
-        console.log('Response Headers:', response.headers);
-        const responseBody = await response.clone().text();
-        console.log('Response Body:', responseBody);
-
-        // Check if the response is JSON
-        const contentType = response.headers['content-type'];
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('Expected JSON response but received non-JSON response');
-        }
-
         if (response && response.length > 0 && response[0].current_price) {
           const newMarketData = {
             price: response[0].current_price,
