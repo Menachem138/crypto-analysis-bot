@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useReducer } from 'react';
 import { getMarketData } from '../coinlayerService.js';
 
 const hasNaN = (array) => array.some(row => Object.values(row).some(value => isNaN(value)));
@@ -27,7 +27,7 @@ const fetchCSVData = async (signal) => {
 
 // Remove deepEqual function
 // Simplify fetchDataAndPreprocess function
-const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef, marketData) => {
+const fetchDataAndPreprocess = async (signal, dispatch, isMountedRef, marketData) => {
   if (!isMountedRef.current) {
     console.log('Component is unmounted, skipping fetchDataAndPreprocess');
     return;
@@ -137,10 +137,7 @@ const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef, marke
         predictions: result.predictions
       });
       console.log('Component is still mounted, updating marketData with predictions');
-      setMarketData(prevData => ({
-        ...prevData,
-        predictions: result.predictions
-      }));
+      dispatch({ type: 'SET_MARKET_DATA', payload: { ...marketData, predictions: result.predictions } });
     } else {
       console.log('Component is unmounted, skipping marketData update');
     }
@@ -164,10 +161,7 @@ const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef, marke
   } catch (error) {
     console.error(`CSV Parsing Error: ${error.message}`);
     if (isMountedRef.current) {
-      setMarketData(prevData => ({
-        ...prevData,
-        error: error.message
-      }));
+      dispatch({ type: 'SET_ERROR', payload: error.message });
     }
   }
 };
@@ -175,8 +169,35 @@ const fetchDataAndPreprocess = async (signal, setMarketData, isMountedRef, marke
 // Define the Dashboard component
 const Dashboard = () => {
   console.log('Dashboard component rendering');
-  const [marketData, setMarketData] = useState(null);
+
+  const initialState = {
+    marketData: null,
+    error: null
+  };
+
+  const reducer = (state, action) => {
+    switch (action.type) {
+      case 'SET_MARKET_DATA':
+        return { ...state, marketData: action.payload };
+      case 'SET_ERROR':
+        return { ...state, error: action.payload };
+      default:
+        return state;
+    }
+  };
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { marketData, error } = state;
   const isMountedRef = useRef(true);
+
+  const shallowCompare = (obj1, obj2) => {
+    for (let key in obj1) {
+      if (obj1[key] !== obj2[key]) {
+        return false;
+      }
+    }
+    return true;
+  };
 
   useEffect(() => {
     console.log('Component mounted');
@@ -200,11 +221,11 @@ const Dashboard = () => {
             ath: response.ath || 'N/A',
             atl: response.atl || 'N/A'
           };
-          if (isMountedRef.current && JSON.stringify(marketData) !== JSON.stringify(newMarketData)) {
+          if (isMountedRef.current && !shallowCompare(marketData, newMarketData)) {
             console.log('Previous marketData state:', marketData);
             console.log('Next marketData state:', newMarketData);
             console.log('Setting marketData:', newMarketData);
-            setMarketData(newMarketData);
+            dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
             console.log('marketData state updated:', newMarketData);
           }
         } else {
@@ -220,9 +241,9 @@ const Dashboard = () => {
             ath: 'N/A',
             atl: 'N/A'
           };
-          if (isMountedRef.current && JSON.stringify(marketData) !== JSON.stringify(newMarketData)) {
+          if (isMountedRef.current && !shallowCompare(marketData, newMarketData)) {
             console.log('Setting marketData to N/A');
-            setMarketData(newMarketData);
+            dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
             console.log('marketData state updated to N/A');
           }
         }
@@ -241,9 +262,9 @@ const Dashboard = () => {
             atl: 'N/A',
             error: err.message
           };
-          if (isMountedRef.current && JSON.stringify(marketData) !== JSON.stringify(newMarketData)) {
+          if (isMountedRef.current && !shallowCompare(marketData, newMarketData)) {
             console.log('Setting marketData to error state');
-            setMarketData(newMarketData);
+            dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
             console.log('marketData state updated to error state:', newMarketData);
           }
         } else {
@@ -257,13 +278,10 @@ const Dashboard = () => {
     const fetchAndProcessData = async () => {
       console.log('Calling fetchMarketData and fetchDataAndPreprocess');
       await fetchMarketData();
-      await fetchDataAndPreprocess(signal, setMarketData, isMountedRef, marketData);
+      await fetchDataAndPreprocess(signal, dispatch, isMountedRef, marketData);
     };
 
-    // Only call these functions when the component mounts for the first time
-    if (!marketData) {
-      fetchAndProcessData();
-    }
+    fetchAndProcessData();
 
     // Cleanup function to cancel ongoing operations when the component unmounts
     return () => {
