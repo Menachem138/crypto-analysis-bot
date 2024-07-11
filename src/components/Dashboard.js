@@ -289,6 +289,7 @@ const Dashboard = () => {
         isMountedRef: isMountedRef.current
       });
       isMountedRef.current = false; // Set isMountedRef to false to cancel ongoing operations
+      console.log('isMountedRef set to false');
       controller.abort(); // Abort any ongoing fetch requests to prevent memory leaks
       console.log('Fetch requests aborted');
       console.log('Component unmounted');
