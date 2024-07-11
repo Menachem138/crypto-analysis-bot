@@ -183,7 +183,7 @@ const Dashboard = () => {
 
     for (let key of keys1) {
       console.log(`Comparing key: ${key}, obj1 value: ${obj1[key]}, obj2 value: ${obj2[key]}`);
-      if (obj1[key] !== obj2[key]) {
+      if (obj1[key] !== obj2[key] && !(obj1[key] == null && obj2[key] == null)) {
         console.log(`shallowCompare result: false (different values for key: ${key})`);
         return false;
       }
