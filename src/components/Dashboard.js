@@ -238,7 +238,7 @@ const Dashboard = () => {
             atl: 'N/A',
             error: 'API response data is missing expected structure or contains an error'
           };
-          if (isMountedRef.current && !shallowCompare(state.marketData, newMarketData)) {
+          if (isMountedRef.current) {
             console.log('Setting marketData to error state');
             dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
             console.log('marketData state updated to error state:', newMarketData);
@@ -261,7 +261,7 @@ const Dashboard = () => {
             atl: 'N/A',
             error: err.message
           };
-          if (isMountedRef.current && !shallowCompare(state.marketData, newMarketData)) {
+          if (isMountedRef.current) {
             console.log('Setting marketData to error state');
             dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
             console.log('marketData state updated to error state:', newMarketData);
