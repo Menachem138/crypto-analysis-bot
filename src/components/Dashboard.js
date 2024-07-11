@@ -171,20 +171,25 @@ const Dashboard = () => {
   const isMountedRef = useRef(true);
 
   const shallowCompare = (obj1, obj2) => {
+    console.log('shallowCompare called with:', obj1, obj2);
     if (!obj1 || !obj2) return false;
     const keys1 = Object.keys(obj1);
     const keys2 = Object.keys(obj2);
 
     if (keys1.length !== keys2.length) {
+      console.log('shallowCompare result: false (different number of keys)');
       return false;
     }
 
     for (let key of keys1) {
+      console.log(`Comparing key: ${key}, obj1 value: ${obj1[key]}, obj2 value: ${obj2[key]}`);
       if (obj1[key] !== obj2[key]) {
+        console.log(`shallowCompare result: false (different values for key: ${key})`);
         return false;
       }
     }
 
+    console.log('shallowCompare result: true');
     return true;
   };
 
