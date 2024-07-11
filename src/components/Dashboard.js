@@ -200,85 +200,85 @@ const Dashboard = () => {
     const signal = controller.signal;
 
     const fetchMarketData = async () => {
-        try {
-            console.log('Starting fetchMarketData');
-            const response = await getMarketData('BTC', { signal });
-            console.log('API response:', response);
+      try {
+        console.log('Starting fetchMarketData');
+        const response = await getMarketData('BTC', { signal });
+        console.log('API response:', response);
 
-            if (response && response.length > 0 && response[0].current_price) {
-                const newMarketData = {
-                    price: response[0].current_price,
-                    volume: response[0].total_volume || 'N/A',
-                    marketCap: response[0].market_cap || 'N/A',
-                    change24h: response[0].price_change_percentage_24h || 'N/A',
-                    change7d: response[0].price_change_percentage_7d || 'N/A',
-                    change30d: response[0].price_change_percentage_30d || 'N/A',
-                    change1y: response[0].price_change_percentage_1y || 'N/A',
-                    ath: response[0].ath || 'N/A',
-                    atl: response[0].atl || 'N/A'
-                };
-                if (isMountedRef.current && !shallowCompare(state.marketData, newMarketData)) {
-                    console.log('Previous marketData state:', state.marketData);
-                    console.log('Next marketData state:', newMarketData);
-                    console.log('Setting marketData:', newMarketData);
-                    dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
-                    console.log('marketData state updated:', newMarketData);
-                } else {
-                    console.log('No change in marketData state detected by shallowCompare');
-                }
-            } else {
-                console.warn('API response is empty or invalid:', response);
-                if (isMountedRef.current) {
-                    console.log('Skipping marketData update due to empty or invalid response');
-                    dispatch({ type: 'SET_ERROR', payload: 'Invalid API response' });
-                }
-            }
-        } catch (err) {
-            if (err.name !== 'AbortError') {
-                console.error('Error fetching market data:', err.message);
-                if (isMountedRef.current) {
-                    console.log('Skipping marketData update due to fetch error');
-                    dispatch({ type: 'SET_ERROR', payload: err.message });
-                }
-            } else {
-                console.log('Fetch request was aborted');
-            }
-        } finally {
-            if (isMountedRef.current) {
-                console.log('Market data fetch completed');
-            }
+        if (response && response.length > 0 && response[0].current_price) {
+          const newMarketData = {
+            price: response[0].current_price,
+            volume: response[0].total_volume || 'N/A',
+            marketCap: response[0].market_cap || 'N/A',
+            change24h: response[0].price_change_percentage_24h || 'N/A',
+            change7d: response[0].price_change_percentage_7d || 'N/A',
+            change30d: response[0].price_change_percentage_30d || 'N/A',
+            change1y: response[0].price_change_percentage_1y || 'N/A',
+            ath: response[0].ath || 'N/A',
+            atl: response[0].atl || 'N/A'
+          };
+          if (isMountedRef.current && !shallowCompare(state.marketData, newMarketData)) {
+            console.log('Previous marketData state:', state.marketData);
+            console.log('Next marketData state:', newMarketData);
+            console.log('Setting marketData:', newMarketData);
+            dispatch({ type: 'SET_MARKET_DATA', payload: newMarketData });
+            console.log('marketData state updated:', newMarketData);
+          } else {
+            console.log('No change in marketData state detected by shallowCompare');
+          }
+        } else {
+          console.warn('API response is empty or invalid:', response);
+          if (isMountedRef.current) {
+            console.log('Skipping marketData update due to empty or invalid response');
+            dispatch({ type: 'SET_ERROR', payload: 'Invalid API response' });
+          }
         }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching market data:', err.message);
+          if (isMountedRef.current) {
+            console.log('Skipping marketData update due to fetch error');
+            dispatch({ type: 'SET_ERROR', payload: err.message });
+          }
+        } else {
+          console.log('Fetch request was aborted');
+        }
+      } finally {
+        if (isMountedRef.current) {
+          console.log('Market data fetch completed');
+        }
+      }
     };
 
     const fetchAndProcessData = async () => {
-        console.log('Calling fetchMarketData and fetchDataAndPreprocess');
-        try {
-            await fetchMarketData();
-            await fetchDataAndPreprocess(signal, dispatch, isMountedRef, state.marketData);
-        } catch (error) {
-            console.error('Error in fetchAndProcessData:', error);
-            if (isMountedRef.current) {
-                dispatch({ type: 'SET_ERROR', payload: error.message });
-            }
+      console.log('Calling fetchMarketData and fetchDataAndPreprocess');
+      try {
+        await fetchMarketData();
+        await fetchDataAndPreprocess(signal, dispatch, isMountedRef, state.marketData);
+      } catch (error) {
+        console.error('Error in fetchAndProcessData:', error);
+        if (isMountedRef.current) {
+          dispatch({ type: 'SET_ERROR', payload: error.message });
         }
+      }
     };
 
     fetchAndProcessData();
 
     // Cleanup function to cancel ongoing operations when the component unmounts
     return () => {
-        console.log('Component unmounting, current marketData state:', state.marketData);
-        console.log('State updates before unmounting:', {
-            marketData: state.marketData,
-            isMountedRef: isMountedRef.current
-        });
-        isMountedRef.current = false; // Set isMountedRef to false to cancel ongoing operations
-        console.log('isMountedRef set to false');
-        controller.abort(); // Abort any ongoing fetch requests to prevent memory leaks
-        console.log('Fetch requests aborted');
-        console.log('Component unmounted');
+      console.log('Component unmounting, current marketData state:', state.marketData);
+      console.log('State updates before unmounting:', {
+        marketData: state.marketData,
+        isMountedRef: isMountedRef.current
+      });
+      isMountedRef.current = false; // Set isMountedRef to false to cancel ongoing operations
+      console.log('isMountedRef set to false');
+      controller.abort(); // Abort any ongoing fetch requests to prevent memory leaks
+      console.log('Fetch requests aborted');
+      console.log('Component unmounted');
     };
-}, []);
+  }, []);
 
   // Updated JSX in Dashboard component
   return (
