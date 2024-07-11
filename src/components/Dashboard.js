@@ -204,6 +204,11 @@ const Dashboard = () => {
         const response = await getMarketData('BTC', { signal });
         console.log('API response:', response);
 
+        // Log the response headers and body as text
+        console.log('Response Headers:', response.headers);
+        const responseBody = await response.clone().text();
+        console.log('Response Body:', responseBody);
+
         // Check if the response is JSON
         const contentType = response.headers['content-type'];
         if (!contentType || !contentType.includes('application/json')) {
@@ -319,7 +324,7 @@ const Dashboard = () => {
       console.log('Fetch requests aborted');
       console.log('Component unmounted');
     };
-  }, []); // Ensure the hook runs only once on mount
+  }, [state.marketData]); // Ensure the hook runs on mount and when marketData changes
 
   // Updated JSX in Dashboard component
   return (
