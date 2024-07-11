@@ -203,6 +203,13 @@ const Dashboard = () => {
         console.log('Starting fetchMarketData');
         const response = await getMarketData('BTC', { signal });
         console.log('API response:', response);
+
+        // Check if the response is JSON
+        const contentType = response.headers['content-type'];
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Expected JSON response but received non-JSON response');
+        }
+
         if (response && response.length > 0 && response[0].current_price) {
           const newMarketData = {
             price: response[0].current_price,
