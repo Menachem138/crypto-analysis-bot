@@ -167,7 +167,7 @@ const Dashboard = () => {
   };
 
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { marketData, error } = state;
+  const { marketData } = state;
   const isMountedRef = useRef(true);
 
   const shallowCompare = (obj1, obj2) => {
@@ -292,7 +292,7 @@ const Dashboard = () => {
       console.log('Fetch requests aborted');
       console.log('Component unmounted');
     };
-  }, [state.marketData]); // Ensure the hook runs only once on mount
+  }, [state.marketData]); // Ensure the hook runs when state.marketData changes
 
   // Updated JSX in Dashboard component
   return (
