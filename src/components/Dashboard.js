@@ -295,7 +295,7 @@ const Dashboard = () => {
       console.log('Fetch requests aborted');
       console.log('Component unmounted');
     };
-  }, []);
+  }, [state.marketData]);
 
   // Updated JSX in Dashboard component
   return (
