@@ -294,7 +294,7 @@ const Dashboard = () => {
       console.log('Component unmounted');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [marketData]); // Ensure the hook runs only once on mount
+  }, []); // Ensure the hook runs only once on mount
 
   // Updated JSX in Dashboard component
   return (
