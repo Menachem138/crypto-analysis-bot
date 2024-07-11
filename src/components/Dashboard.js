@@ -229,8 +229,19 @@ const Dashboard = () => {
         } else {
           console.warn('API response is empty or invalid:', response);
           if (isMountedRef.current) {
-            console.log('Skipping marketData update due to empty or invalid response');
-            dispatch({ type: 'SET_ERROR', payload: 'Invalid API response' });
+            console.log('Setting default marketData due to empty or invalid response');
+            const defaultMarketData = {
+              price: 'N/A',
+              volume: 'N/A',
+              marketCap: 'N/A',
+              change24h: 'N/A',
+              change7d: 'N/A',
+              change30d: 'N/A',
+              change1y: 'N/A',
+              ath: 'N/A',
+              atl: 'N/A'
+            };
+            dispatch({ type: 'SET_MARKET_DATA', payload: defaultMarketData });
           }
         }
       } catch (err) {
