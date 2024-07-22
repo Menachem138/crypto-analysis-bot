@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box, VStack, Heading, FormControl, FormLabel, Input, Button,
   Table, Thead, Tbody, Tr, Th, Td, Stat, StatLabel, StatNumber, StatGroup,
@@ -26,21 +26,7 @@ const Dashboard = () => {
     return savedLayout ? JSON.parse(savedLayout) : ['summary', 'expenseDistribution', 'expenseTrends', 'expenseComparison'];
   });
 
-  useEffect(() => {
-    console.log('Expenses state:', expenses);
-    console.log('Fetching visualization data...');
-    fetchVisualizationData();
-  }, [expenses, fetchVisualizationData]);
-
-  useEffect(() => {
-    console.log('Visualization data updated:');
-    console.log('- Expense Distribution:', expenseDistribution);
-    console.log('- Expense Trends:', expenseTrends);
-    console.log('- Expense Comparison:', expenseComparison);
-    console.log('- Dashboard Summary:', dashboardSummary);
-  }, [expenseDistribution, expenseTrends, expenseComparison, dashboardSummary]);
-
-  const fetchVisualizationData = async () => {
+  const fetchVisualizationData = useCallback(async () => {
     try {
       console.log('Fetching visualization data for expenses:', expenses);
       const data = await api.getVisualizations(expenses);
@@ -79,7 +65,21 @@ const Dashboard = () => {
       console.error('Error fetching visualization data:', error);
       setVisualizationDataFetched(false);
     }
-  };
+  }, [expenses]);
+
+  useEffect(() => {
+    console.log('Expenses state:', expenses);
+    console.log('Fetching visualization data...');
+    fetchVisualizationData();
+  }, [fetchVisualizationData]);
+
+  useEffect(() => {
+    console.log('Visualization data updated:');
+    console.log('- Expense Distribution:', expenseDistribution);
+    console.log('- Expense Trends:', expenseTrends);
+    console.log('- Expense Comparison:', expenseComparison);
+    console.log('- Dashboard Summary:', dashboardSummary);
+  }, [expenseDistribution, expenseTrends, expenseComparison, dashboardSummary]);
 
   const updateLayout = (newLayout) => {
     setLayout(newLayout);
