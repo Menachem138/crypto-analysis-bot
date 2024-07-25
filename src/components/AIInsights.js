@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Heading, Text, VStack } from '@chakra-ui/react';
-import api from '../utils/api'; // Assuming we have an API utility
+import { Box, Heading, Text, VStack, List, ListItem, ListIcon, Button } from '@chakra-ui/react';
+import { MdCheckCircle } from 'react-icons/md';
+import api from '../utils/api';
 
 const AIInsights = ({ userId }) => {
-  const [insights, setInsights] = useState([]);
+  const [insights, setInsights] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -14,8 +15,13 @@ const AIInsights = ({ userId }) => {
   const fetchInsights = async () => {
     try {
       setLoading(true);
-      const response = await api.post('/api/ai/insights', { userId });
-      setInsights(response.data.insights);
+      setError(null);
+      const response = await api.getInsights(userId);
+      if (response.data.error === "Not enough data to generate insights.") {
+        setError("Not enough data to generate insights. Please add more expenses.");
+      } else {
+        setInsights(response.data);
+      }
     } catch (err) {
       console.error('Error fetching insights:', err);
       setError('Failed to fetch insights. Please try again later.');
@@ -24,17 +30,54 @@ const AIInsights = ({ userId }) => {
     }
   };
 
+  const handleRefresh = () => {
+    fetchInsights();
+  };
+
   if (loading) return <Text>Loading insights...</Text>;
-  if (error) return <Text color="red.500">{error}</Text>;
+  if (error) return (
+    <Box>
+      <Text color="red.500">{error}</Text>
+      <Button onClick={handleRefresh} mt={4}>Refresh</Button>
+    </Box>
+  );
 
   return (
     <Box>
       <Heading size="md" mb={4}>AI Insights</Heading>
-      <VStack align="start" spacing={2}>
-        {insights.map((insight, index) => (
-          <Text key={index}>{insight}</Text>
-        ))}
-      </VStack>
+      {insights && (
+        <VStack align="start" spacing={4}>
+          <Box>
+            <Heading size="sm" mb={2}>Top Spending Categories</Heading>
+            <List spacing={2}>
+              {insights.topSpendingCategories.map((category, index) => (
+                <ListItem key={index}>
+                  <ListIcon as={MdCheckCircle} color="green.500" />
+                  {category.category}: ${category.amount}
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+          {insights.unusualExpenses.length > 0 && (
+            <Box>
+              <Heading size="sm" mb={2}>Unusual Expenses</Heading>
+              <List spacing={2}>
+                {insights.unusualExpenses.map((expense, index) => (
+                  <ListItem key={index}>
+                    <ListIcon as={MdCheckCircle} color="yellow.500" />
+                    {expense}
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          )}
+          <Box>
+            <Heading size="sm" mb={2}>Potential Savings</Heading>
+            <Text>{insights.potentialSavings}</Text>
+          </Box>
+        </VStack>
+      )}
+      <Button onClick={handleRefresh} mt={4}>Refresh Insights</Button>
     </Box>
   );
 };

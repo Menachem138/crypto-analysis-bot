@@ -7,34 +7,133 @@ const axiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
+  timeout: 60000, // Increase timeout to 60 seconds
 });
 
+const handleApiError = (error, operation) => {
+  let errorMessage = `Error during ${operation}: `;
+  if (error.response) {
+    errorMessage += `Server responded with status ${error.response.status}. `;
+    errorMessage += error.response.data.message || JSON.stringify(error.response.data);
+  } else if (error.request) {
+    errorMessage += 'No response received from server. Please check your internet connection.';
+  } else {
+    errorMessage += error.message;
+  }
+  console.error(errorMessage);
+  console.error(`Detailed ${operation} error:`, JSON.stringify(error, Object.getOwnPropertyNames(error)));
+  return errorMessage;
+};
+
 const api = {
+  retryApiCall: async (apiCall, retries = 3, initialDelay = 1000) => {
+    try {
+      return await apiCall();
+    } catch (error) {
+      if (retries > 0 && (error.message.includes('timeout') || error.response?.status >= 500)) {
+        const delay = initialDelay * Math.pow(2, 3 - retries);
+        console.log(`Retrying API call. Attempts left: ${retries}. Waiting for ${delay}ms.`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return api.retryApiCall(apiCall, retries - 1, initialDelay);
+      }
+      throw error;
+    }
+  },
+
   // User management
-  register: (userData) => axiosInstance.post('/register', userData),
-  login: (credentials) => axiosInstance.post('/login', credentials),
+  register: async (userData) => {
+    try {
+      const response = await axiosInstance.post('/register', userData);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'user registration');
+    }
+  },
+  login: async (credentials) => {
+    try {
+      const response = await axiosInstance.post('/login', credentials);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'user login');
+    }
+  },
 
   // Subscription management
-  getSubscriptions: (userId) => axiosInstance.get(`/subscriptions/${userId}`),
-  addSubscription: (subscriptionData) => axiosInstance.post('/subscription', subscriptionData),
-  updateSubscription: (subscriptionId, subscriptionData) => axiosInstance.put(`/subscription/${subscriptionId}`, subscriptionData),
-  deleteSubscription: (subscriptionId) => axiosInstance.delete(`/subscription/${subscriptionId}`),
+  getSubscriptions: async (userId) => {
+    try {
+      const response = await axiosInstance.get(`/subscriptions/${userId}`);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'fetching subscriptions');
+    }
+  },
+  addSubscription: async (subscriptionData) => {
+    try {
+      const response = await axiosInstance.post('/subscription', subscriptionData);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'adding subscription');
+    }
+  },
+  updateSubscription: async (subscriptionId, subscriptionData) => {
+    try {
+      const response = await axiosInstance.put(`/subscription/${subscriptionId}`, subscriptionData);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'updating subscription');
+    }
+  },
+  deleteSubscription: async (subscriptionId) => {
+    try {
+      const response = await axiosInstance.delete(`/subscription/${subscriptionId}`);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'deleting subscription');
+    }
+  },
 
   // Categories
-  getCategories: () => axiosInstance.get('/categories'),
+  getCategories: async () => {
+    try {
+      const response = await axiosInstance.get('/categories');
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'fetching categories');
+    }
+  },
 
   // Statistics and insights
-  getStatistics: (userId) => axiosInstance.get(`/statistics/${userId}`),
-  getInsights: (userId) => axiosInstance.get(`/insights/${userId}`),
+  getStatistics: async (userId) => {
+    try {
+      const response = await axiosInstance.get(`/statistics/${userId}`);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'fetching statistics');
+    }
+  },
+  getInsights: async (userId) => {
+    try {
+      const response = await axiosInstance.get(`/insights/${userId}`);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'fetching insights');
+    }
+  },
 
   // Visualizations
   getVisualizations: async (userId) => {
     try {
-      const response = await axiosInstance.get(`/visualizations/${userId}`);
-      return response.data;
+      console.log('Fetching visualizations for user:', userId);
+      return await api.retryApiCall(async () => {
+        console.log('Attempting API call for visualizations');
+        const response = await axiosInstance.get(`/visualizations/${userId}`);
+        console.log('Visualization API response:', response);
+        return response.data;
+      });
     } catch (error) {
-      console.error('Error fetching visualizations:', error);
-      throw error;
+      const errorMessage = handleApiError(error, 'fetching visualizations');
+      throw new Error(errorMessage);
     }
   },
 
@@ -44,8 +143,7 @@ const api = {
       const response = await axiosInstance.post('/expenses', expenseData);
       return response.data;
     } catch (error) {
-      console.error('Error adding expense:', error);
-      throw error;
+      handleApiError(error, 'adding expense');
     }
   },
 
@@ -54,8 +152,7 @@ const api = {
       const response = await axiosInstance.get(`/expenses/${userId}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching expenses:', error);
-      throw error;
+      handleApiError(error, 'fetching expenses');
     }
   },
 };

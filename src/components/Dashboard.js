@@ -28,8 +28,8 @@ const Dashboard = () => {
 
   const fetchVisualizationData = useCallback(async () => {
     try {
-      console.log('Fetching visualization data for expenses:', expenses);
-      const data = await api.getVisualizations(expenses);
+      console.log('Fetching visualization data for user:', userId);
+      const data = await api.getVisualizations(userId);
       console.log('Raw visualization data received:', data);
 
       if (data?.expenseDistribution) {
@@ -65,7 +65,7 @@ const Dashboard = () => {
       console.error('Error fetching visualization data:', error);
       setVisualizationDataFetched(false);
     }
-  }, [expenses]);
+  }, [userId]);
 
   useEffect(() => {
     console.log('Expenses state:', expenses);
