@@ -1,5 +1,5 @@
 .App {
-  text-align: center;
+  text-align: left;
 }
 
 .App-logo {
@@ -56,6 +56,28 @@
   text-decoration: underline;
 }
 
+.navbar-search {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.5rem;
+  margin-left: 1rem;
+  width: 200px;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-search input {
+  border: none;
+  outline: none;
+  width: 100%;
+}
+
+.navbar-search .search-icon {
+  margin-left: 0.5rem;
+  color: #333;
+}
+
 .container {
   display: flex;
   flex-wrap: wrap;
@@ -76,10 +98,13 @@
 
 .card h3 {
   margin-top: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
 .card p {
   margin-bottom: 0;
+  font-size: 1rem;
 }
 
 .chart-container {
